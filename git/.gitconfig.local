@@ -1,0 +1,8 @@
+# Local gitconfig
+
+[user]
+    name = Christophe Leconte
+    email = christophe@leconte.online
+
+[github]
+    user = notfoundy

@@ -1,0 +1,9 @@
+# Global gitconfig
+
+[include]
+    path = ~/.gitconfig.local
+
+[core]
+    editor = nvim
+    autocrlf = false
+    eol = lf
