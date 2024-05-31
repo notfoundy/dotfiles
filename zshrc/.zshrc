@@ -56,9 +56,6 @@ alias dx="docker exec -it"
 # alias .....="cd ../../../.."
 # alias ......="cd ../../../../.."
 
-# GO
-# export GOPATH='/Users/omerhamerman/go'
-
 # VIM
 # alias v="/opt/homebrew/bin/nvim"
 
@@ -66,6 +63,7 @@ alias dx="docker exec -it"
 # alias nm="nmap -sC -sV -oN nmap"
 
 # export PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Users/omer/.vimpkg/bin:${GOPATH}/bin:/Users/omerhamerman/.cargo/bin
+export PATH=$PATH:/usr/local/go/bin
 
 alias cl='clear'
 
