@@ -1,0 +1,49 @@
+# Base
+indicator
+indicator-caps-lock
+image=$HOME/.config/sway/backgrounds/1357334.png
+font=JetBrains Mono
+font-size=20
+
+# Date
+clock
+datestr=%A %d %B
+timestr=%H:%M
+
+# Effects
+effect-vignette=0.5:0.5:0.5:0.5:0
+fade-in=0.1
+
+# Ring
+indicator-radius=200
+line-uses-ring
+
+# Colors
+color=1e1e2e
+bs-hl-color=f5e0dc
+caps-lock-bs-hl-color=f5e0dc
+caps-lock-key-hl-color=a6e3a1
+inside-clear-color=df8e1d66
+inside-caps-lock-color=fe640b66
+inside-ver-color=40a02b66
+inside-wrong-color=d20f3966
+key-hl-color=40a02b
+layout-bg-color=00000000
+layout-border-color=00000000
+layout-text-color=cdd6f4
+line-color=c6a0f6
+line-clear-color=df8e1d
+line-caps-lock-color=fe640b
+line-ver-color=40a02b
+line-wrong-color=d20f39
+ring-color=c6a0f6
+ring-clear-color=df8e1d
+ring-caps-lock-color=fe640b
+ring-ver-color=40a02b
+ring-wrong-color=d20f39
+separator-color=00000000
+text-color=cdd6f4
+text-clear-color=f5e0dc
+text-caps-lock-color=fab387
+text-ver-color=89b4fa
+text-wrong-color=eba0ac
