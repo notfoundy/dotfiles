@@ -1,0 +1,36 @@
+### Input configuration
+
+# Example configuration:
+# You can get the names of your inputs by running: swaymsg -t get_inputs
+# Put your touchpad's ID to replace "Touchpad-ID" (keep the quotation marks)
+
+input type:touchpad {
+      dwt enabled
+      tap enabled
+      natural_scroll enabled
+      pointer_accel 0.35
+}
+
+#
+# Default Keyboard Layout
+#
+input "1:1:AT_Translated_Set_2_keyboard" {
+    xkb_layout fr
+}
+#
+# Custom Layout for External Keyboard
+#
+input "1133:45890:Keyboard_K380_Keyboard" {
+    xkb_layout fr
+}
+
+# Read `man 5 sway-input` for more information about this section.
+#
+# input type:keyboard xkb_layout "us, fr"
+
+# exec_always {
+#    'swaymsg input type:keyboard xkb_layout "$(localectl status | grep "X11 Layout" | sed -e "s/^.*X11 Layout://")"'
+#    'swaymsg input type:keyboard xkb_variant "$(localectl status | grep "X11 Variant" | sed -e "s/^.*X11 Variant://")"'
+# }
+
+
