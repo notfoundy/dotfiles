@@ -6,4 +6,4 @@ swayidle \
 # Locks the screen immediately
 swaylock
 # Kills last background task so idle timer doesn't keep running
-kill %%
+# kill %%

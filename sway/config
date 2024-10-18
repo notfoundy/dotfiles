@@ -1,14 +1,7 @@
-# Default config for sway
-#
-# Copy this to ~/.config/sway/config and edit it to your liking.
-#
-# Read `man 5 sway` for a complete reference.
-
 ### Variables
-#
 # Logo key. Use Mod1 for Alt.
 # Logo key, Use Mod4 for Win.
-set $mod Mod1
+set $mod Mod4
 
 # Home row direction keys, like vim
 set $left h
@@ -18,11 +11,12 @@ set $right l
 
 # Your preferred terminal emulator
 set $term wezterm
+set $fileManager nautilus
+
+set $menu wofi --show
 
 # user config directory
 include $HOME/.config/sway/config.d/*
-
-set $menu wofi --show
 
 ### Window Style
 
@@ -40,13 +34,6 @@ gaps outer 1
 gaps top 1
 gaps bottom 1
 
-# Hide gaps when there is only 1 window
-# smart_gaps on
-
-#
-# Status Bar:
-#
-# Read `man 5 sway-bar` for more information about this section.
 bar {
     swaybar_command waybar
 }
