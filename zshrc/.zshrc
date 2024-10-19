@@ -1,7 +1,7 @@
 # Lines configured by zsh-newuser-install
 HISTFILE=~/.histfile
-HISTSIZE=1000
-SAVEHIST=1000
+HISTSIZE=10000
+SAVEHIST=10000
 bindkey -v
 # End of lines configured by zsh-newuser-install
 # The following lines were added by compinstall
@@ -16,11 +16,6 @@ compinit
 
 eval "$(starship init zsh)"
 export STARSHIP_CONFIG=~/.config/starship/starship.toml
-
-# You may need to manually set your language environment
-# export LANG=en_US.UTF-8
-
-# export EDITOR=/opt/homebrew/bin/nvim
 
 alias la=tree
 alias cat=bat
@@ -49,8 +44,10 @@ alias dpa="docker ps -a"
 alias dl="docker ps -l -q"
 alias dx="docker exec -it"
 
-# Air
+# Go
+export PATH=$PATH:/usr/local/go/bin
 alias air="~/go/bin/air"
+alias templ="~/go/bin/templ"
 
 # Dirs
 # alias ..="cd .."
@@ -60,21 +57,15 @@ alias air="~/go/bin/air"
 # alias ......="cd ../../../../.."
 
 # VIM
-# alias v="/opt/homebrew/bin/nvim"
-
-# Nmap
-# alias nm="nmap -sC -sV -oN nmap"
-
-# export PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Users/omer/.vimpkg/bin:${GOPATH}/bin:/Users/omerhamerman/.cargo/bin
-export PATH=$PATH:/usr/local/go/bin
+alias v="/usr/bin/nvim"
+alias vi="/usr/bin/nvim"
+alias vim="/usr/bin/nvim"
+export EDITOR=/usr/bin/nvim
 
 alias cl='clear'
 
 # HTTP requests with xh!
 alias http="xh"
-
-# VI Mode!!!
-bindkey jj vi-cmd-mode
 
 # Eza
 alias l="eza -l --icons --git -a"
@@ -86,22 +77,15 @@ export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow'
 
 # export PATH=/opt/homebrew/bin:$PATH
 
-function ranger {
-	local IFS=$'\t\n'
-	local tempfile="$(mktemp -t tmp.XXXXXX)"
-	local ranger_cmd=(
-		command
-		ranger
-		--cmd="map Q chain shell echo %d > "$tempfile"; quitall"
-	)
-
-	${ranger_cmd[@]} "$@"
-	if [[ -f "$tempfile" ]] && [[ "$(cat -- "$tempfile")" != "$(echo -n `pwd`)" ]]; then
-		cd -- "$(cat "$tempfile")" || return
+# Yazi
+function y() {
+	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")"
+	yazi "$@" --cwd-file="$tmp"
+	if cwd="$(cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+		builtin cd -- "$cwd"
 	fi
-	command rm -f -- "$tempfile" 2>/dev/null
+	rm -f -- "$tmp"
 }
-alias rr='ranger'
 
 # navigation
 cx() { cd "$@" && l; }
