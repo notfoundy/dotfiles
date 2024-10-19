@@ -1,3 +1,6 @@
+# Sway Notification Center
+bindsym $mod+Shift+n exec swaync-client -t -sw
+
 # Lock Screen
 bindsym Control+Mod1+l exec swaylock
 
