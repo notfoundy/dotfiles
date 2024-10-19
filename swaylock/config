@@ -1,49 +1,59 @@
 # Base
 indicator
 indicator-caps-lock
-image=$HOME/.config/sway/backgrounds/1357334.png
+image=$HOME/.config/backgrounds/wall.png
 font=JetBrains Mono
-font-size=20
+font-size=24
+effect-blur=3x5
 
 # Date
 clock
-datestr=%A %d %B
 timestr=%H:%M
 
-# Effects
-effect-vignette=0.5:0.5:0.5:0.5:0
-fade-in=0.1
-
 # Ring
-indicator-radius=200
-line-uses-ring
 
-# Colors
-color=1e1e2e
-bs-hl-color=f5e0dc
-caps-lock-bs-hl-color=f5e0dc
-caps-lock-key-hl-color=a6e3a1
-inside-clear-color=df8e1d66
-inside-caps-lock-color=fe640b66
-inside-ver-color=40a02b66
-inside-wrong-color=d20f3966
-key-hl-color=40a02b
-layout-bg-color=00000000
-layout-border-color=00000000
-layout-text-color=cdd6f4
-line-color=c6a0f6
-line-clear-color=df8e1d
-line-caps-lock-color=fe640b
-line-ver-color=40a02b
-line-wrong-color=d20f39
-ring-color=c6a0f6
-ring-clear-color=df8e1d
-ring-caps-lock-color=fe640b
-ring-ver-color=40a02b
-ring-wrong-color=d20f39
-separator-color=00000000
-text-color=cdd6f4
-text-clear-color=f5e0dc
-text-caps-lock-color=fab387
-text-ver-color=89b4fa
-text-wrong-color=eba0ac
+# Background color
+color=#faf4ed
+
+# Layout text colors
+layout-bg-color=#00000000
+layout-border-color=#00000000
+layout-text-color=#575279
+
+# Text color
+text-color=#286983
+text-clear-color=#56949f
+text-caps-lock-color=#ea9d34
+text-ver-color=#907aa9
+text-wrong-color=#b4637a
+
+# Highlight segments
+bs-hl-color=#faf4ed66
+key-hl-color=#286983
+caps-lock-bs-hl-color=#faf4ed66
+caps-lock-key-hl-color=#ea9d34
+
+# Highlight segments separator
+separator-color=#00000000
+
+# Inside of the indicator
+inside-color=#28698355
+inside-clear-color=#56949f55
+inside-caps-lock-color=#ea9d3455
+inside-ver-color=#907aa955
+inside-wrong-color=#b4637a55
+
+# Line between the inside and ring
+line-color=#28698311
+line-clear-color=#56949f11
+line-caps-lock-color=#ea9d3411
+line-ver-color=#907aa911
+line-wrong-color=#b4637a11
+
+# Indicator ring
+ring-color=#286983aa
+ring-clear-color=#56949faa
+ring-caps-lock-color=#ea9d34aa
+ring-ver-color=#907aa9aa
+ring-wrong-color=#b4637aaa
+
