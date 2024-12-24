@@ -1,0 +1,79 @@
+- name: Install xdg-desktop-portal-hyprland
+  ansible.builtin.package:
+    name: xdg-desktop-portal-hyprland
+    state: present
+  become: true
+
+- name: Create xdg-desktop-portal-hyprland config directory
+  ansible.builtin.file:
+    path: "{{ config }}/xdg-desktop-portal"
+    state: directory
+
+- name: Copy xdg-desktop-portal-hyprland config
+  ansible.builtin.copy:
+    src: "files/hyprland-portals.conf"
+    dest: "{{ config }}/xdg-desktop-portal/hyprland-portals.conf"
+
+- name: Install hyprpolkitagent
+  ansible.builtin.package:
+    name: hyprpolkitagent
+    state: present
+  become: true
+
+- name: Install qt5-wayland
+  ansible.builtin.package:
+    name:  qt5-qtwayland-devel
+    state: present
+  become: true
+
+- name: Install qt6-wayland
+  ansible.builtin.package:
+    name: qt6-qtwayland-devel
+    state: present
+  become: true
+
+- name: Install dbus-broker
+  ansible.builtin.package:
+    name: dbus
+    state: present
+  become: true
+  notify:
+    - Restart dbus
+
+- name: Build uwsm from source
+  vars:
+    source_url: "https://github.com/Vladimir-csp/uwsm.git"
+    dest: "{{ build }}/uwsm"
+  ansible.builtin.include_tasks: "uwsm.yml"
+
+- name: Install hyprland
+  ansible.builtin.package:
+    name: hyprland
+    state: present
+  become: true
+
+- name: Add hyprland autostart to .bash_profile
+  ansible.builtin.blockinfile:
+    path: "{{ home }}/.bash_profile"
+    block: |
+      if uwsm check may-start; then
+          exec uwsm start hyprland.desktop
+      else
+        echo "Condition 'uwsm check may-start' failed. Debugging the issue..."
+      fi
+    insertafter: EOF
+
+- name: Source bash profile
+  ansible.builtin.shell:
+    cmd: "source {{ home }}/.bash_profile"
+
+- name: Check if graphical.target is the default target
+  ansible.builtin.shell: systemctl get-default
+  register: systemd_default
+  changed_when: false
+
+- name: Set graphical.target as the default target
+  ansible.builtin.shell: systemctl set-default graphical.target
+  when: systemd_default.stdout != 'graphical.target'
+  become: true
+

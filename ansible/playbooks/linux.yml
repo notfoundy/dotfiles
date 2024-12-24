@@ -1,7 +1,9 @@
 - name: Setup Linux Workstation
   hosts: dev
   roles:
-    ### Repos
-    - copr
-    ### CLI
-    - fzf
+    - git
+    - repos
+    - rust
+    - dunst
+    - hyprland
+

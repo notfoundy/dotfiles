@@ -1,4 +1,4 @@
-- name: Install Copr
+- name: Install copr
   community.general.copr:
     name: "{{item}}"
   loop:
