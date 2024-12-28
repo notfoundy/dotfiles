@@ -1,0 +1,11 @@
+[Unit]
+Description=Swww Daemon
+After=default.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/swww-daemon
+Restart=always
+
+[Install]
+WantedBy=default.target

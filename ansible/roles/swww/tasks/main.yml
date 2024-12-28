@@ -1,0 +1,47 @@
+- name: Clone the source repository
+  ansible.builtin.git:
+    repo: "https://github.com/LGFae/swww.git"
+    dest: "{{ build }}/swww"
+    update: true
+
+- name: Install dependancies
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - lz4
+    - lz4-devel
+  become: true
+
+- name: Build from source
+  ansible.builtin.command:
+    cmd: cargo build --release
+    chdir: "{{ build }}/swww"
+  args:
+    creates: "{{ build }}/swww/target/release/swww"
+
+- name: Copy binary to /usr/local/bin
+  ansible.builtin.copy:
+    src: "{{ build }}/swww/target/release/{{ item }}"
+    dest: "/usr/local/bin/{{ item }}"
+    mode: "0755"
+    remote_src: true
+  with_items:
+    - swww
+    - swww-daemon
+  become: true
+
+- name: Copy swww-daemon.service to /etc/systemd/system
+  ansible.builtin.copy:
+    src: "files/swww-daemon.service"
+    dest: "/etc/systemd/user/swww-daemon.service"
+  notify: Start swww-daemon.service
+  become: true
+
+- name: Start swww-daemon.service
+  ansible.builtin.systemd:
+    name: swww-daemon
+    scope: user
+    enabled: true
+    state: started
+
