@@ -1,0 +1,92 @@
+- name: Checking node version
+  ansible.builtin.command:
+    cmd: /usr/local/node/bin/node --version
+  register: current_version
+  changed_when: false
+  failed_when: false
+
+- name: Query node latest version
+  ansible.builtin.uri:
+    url: https://api.github.com/repos/nodejs/node/releases/latest?mode=json
+  register: latest_version
+  changed_when: false
+
+- name: Registering node current version
+  ansible.builtin.set_fact:
+    node_current_version: "{{ current_version.stdout | trim | replace('v', '') }}"
+
+- name: Registering node latest version
+  ansible.builtin.set_fact:
+    node_latest_version: "{{ latest_version.json.tag_name | trim | replace('v', '') }}"
+
+- name: Define NodeOS
+  ansible.builtin.set_fact:
+    nodeos: "{{ (ansible_system | lower).replace('windows', 'win') }}"
+
+- name: Define NodeArch
+  ansible.builtin.set_fact:
+    nodearch: "{{ ansible_machine | replace('x86_64', 'x64') | replace('aarch64', 'arm64') }}"
+
+- name: Define node file
+  ansible.builtin.set_fact:
+    node_file: "node-v{{ node_latest_version }}-{{ nodeos }}-{{ nodearch }}.{{ 'zip' if nodearch == 'win' else 'tar.gz' }}"
+
+- name: Show node os
+  ansible.builtin.debug:
+    var: nodeos
+
+- name: Show node arch
+  ansible.builtin.debug:
+    var: nodearch
+
+- name: Show current node version
+  ansible.builtin.debug:
+    var: current_version.stdout|default('')
+
+- name: Show latest node release
+  ansible.builtin.debug:
+    var: latest_version.json.tag_name
+
+- name: Show node file
+  ansible.builtin.debug:
+    var: node_file
+
+- name: Install node
+  block:
+    - name: Ensure clean download destination
+      ansible.builtin.file:
+        path: "/tmp/{{ node_file }}"
+        state: absent
+
+    - name: Downloading NodeJS Release
+      ansible.builtin.get_url:
+        url: https://nodejs.org/dist/v{{ node_latest_version }}/{{ node_file }}
+        dest: /tmp/{{ node_file }}
+
+    - name: Extract downloaded 
+      ansible.builtin.unarchive:
+        src: "/tmp/{{ node_file }}"
+        dest: /tmp
+        remote_src: true
+      notify: Cleanup downloaded node archive
+
+    - name: Remove any current node installation
+      ansible.builtin.file:
+        path: /usr/local/node
+        state: absent
+      become: true
+
+    - name: Install node
+      ansible.builtin.copy:
+        src: /tmp/node-v{{ node_latest_version }}-{{ nodeos }}-{{ nodearch }}/
+        dest: /usr/local/node/
+        owner: "{{ username }}"
+        group: "{{ username }}"
+        remote_src: true
+        force: true
+      become: true
+      notify:
+        - Remove extracted node directory
+   
+  when: node_latest_version != node_current_version
+
