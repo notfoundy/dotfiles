@@ -31,3 +31,16 @@
     cmd: "meson install -C build"
   become: true
 
+- name: Create uwsm config directory
+  ansible.builtin.file:
+    path: "{{ config }}/uwsm"
+    state: directory
+
+- name: uwsm | Copy config
+  ansible.builtin.copy:
+    src: "files/{{ item }}"
+    dest: "{{ config }}/uwsm/{{ item }}"
+  with_items:
+    - env
+    - env-hyprland
+
