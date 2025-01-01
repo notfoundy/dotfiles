@@ -20,6 +20,13 @@
     state: present
   become: true
 
+- name: Start hyprpolkitagent
+  ansible.builtin.systemd:
+    name: hyprpolkitagent
+    enabled: true
+    scope: user
+    state: started
+
 - name: Install qt5-wayland
   ansible.builtin.package:
     name:  qt5-qtwayland-devel
@@ -58,8 +65,6 @@
     block: |
       if uwsm check may-start; then
           exec uwsm start hyprland.desktop
-      else
-        echo "Condition 'uwsm check may-start' failed. Debugging the issue..."
       fi
     insertafter: EOF
 
