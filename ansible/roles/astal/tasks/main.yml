@@ -1,0 +1,79 @@
+- name: Install dependancies with package manager
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - vala
+    - valadoc
+    - gtk-layer-shell-devel
+    - libdbusmenu-gtk3-devel
+    - gtk3-devel
+    - gobject-introspection-devel
+    - wayland-protocols-devel
+    - json-glib-devel # Use to build hyprland lib
+    - wireplumber-devel
+    - NetworkManager-libnm-devel
+    - gcc
+  become: true
+
+- name: "Checking config for {{ ansible_distribution }}"
+  ansible.builtin.stat:
+    path: "{{ role_path }}/tasks/{{ ansible_distribution | lower }}.yml"
+  register: distribution_config
+  delegate_to: localhost
+
+- name: "Run tasks for {{ ansible_distribution }}"
+  ansible.builtin.include_tasks: "{{ ansible_distribution | lower }}.yml"
+  when: distribution_config.stat.exists
+
+- name: Build from source
+  block:
+    - name: Clone the source repository
+      ansible.builtin.git:
+        repo: https://github.com/aylur/astal.git
+        dest: "{{ build }}/astal"
+        update: true
+    
+    - name: io | Meson setup
+      ansible.builtin.command:
+        cmd: meson setup --prefix /usr build
+        chdir: "{{ build }}/astal/lib/astal/io"
+      args:
+        creates: "{{ build }}/astal/lib/astal/io/build/astal"
+    
+    - name: io | Meson install
+      ansible.builtin.command:
+        cmd: meson install -C build
+        chdir: "{{ build }}/astal/lib/astal/io"
+      args:
+        creates: "{{ build }}/astal/lib/astal/io/build/astal"
+      become: true
+     
+    - name: gtk3 | Meson setup
+      ansible.builtin.command:
+        cmd: meson setup --prefix /usr build
+        chdir: "{{ build }}/astal/lib/astal/gtk3"
+      args:
+        creates: "{{ build }}/astal/lib/astal/gtk3/build/astal"
+    
+    - name: gtk3 | Meson install
+      ansible.builtin.command:
+        cmd: meson install -C build
+        chdir: "{{ build }}/astal/lib/astal/gtk3"
+      become: true
+
+- name: Install astal libraries
+  ansible.builtin.include_tasks: libraries.yml
+  with_items:
+    - hyprland
+    - mpris
+    - battery
+    - wireplumber
+    - network
+    - tray
+
+- name: Copy config file
+  ansible.builtin.copy:
+    src: "files/ags/"
+    dest: "{{ config }}/ags/"
+

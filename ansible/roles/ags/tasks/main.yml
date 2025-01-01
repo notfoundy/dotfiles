@@ -1,0 +1,63 @@
+- name: astal js package | Meson setup
+  ansible.builtin.command:
+    cmd: meson setup --prefix /usr build
+    chdir: "{{ build }}/astal/lang/gjs"
+
+- name: astal js package | Meson install
+  ansible.builtin.command:
+    cmd: meson install -C build
+    chdir: "{{ build }}/astal/lang/gjs"
+  become: true
+
+- name: Install dependencies
+  ansible.builtin.package:
+    name: gjs
+    state: present
+  become: true
+
+- name: Getting information version
+  ansible.builtin.command:
+    cmd: "{{ home }}/go/bin/ags --version"
+  register: current_ags_version
+  changed_when: false
+  failed_when: false
+
+- name: Query latest version
+  ansible.builtin.uri:
+    url: https://api.github.com/repos/aylur/ags/releases/latest?mode=json
+  register: latest_ags_version
+  changed_when: false
+
+- name: Registering current version
+  ansible.builtin.set_fact:
+    current_ags_version: "{{ current_ags_version.stdout | trim | replace('ags version ', '') }}"
+
+- name: Registering latest version
+  ansible.builtin.set_fact:
+    latest_ags_release: "{{ latest_ags_version.json.tag_name | trim | replace('v', '') }}"
+
+- name: Show current ags version
+  ansible.builtin.debug:
+    var: current_ags_version
+
+- name: Show latest ags version
+  ansible.builtin.debug:
+    var: latest_ags_release
+
+- name: Build from source
+  block:
+    - name: Clone rerpository
+      ansible.builtin.git:
+        repo: "https://github.com/aylur/ags.git"
+        dest: "{{ build }}/ags"
+    
+    - name: Go install
+      ansible.builtin.command:
+        cmd: >
+          /usr/local/go/bin/go install -ldflags "\
+            -X 'main.gtk4LayerShell=$(pkg-config --variable=libdir gtk4-layer-shell-0)/libgtk4-layer-shell.so' \
+            -X 'main.astalGjs=$(pkg-config --variable=srcdir astal-gjs)'"
+        chdir: "{{ build }}/ags"
+
+  when: latest_ags_release != current_ags_version
+
