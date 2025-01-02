@@ -1,3 +1,4 @@
+username: "{{ lookup('env', 'USER') }}"
 home: "{{ lookup('env', 'HOME') }}"
 config: "{{ home }}/.config"
 build: "{{ home }}/.build"
