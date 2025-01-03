@@ -35,13 +35,6 @@
   ansible.builtin.copy:
     src: "files/swww-daemon.service"
     dest: "/etc/systemd/user/swww-daemon.service"
-  notify: Start swww-daemon.service
+  notify: Start swww daemon
   become: true
-
-- name: Start swww-daemon.service
-  ansible.builtin.systemd:
-    name: swww-daemon
-    scope: user
-    enabled: true
-    state: started
 
