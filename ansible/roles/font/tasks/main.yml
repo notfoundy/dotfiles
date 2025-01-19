@@ -1,0 +1,97 @@
+- name : Define fonts
+  ansible.builtin.set_fact:
+    fonts: [JetBrainsMono]
+
+- name: Checking if {{ item }} is installed
+  ansible.builtin.command:
+    cmd: "fc-list | grep {{ item }}"
+  register: nerd_font_check
+  with_items:
+    - "{{ fonts }}"
+  changed_when: false
+  failed_when: false
+
+- name: Fetch fonts info
+  ansible.builtin.uri:
+    url: "https://api.github.com/repos/ryanoasis/nerd-fonts/releases/latest"
+  register: fonts_info
+  changed_when: false
+
+- name: Define extension
+  ansible.builtin.set_fact:
+    font_extension: "{{ 'zip' if ansible_os_family == 'Windows' else 'tar.xz' }}"
+
+- name: Define named font URLs
+  ansible.builtin.set_fact:
+    font_urls: >-
+      {{
+        (font_urls | default([])) + [
+          {
+            'name': item,
+            'url': (
+              fonts_info.json['assets']
+              | selectattr('name', 'equalto', item + '.' + font_extension)
+              | map(attribute='browser_download_url') 
+              | first
+            )
+          }
+        ]
+      }}
+  with_items:
+    - "{{ fonts }}"
+
+- name: Show extension
+  ansible.builtin.debug:
+    var: font_extension
+
+- name: Show searched font name
+  ansible.builtin.debug:
+    var: fonts
+
+- name: Show searched font url
+  ansible.builtin.debug:
+    var: font_urls
+
+- name: Install font
+  block:
+    - name: Ensure clean download destination
+      ansible.builtin.file:
+        path: "/tmp/{{ item }}.{{ font_extension }}"
+        state: absent
+      with_items:
+        - "{{ fonts }}"
+      become: true
+
+    - name: Download font archive
+      ansible.builtin.get_url:
+        url: "{{ item.url }}"
+        dest: "/tmp/{{ item.name }}.{{ font_extension }}"
+        force: true
+      with_items:
+        - "{{ font_urls }}"
+      become: true
+      notify: Cleanup downloaded font archive
+
+    - name: Ensure clean extraction destination
+      ansible.builtin.file:
+        path: "{{ home }}/.local/share/fonts"
+        state: absent
+
+    - name: Create local fonts directory
+      ansible.builtin.file:
+        path: "{{ home }}/.local/share/fonts"
+        state: directory
+
+    - name: Extract fonts
+      ansible.builtin.unarchive:
+        src: "/tmp/{{ item }}.{{ font_extension }}"
+        dest: "{{ home }}/.local/share/fonts"
+        remote_src: true
+      with_items:
+        - "{{ fonts }}"
+
+    - name: Update font cache
+      ansible.builtin.command:
+        cmd: "fc-cache -fv"
+
+

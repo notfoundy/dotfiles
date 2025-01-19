@@ -1,0 +1,8 @@
+- name: Cleanup downloaded font archive
+  ansible.builtin.file:
+    path: /tmp/{{ item }}.{{ font_extension }}
+    state: absent
+  with_items:
+    - "{{ fonts }}"
+  become: true
+
