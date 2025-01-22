@@ -1,0 +1,35 @@
+- name: Check flatpak version
+  ansible.builtin.command:
+    cmd: flatpak --version
+  register: flatpak_version
+  changed_when: false
+  failed_when: false
+
+- name: Install flatpak
+  block:
+    - name: Install flatpak
+      ansible.builtin.package:
+        name: flatpak
+        state: present
+      become: true
+
+    - name: Add the flathub repository
+      community.general.flatpak_remote:
+        name: flathub
+        state: present
+        flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
+        method: user
+
+  when: flatpak_version.rc != 0
+
+- name: Install applications
+  vars:
+    - name: "{{ item.name }}"
+    - flathub_name: "{{ item.flathub_name }}"
+  ansible.builtin.include_tasks: "application.yml"
+  loop:
+    - { name: 'Obsidian', flathub_name: 'md.obsidian.Obsidian' }
+    - { name: 'Discord', flathub_name: 'com.discordapp.Discord' }
+    - { name: 'Zen Browser', flathub_name: 'app.zen_browser.zen' }
+    - { name: 'KeePassXC', flathub_name: 'org.keepassxc.KeePassXC' }
+
