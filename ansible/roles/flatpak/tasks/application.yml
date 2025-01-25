@@ -4,11 +4,3 @@
     state: present
     method: user
 
-- name: Add Desktop Entry for {{ name }}
-  ansible.builtin.template:
-    src: "templates/application.desktop.j2"
-    dest: "{{ home }}/.local/share/applications/{{ flathub_name }}.desktop"
-    owner: "{{ username }}"
-    group: "{{ username }}"
-  become: true
-
