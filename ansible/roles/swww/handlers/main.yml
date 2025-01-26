@@ -1,7 +1,0 @@
-- name: Start swww daemon
-  ansible.builtin.systemd:
-    name: swww-daemon
-    scope: user
-    enabled: true
-    state: started
-
