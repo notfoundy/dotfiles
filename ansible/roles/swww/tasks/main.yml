@@ -31,10 +31,26 @@
     - swww-daemon
   become: true
 
-- name: Copy swww-daemon.service to /etc/systemd/system
+# - name: Copy swww-daemon.service to /etc/systemd/system
+#   ansible.builtin.copy:
+#     src: "files/swww-daemon.service"
+#     dest: "/etc/systemd/user/swww-daemon.service"
+#   notify: Start swww daemon
+#   become: true
+
+- name: Create swww config directory
+  ansible.builtin.file:
+    path: "{{ config }}/hypr/scripts"
+    state: directory
+
+- name: Copy wallpaper script
   ansible.builtin.copy:
-    src: "files/swww-daemon.service"
-    dest: "/etc/systemd/user/swww-daemon.service"
-  notify: Start swww daemon
-  become: true
+    src: "files/wallpaper.sh"
+    dest: "{{ config }}/hypr/scripts/wallpaper.sh"
+    mode: "0755"
+
+- name: Copy wallpapers
+  ansible.builtin.copy:
+    src: "files/wallpapers"
+    dest: "{{ home }}/.local/share"
 
