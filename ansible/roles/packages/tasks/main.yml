@@ -1,0 +1,33 @@
+- name: "Checking config for {{ ansible_distribution }}"
+  ansible.builtin.stat:
+    path: "{{ role_path }}/tasks/{{ ansible_distribution | lower }}.yml"
+  register: distribution_config
+
+- name: "Run Tasks for {{ ansible_distribution }}"
+  ansible.builtin.include_tasks: "{{ ansible_distribution | lower }}.yml"
+  when: distribution_config.stat.exists
+
+- name: Install packages
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    # Development
+    - tokei
+    - lazygit
+    - httpie
+    # Utils
+    - zoxide
+    - exa
+    - bat
+    - fd-find
+    - nnn
+    - ripgrep
+    - aspell
+    - btop
+    - hyperfine
+    - ncdu
+    - qemu
+    - tealdeer
+  become: true
+

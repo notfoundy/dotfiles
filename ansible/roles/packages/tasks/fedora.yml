@@ -2,6 +2,6 @@
   community.general.copr:
     name: "{{item}}"
   loop:
-    - solopasha/hyprland
+    - atim/lazygit
   become: yes
  
