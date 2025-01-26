@@ -3,10 +3,13 @@
   roles:
     - git
     - repos
+    - packages
+    - font
     - rust
     - dunst
     - hyprland
     - hyprdot
     - ghostty
     - fuzzel
+    - flatpak
 
