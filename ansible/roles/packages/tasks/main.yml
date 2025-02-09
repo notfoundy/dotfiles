@@ -29,5 +29,7 @@
     - ncdu
     - qemu
     - tealdeer
+    - unzip
+    - tar
   become: true
 
