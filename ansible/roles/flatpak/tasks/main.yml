@@ -24,8 +24,8 @@
 
 - name: Install applications
   vars:
-    - name: "{{ item.name }}"
-    - flathub_name: "{{ item.flathub_name }}"
+    app_name: "{{ item.name }}"
+    flathub_name: "{{ item.flathub_name }}"
   ansible.builtin.include_tasks: "application.yml"
   loop:
     - { name: 'Obsidian', flathub_name: 'md.obsidian.Obsidian' }
