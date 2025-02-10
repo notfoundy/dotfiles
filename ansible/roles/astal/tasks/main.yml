@@ -26,6 +26,17 @@
   ansible.builtin.include_tasks: "{{ ansible_distribution | lower }}.yml"
   when: distribution_config.stat.exists
 
+- name: Checking version
+  ansible.builtin.command:
+    cmd: astal --version
+  register: current_astal_version
+  changed_when: false
+  failed_when: false
+
+- name: Show version
+  ansible.builtin.debug:
+    var: current_astal_version.stdout
+
 - name: Build from source
   block:
     - name: Clone the source repository
@@ -61,6 +72,8 @@
         cmd: meson install -C build
         chdir: "{{ build }}/astal/lib/astal/gtk3"
       become: true
+
+  when: current_astal_version.rc != 0
 
 - name: Install astal libraries
   ansible.builtin.include_tasks: libraries.yml
