@@ -1,0 +1,19 @@
+- name: Checking version
+  ansible.builtin.command:
+    cmd: sass --version
+  register: sass_version
+  changed_when: false
+  failed_when: false
+
+- name: Show version
+  ansible.builtin.debug:
+    var: sass_version.stdout
+
+- name: Install sass
+  community.general.npm:
+    name: sass
+    global: yes
+  environment:
+    PATH: "/usr/local/node/bin:{{ ansible_env.PATH }}"
+  when: sass_version.rc != 0
+
