@@ -9,9 +9,6 @@
     chdir: "{{ build }}/astal/lang/gjs"
   become: true
 
-- name: Install sass
-  ansible.builtin.include_tasks: "sass.yml"
-
 - name: Install dependencies
   ansible.builtin.package:
     name: gjs

@@ -90,3 +90,11 @@
    
   when: node_latest_version != node_current_version
 
+- name: Install npm global packages
+  vars:
+    node_bin: "/usr/local/node/bin"
+  ansible.builtin.include_tasks: "{{ item }}.yml"
+  with_items:
+    - typescript
+    - sass
+
