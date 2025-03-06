@@ -1,0 +1,30 @@
+- name: Checking if {{item}} is installed
+  ansible.builtin.stat:
+    path: ~/.local/share/fonts/{{item}}/done
+  register: font_check
+  changed_when: false
+  failed_when: false
+
+- name: Installing {{item}}
+  block:
+
+  - name: Create {{item}} directory
+    ansible.builtin.file:
+      path: ~/.local/share/fonts/{{item}}
+      state: directory
+
+  - name: Installing {{item}}
+    ansible.builtin.unarchive:
+      src: https://github.com/ryanoasis/nerd-fonts/releases/latest/download/{{item}}.zip
+      dest: ~/.local/share/fonts/{{item}}
+      creates: ~/.local/share/fonts/{{item}}/done
+      remote_src: true
+
+  - name: Installing {{item}}
+    ansible.builtin.copy:
+      dest: ~/.local/share/fonts/{{item}}/done
+      content: ''
+
+  when: font_check.stat.exists == false
+  notify: Update font cache
+
