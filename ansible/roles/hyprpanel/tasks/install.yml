@@ -1,0 +1,41 @@
+- name: Installing dependencies
+  ansible.builtin.package:
+    name:
+      - wireplumber
+      - upower
+      - libgtop2
+      - bluez
+      - bluez-tools
+      - grimblast
+      - hyprpicker
+      - NetworkManager
+      - wl-clipboard
+      - brightnessctl
+      - gnome-bluetooth
+      - aylurs-gtk-shell
+      - power-profiles-daemon
+      - gvfs
+      - wf-recorder
+    state: present
+  become: true
+
+- name: Clone repository
+  ansible.builtin.git:
+    repo: https://github.com/Jas-SinghFSU/HyprPanel.git
+    dest: "{{home}}/.build/hyprpanel"
+
+- name: Meson setup
+  ansible.builtin.command:
+    chdir: "{{build}}/hyprpanel"
+    cmd: "meson setup build/"
+
+- name: Meson compile
+  ansible.builtin.command:
+    chdir: "{{build}}/hyprpanel"
+    cmd: "meson compile -C build/"
+
+- name: Meson install
+  ansible.builtin.command:
+    chdir: "{{build}}/hyprpanel"
+    cmd: "meson install -C build/"
+

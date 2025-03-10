@@ -1,0 +1,11 @@
+- name: Checking if hyprpanel is installed
+  ansible.builtin.stat:
+    path: /usr/bin/hyprpanel
+  register: hyprpanel_check
+  changed_when: false
+  failed_when: false
+
+- name: Installing hyprpanel
+  ansible.builtin.include_tasks: install.yml
+  when: hyprpanel_check.stat.exists == false
+
