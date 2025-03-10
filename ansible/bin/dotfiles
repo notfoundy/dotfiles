@@ -96,11 +96,16 @@ function fedora_setup() {
     _task "Installing Git"
     _cmd "sudo dnf install -y git"
   fi
+  if ! dnf list --installed dnf-plugins-core >/dev/null 2>&1; then
+    _task "Installing DNF plugins"
+    _cmd "sudo dnf install -y dnf-plugins-core"
+  fi
 }
 
 update_ansible_galaxy() {
   _task "Updating Ansible Galaxy"
   _cmd "ansible-galaxy install -r $DOTFILES_DIR/ansible/requirements/common.yml"
+  _task_done
 }
 
 _task "Loading Setup for Fedora"
