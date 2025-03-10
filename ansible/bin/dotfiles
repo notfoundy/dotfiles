@@ -42,7 +42,6 @@ DOTFILES_DIR="$HOME/.dotfiles"
 SSH_DIR="$HOME/.ssh"
 IS_FIRST_RUN="$HOME/.dotfiles_run"
 
-
 # _header colorize the given argument with spacing
 function _task {
   # if _task is called while a task was set, complete the previous
@@ -122,7 +121,7 @@ fi
 pushd "$DOTFILES_DIR" 2>&1 > /dev/null
 update_ansible_galaxy
 
-ansible-playbook "$DOTFILES_DIR/main.yml" --vault-password-file "$VAULT_SECRET_FILE" "$@"
+ansible-playbook "$DOTFILES_DIR/main.yml" --vault-password-file "$VAULT_SECRET_FILE" "$@" -K
 
 popd 2>&1 > /dev/null
 
@@ -132,4 +131,3 @@ if ! [[ -f "$IS_FIRST_RUN" ]]; then
   touch "$IS_FIRST_RUN"
 fi
 
-# vi:ft=sh:

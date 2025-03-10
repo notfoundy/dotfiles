@@ -6,21 +6,18 @@
   failed_when: false
 
 - name: Install flatpak
-  block:
-    - name: Install flatpak
-      ansible.builtin.package:
-        name: flatpak
-        state: present
-      become: true
-
-    - name: Add the flathub repository
-      community.general.flatpak_remote:
-        name: flathub
-        state: present
-        flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
-        method: user
-
+  ansible.builtin.package:
+    name: flatpak
+    state: present
   when: flatpak_version.rc != 0
+  become: true
+
+- name: Add the flathub repository
+  community.general.flatpak_remote:
+    name: flathub
+    state: present
+    flatpakrepo_url: https://flathub.org/repo/flathub.flatpakrepo
+    method: user
 
 - name: Install applications
   vars:

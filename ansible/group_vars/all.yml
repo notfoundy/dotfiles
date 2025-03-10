@@ -17,4 +17,4 @@ default_roles:
   # - ghostty
   - fuzzel
   - flatpak
-  - ssh
+  # - ssh
