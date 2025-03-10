@@ -92,11 +92,15 @@ function fedora_setup() {
     _cmd "sudo dnf update"
     _cmd "sudo dnf install -y ansible"
   fi
+  if ! dnf list --installed git >/dev/null 2>&1; then
+    _task "Installing Git"
+    _cmd "sudo dnf install -y git"
+  fi
 }
 
 update_ansible_galaxy() {
   _task "Updating Ansible Galaxy"
-  _cmd "ansible-galaxy install -r $DOTFILES_DIR/requirements/common.yml"
+  _cmd "ansible-galaxy install -r $DOTFILES_DIR/ansible/requirements/common.yml"
 }
 
 _task "Loading Setup for Fedora"
@@ -121,7 +125,7 @@ fi
 pushd "$DOTFILES_DIR" 2>&1 > /dev/null
 update_ansible_galaxy
 
-ansible-playbook "$DOTFILES_DIR/main.yml" --vault-password-file "$VAULT_SECRET_FILE" "$@" -K
+ansible-playbook "$DOTFILES_DIR/ansible/main.yml" --vault-password-file "$VAULT_SECRET_FILE" "$@" -K
 
 popd 2>&1 > /dev/null
 
