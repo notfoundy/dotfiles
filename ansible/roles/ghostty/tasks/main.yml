@@ -1,35 +1,13 @@
-- name: Install dependencies
-  ansible.builtin.package:
-    name: "{{ item }}"
-    state: present
-  with_items:
-    - zig
-    - gtk4-devel
-    - libadwaita-devel
-  become: true
-
-- name: Search for ghostty binary
-  ansible.builtin.find:
-    paths: "{{ home }}/.local/bin"
-    patterns: ghostty
-  register: ghostty_file
+- name: Check if ghostty is installed
+  ansible.builtin.stat:
+    path: /usr/bin/ghostty
+  register: ghostty
   changed_when: false
+  failed_when: false
 
 - name: Install ghostty
-  block:
-    - name: Clone the source repository
-      ansible.builtin.git:
-        repo: https://github.com/ghostty-org/ghostty.git
-        dest: "{{ build }}/ghostty"
-        version: main
-
-    - name: Build from source
-      ansible.builtin.command:
-        cmd: zig build -p $HOME/.local -Doptimize=ReleaseFast
-        chdir: "{{ build }}/ghostty"
-      become: true
-
-  when: ghostty_file.matched == 0
+  ansible.builtin.include_tasks: install.yml
+  when: ghostty.stat.exists == false
 
 - name: Copy ghostty configuration
   ansible.builtin.copy:
