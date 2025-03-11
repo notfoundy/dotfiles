@@ -1,0 +1,40 @@
+- name: Checking for neovim
+  ansible.builtin.stat:
+    path: /usr/bin/nvim
+  register: neovim
+  changed_when: false
+  failed_when: false
+
+- name: Searching for neovim config
+  ansible.builtin.stat:
+    path: "{{ ansible_user_dir }}/.config/nvim"
+  register: neovim_config
+  changed_when: false
+  failed_when: false
+
+- name: Installing neovim
+  ansible.builtin.package:
+    name: neovim
+    state: present
+  become: true
+  when: neovim.stat.exists == false
+
+- name: Install lazyvim
+  ansible.builtin.git:
+    repo: https://github.com/LazyVim/starter
+    dest: "{{ ansible_user_dir }}/.config/nvim"
+  when: neovim_config.stat.exists == false
+
+- name: Search for git folder in neovim config
+  ansible.builtin.stat:
+    path: "{{ ansible_user_dir }}/.config/nvim/.git"
+  register: git_folder
+  changed_when: false
+  failed_when: false
+
+- name: Remove git folder in neovim config
+  ansible.builtin.file:
+    path: "{{ ansible_user_dir }}/.config/nvim/.git"
+    state: absent
+  when: git_folder.stat.exists
+
