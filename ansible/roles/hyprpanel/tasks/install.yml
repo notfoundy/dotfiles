@@ -10,7 +10,9 @@
 
 - name: Installing dependencies
   ansible.builtin.package:
-    name: hyprpanel
+    name:
+      - hyprpanel
+      - bluez-tools
     state: present
   become: true
 
