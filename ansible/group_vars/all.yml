@@ -4,6 +4,7 @@ config: "{{ home }}/.config"
 build: "{{ home }}/.build"
 
 default_roles:
+  - bash
   - git
   - packages
   - font
