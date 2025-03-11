@@ -1,7 +1,0 @@
-- name: Install copr
-  community.general.copr:
-    name: "{{item}}"
-  loop:
-    - solopasha/hyprland
-  become: yes
- 

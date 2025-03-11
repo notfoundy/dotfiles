@@ -1,6 +1,30 @@
-font-family = JetBrains Mono
-theme = tokyonight
+# Fonts
+font-family = "JetBrains Mono"
+font-family-bold = "JetBrains Mono"
+font-family-italic = "Maple Mono"
+font-family-bold-italic = "Maple Mono"
+font-family = "Symbols Nerd Font Mono"
+font-size = 12
+adjust-underline-position = 4
 
-shell-integration = fish
+# Mouse
+mouse-hide-while-typing = true
+# mouse-scroll-multiplier = 1
 
-auto-update-channel = stable
+# Theme
+cursor-invert-fg-bg = true
+background-opacity = 0.92
+window-theme = ghostty
+
+# Window
+gtk-single-instance = true
+gtk-tabs-location = bottom
+gtk-wide-tabs = false
+window-padding-y = 2,0
+window-padding-balance = true
+window-decoration = false
+
+# Other
+copy-on-select = clipboard
+shell-integration-features = cursor,sudo,no-title
+
