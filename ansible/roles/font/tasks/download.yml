@@ -1,28 +1,37 @@
-- name: Checking if {{item}} is installed
+- name: Checking if {{font_name}} is installed
   ansible.builtin.stat:
-    path: ~/.local/share/fonts/{{item}}/done
+    path: ~/.local/share/fonts/{{font_name}}/done
   register: font_check
   changed_when: false
   failed_when: false
 
-- name: Installing {{item}}
+- name: Installing {{font_name}}
   block:
 
-  - name: Create {{item}} directory
+  - name: Create {{font_name}} directory
     ansible.builtin.file:
-      path: ~/.local/share/fonts/{{item}}
+      path: ~/.local/share/fonts/{{font_name}}
       state: directory
 
-  - name: Installing {{item}}
+  - name: Installing {{font_name}}
     ansible.builtin.unarchive:
-      src: https://github.com/ryanoasis/nerd-fonts/releases/latest/download/{{item}}.zip
-      dest: ~/.local/share/fonts/{{item}}
-      creates: ~/.local/share/fonts/{{item}}/done
+      src: https://github.com/ryanoasis/nerd-fonts/releases/latest/download/{{font_name}}.zip
+      dest: ~/.local/share/fonts/{{font_name}}
+      creates: ~/.local/share/fonts/{{font_name}}/done
       remote_src: true
+    when: is_nerd_font == true
 
-  - name: Installing {{item}}
+  - name: Installing {{font_name}}
+    ansible.builtin.unarchive:
+      src: https://github.com/subframe7536/maple-font/releases/latest/download/{{font_name}}-TTF.zip
+      dest: ~/.local/share/fonts/{{font_name}}
+      creates: ~/.local/share/fonts/{{font_name}}/done
+      remote_src: true
+    when: is_nerd_font != true
+
+  - name: Installing {{font_name}}
     ansible.builtin.copy:
-      dest: ~/.local/share/fonts/{{item}}/done
+      dest: ~/.local/share/fonts/{{font_name}}/done
       content: ''
 
   when: font_check.stat.exists == false
