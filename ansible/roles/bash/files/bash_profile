@@ -6,7 +6,7 @@ if [ -f ~/.bashrc ]; then
 fi
 
 # User specific environment and startup programs
-if uwsm check may-startup; then
+if uwsm check may-start; then
     exec uwsm start hyprland.desktop
 fi
 

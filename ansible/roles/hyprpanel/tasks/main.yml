@@ -9,3 +9,8 @@
   ansible.builtin.include_tasks: install.yml
   when: hyprpanel_check.stat.exists == false
 
+- name: Copy hyprpanel configuration
+  ansible.builtin.copy:
+    src: "files/config.json"
+    dest: "{{ansible_user_dir}}/.config/hyprpanel/config.json"
+
