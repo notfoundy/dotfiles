@@ -1,0 +1,33 @@
+- name: Define pattern
+  ansible.builtin.set_fact:
+    pattern: "libastal-{{ item }}.so"
+
+- name: Cheking for {{ item }}
+  ansible.builtin.find:
+    paths: /usr
+    patterns: "{{ pattern }}"
+    file_type: link
+    recurse: true
+  register: library
+  changed_when: false
+  become: true
+
+- name: "Build library {{ item }}"
+  block:
+    - name: "astal library {{ item }} | Meson setup"
+      ansible.builtin.command:
+        cmd: meson setup --prefix /usr build
+        chdir: "{{ build }}/astal/lib/{{ item }}"
+      args:
+        creates: "{{ build }}/astal/lib/{{ item }}/build/astal-{{ item }}"
+    
+    - name: "astal liberary {{ item }} | Meson install"
+      ansible.builtin.command:
+        cmd: meson install -C build
+        chdir: "{{ build }}/astal/lib/{{ item }}"
+      args:
+        creates: "{{ build }}/astal/lib/{{ item }}/build/astal-{{ item }}"
+      become: true
+    
+  when: library.matched == 0
+

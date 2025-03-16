@@ -1,0 +1,34 @@
+# .bashrc
+
+HISTTIMEFORMAT='dd-mm-yyyy %T '
+# Don't put duplicate lines in the history. See bash(1) for more options
+export HISTCONTROL=ignoredups
+
+# Source files
+for file in $(find $HOME/.config/bash/ -type f -name "*.sh"); do
+  source "$file"
+done
+
+PATHS=(
+  "/usr/local/go/bin"
+  "/usr/local/node/bin"
+  "$HOME/go/bin"
+  "$HOME/.local/bin"
+)
+
+# PATH
+for p in "${PATHS[@]}"; do
+  if [[ -d "$p" && ! "$PATH" =~ "(^|:)$p(:|$)" ]]; then
+    export PATH="$PATH:$p"
+  fi
+done
+
+# Starship
+eval "$(starship init bash)"
+
+# FZF
+eval "$(fzf --bash)"
+
+# Zoxide
+eval "$(zoxide init bash)"
+

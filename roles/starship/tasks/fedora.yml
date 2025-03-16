@@ -1,0 +1,4 @@
+- name: Add corp
+  community.general.copr:
+    name: "atim/starship"
+  become: true

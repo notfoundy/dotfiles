@@ -1,8 +1,0 @@
-[Unit]
-Description=Mount for One Drive
-
-[Mount]
-Type=rclone
-What=onedrive:
-Where=/mnt/onedrive
-Options=rw,vfs-cache-mode=writes,config=.config/rclone/rclone.conf

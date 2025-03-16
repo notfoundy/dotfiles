@@ -1,0 +1,41 @@
+- name: "Checking config for {{ ansible_distribution }}"
+  ansible.builtin.stat:
+    path: "{{ role_path }}/tasks/{{ ansible_distribution | lower }}.yml"
+  register: distribution_config
+  delegate_to: localhost
+
+- name: "Run Tasks for {{ ansible_distribution }}"
+  ansible.builtin.include_tasks: "{{ ansible_distribution | lower }}.yml"
+  when: distribution_config.stat.exists
+
+- name: Checking swww binary
+  ansible.builtin.find:
+    path: "/usr/bin"
+    patterns: ["swww"]
+  register: swww_binary
+  changed_when: false
+  failed_when: false
+
+- name: Install swww
+  ansible.builtin.package:
+    name: swww
+    state: present
+  when: swww_binary.matched == 0
+  become: true
+
+- name: Create swww config directory
+  ansible.builtin.file:
+    path: "{{ config }}/hypr/scripts"
+    state: directory
+
+- name: Copy wallpaper script
+  ansible.builtin.copy:
+    src: "files/wallpaper.sh"
+    dest: "{{ config }}/hypr/scripts/wallpaper.sh"
+    mode: "0755"
+
+- name: Copy wallpapers
+  ansible.builtin.copy:
+    src: "files/wallpapers"
+    dest: "{{ home }}/.local/share"
+

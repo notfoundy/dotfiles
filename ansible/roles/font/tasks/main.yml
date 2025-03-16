@@ -1,9 +1,0 @@
-- name: Download Nerd Fonts
-  vars:
-    font_name: "{{ item.name }}"
-    is_nerd_font: "{{ item.is_nerd_font }}"
-  include_tasks: download.yml
-  loop:
-  - { name: 'JetBrainsMono', is_nerd_font: true }
-  - { name: 'MapleMono', is_nerd_font: false }
-

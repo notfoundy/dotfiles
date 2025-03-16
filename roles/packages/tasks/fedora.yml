@@ -1,0 +1,7 @@
+- name: Install copr
+  community.general.copr:
+    name: "{{item}}"
+  loop:
+    - atim/lazygit
+  become: yes
+ 

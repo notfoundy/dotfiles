@@ -1,6 +1,0 @@
-- name: Install fuzzel
-  ansible.builtin.package:
-    name: fuzzel
-    state: present
-  become: true
-

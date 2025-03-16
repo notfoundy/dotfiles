@@ -1,9 +1,0 @@
-[Unit]
-Description=AutoMount for /mnt/one-drive
-
-[Automount]
-Where=/mnt/onedrive
-TimeoutIdleSec=600
-
-[Install]
-WantedBy=default.target

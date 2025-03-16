@@ -1,0 +1,5 @@
+- name: Restart dbus-broker
+  service:
+    name: dbus
+    state: restarted
+

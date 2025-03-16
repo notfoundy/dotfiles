@@ -1,5 +1,0 @@
-- name: Copy hyprland config
-  ansible.builtin.copy:
-    src: "files/"
-    dest: "{{ config }}/hypr/"
-

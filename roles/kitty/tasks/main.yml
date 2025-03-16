@@ -1,0 +1,11 @@
+- name: Ensure kitty directory exists in .config
+  ansible.builtin.file:
+    path: "{{ config }}/kitty"
+    state: directory
+    mode: '0755'
+
+- name: Ensure Kitty starts with fish
+  ansible.builtin.copy:
+    src: "files/kitty.conf"
+    dest: "{{ config }}/kitty/kitty.conf"
+

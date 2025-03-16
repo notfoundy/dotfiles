@@ -1,0 +1,5 @@
+- name: Install copr
+  community.general.copr:
+    name: pgdev/ghostty
+  become: yes
+
