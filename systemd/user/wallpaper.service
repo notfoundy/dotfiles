@@ -1,8 +1,0 @@
-[Unit]
-Description=swaymsg output rotate wallpaper service
-
-[Service]
-ExecStart=sh /home/notfoundy/.config/sway/scripts/wallpaper.sh
-
-[Install]
-WantedBy=multi-user.target

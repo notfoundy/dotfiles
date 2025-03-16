@@ -1,0 +1,18 @@
+- name: "Checking config for {{ ansible_distribution }}"
+  ansible.builtin.stat:
+    path: "{{ role_path }}/tasks/{{ ansible_distribution | lower }}.yml"
+  register: distribution_config
+  delegate_to: localhost
+
+- name: "Run Tasks for {{ ansible_distribution }}"
+  ansible.builtin.include_tasks: "{{ ansible_distribution | lower }}.yml"
+  when: distribution_config.stat.exists
+
+- name: Installing dependencies
+  ansible.builtin.package:
+    name:
+      - hyprpanel
+      - bluez-tools
+    state: present
+  become: true
+

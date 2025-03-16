@@ -1,0 +1,16 @@
+- name: Check if starship is installed
+  ansible.builtin.stat:
+    path: /usr/bin/starship
+  register: starship
+  changed_when: false
+  failed_when: false
+
+- name: Install starship
+  ansible.builtin.include_tasks: install.yml
+  when: starship.stat.exists == false
+
+- name: Copy config files
+  ansible.builtin.copy:
+    src: "files/"
+    dest: "{{ config }}"
+

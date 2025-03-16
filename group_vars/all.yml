@@ -1,0 +1,22 @@
+username: "{{ lookup('env', 'USER') }}"
+home: "{{ lookup('env', 'HOME') }}"
+config: "{{ home }}/.config"
+build: "{{ home }}/.build"
+
+default_roles:
+  - bash
+  - git
+  - packages
+  - font
+  - go
+  - nodejs
+  - nvim
+  - rust
+  # - dunst
+  - hyprland
+  - hyprpanel
+  - hyprdot
+  - ghostty
+  - fuzzel
+  - flatpak
+  # - ssh
