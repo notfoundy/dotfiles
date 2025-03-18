@@ -14,6 +14,7 @@ PATHS=(
   "/usr/local/node/bin"
   "$HOME/go/bin"
   "$HOME/.local/bin"
+  "$HOME/.dotfiles/bin"
 )
 
 # PATH
@@ -31,4 +32,3 @@ eval "$(fzf --bash)"
 
 # Zoxide
 eval "$(zoxide init bash)"
-
