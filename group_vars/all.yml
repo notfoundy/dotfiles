@@ -4,6 +4,7 @@ config: "{{ home }}/.config"
 build: "{{ home }}/.build"
 
 default_roles:
+  - system
   - bash
   - git
   - packages

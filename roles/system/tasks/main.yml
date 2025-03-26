@@ -1,0 +1,4 @@
+- name: Set timezome to Europe/Paris
+  community.general.timezone:
+    name: Europe/Paris
+  become: true
