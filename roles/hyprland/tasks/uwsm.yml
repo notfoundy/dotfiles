@@ -6,12 +6,11 @@
 
 - name: "uwsm | Install dependancies"
   ansible.builtin.package:
-    name: "{{ item }}"
+    name:
+      - python3-pyxdg
+      - ninja-build
+      - scdoc
     state: present
-  with_items:
-    - python3-pyxdg
-    - ninja-build
-    - scdoc
   become: true
 
 - name: "uwsm | Clone the source repository"
@@ -35,12 +34,13 @@
   ansible.builtin.file:
     path: "{{ config }}/uwsm"
     state: directory
+    mode: "755"
 
 - name: uwsm | Copy config
   ansible.builtin.copy:
     src: "files/{{ item }}"
     dest: "{{ config }}/uwsm/{{ item }}"
+    mode: "755"
   with_items:
     - env
     - env-hyprland
-

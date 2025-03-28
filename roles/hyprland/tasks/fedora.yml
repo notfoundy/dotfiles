@@ -1,5 +1,4 @@
 - name: Install copr
   community.general.copr:
     name: solopasha/hyprland
-  become: yes
-
+  become: true
