@@ -20,4 +20,5 @@ default_roles:
   - ghostty
   - fuzzel
   - flatpak
+  - app
   # - ssh

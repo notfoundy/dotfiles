@@ -4,3 +4,8 @@
     state: present
   become: true
 
+- name: Copy configuration
+  ansible.builtin.copy:
+    src: files/fuzzel.ini
+    dest: "{{ ansible_user_dir }}/.config/fuzzel/fuzzel.ini"
+    mode: "0755"

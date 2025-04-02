@@ -1,0 +1,35 @@
+- name: Ensure .local/share/applications exist
+  ansible.builtin.file:
+    path: "{{ ansible_user_dir }}/.local/share/applications"
+    owner: "{{ username }}"
+    group: "{{ username }}"
+    state: directory
+    mode: "0755"
+
+- name: Add entry desktop for Zen Browser apps
+  ansible.builtin.template:
+    src: templates/web.j2
+    dest: "~/.local/share/applications/zen-browser-{{ item.name | lower | regex_replace(' ', '-') }}.desktop"
+    mode: "0744"
+  loop:
+    - {
+      name: "Gmail",
+      url: "https://mail.google.com/mail/u/0/#inbox"
+    }
+    - {
+      name: "Google Drive",
+      url: "https://drive.google.com/drive/my-drive"
+    }
+    - {
+      name: "Google Calandar",
+      url: "https://calendar.google.com/calendar/u/0/r",
+      icon: "google-agenda"
+    }
+    - {
+      name: "Whatsapp",
+      url: "https://web.whatsapp.com/"
+    }
+    - {
+      name: "1Password",
+      url: "https://my.1password.eu/signin"
+    }

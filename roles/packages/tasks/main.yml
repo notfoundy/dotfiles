@@ -10,27 +10,27 @@
 
 - name: Install packages
   ansible.builtin.package:
-    name: "{{ item }}"
+    name:
+      # Development
+      - tokei
+      - lazygit
+      - httpie
+      # Utils
+      - zoxide
+      - exa
+      - bat
+      - fd-find
+      - nnn
+      - ripgrep
+      - aspell
+      - btop
+      - hyperfine
+      - ncdu
+      - qemu
+      - tealdeer
+      - unzip
+      - tar
+      # Icons
+      - papirus-icon-theme
     state: present
-  with_items:
-    # Development
-    - tokei
-    - lazygit
-    - httpie
-    # Utils
-    - zoxide
-    - exa
-    - bat
-    - fd-find
-    - nnn
-    - ripgrep
-    - aspell
-    - btop
-    - hyperfine
-    - ncdu
-    - qemu
-    - tealdeer
-    - unzip
-    - tar
   become: true
-

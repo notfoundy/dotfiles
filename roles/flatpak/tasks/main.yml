@@ -26,7 +26,5 @@
   ansible.builtin.include_tasks: "application.yml"
   loop:
     - { name: 'Obsidian', flathub_name: 'md.obsidian.Obsidian' }
-    - { name: 'Discord', flathub_name: 'com.discordapp.Discord' }
+    - { name: 'Vesktop', flathub_name: 'dev.vencord.Vesktop' }
     - { name: 'Zen Browser', flathub_name: 'app.zen_browser.zen' }
-    - { name: 'KeePassXC', flathub_name: 'org.keepassxc.KeePassXC' }
-

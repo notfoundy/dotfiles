@@ -1,6 +1,5 @@
-- name: Install {{ app_name }} with flatpak
+- name: "Install with flatpak for {{ app_name }}"
   community.general.flatpak:
     name: "{{ flathub_name }}"
     state: present
     method: user
-
