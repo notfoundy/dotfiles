@@ -2,16 +2,16 @@
   ansible.builtin.copy:
     src: "files/bashrc"
     dest: "{{ ansible_user_dir }}/.bashrc"
-    mode: 0644
+    mode: "0644"
 
 - name: Copy bash_profile
   ansible.builtin.copy:
     src: "files/bash_profile"
-    dest: "{{ ansible_user_dir  }}/.bash_profile"
-    mode: 0644
+    dest: "{{ ansible_user_dir }}/.bash_profile"
+    mode: "0644"
 
 - name: Copy bash configuration
   ansible.builtin.copy:
     src: "files/bash"
     dest: "{{ ansible_user_dir }}/.config"
-
+    mode: "0644"
