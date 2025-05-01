@@ -30,6 +30,7 @@
       - tealdeer
       - unzip
       - tar
+      - ffmpeg
       # Icons
       - papirus-icon-theme
     state: present
