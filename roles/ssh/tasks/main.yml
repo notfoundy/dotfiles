@@ -1,0 +1,3 @@
+- name: Deploy SSH keys from Vault
+  ansible.builtin.include_tasks: ssh_keys.yml
+  with_items: "{{ op.ssh.github.notfoundy }}"

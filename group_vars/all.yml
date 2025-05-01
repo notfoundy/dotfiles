@@ -13,7 +13,6 @@ default_roles:
   - nodejs
   - nvim
   - rust
-  # - dunst
   - hyprland
   - hyprpanel
   - hyprdot
@@ -21,4 +20,11 @@ default_roles:
   - fuzzel
   - flatpak
   - app
-  # - ssh
+  - ssh
+
+op:
+  ssh:
+    github:
+      notfoundy:
+        - name: github_key
+          vault_path: "op://Private/github_key"

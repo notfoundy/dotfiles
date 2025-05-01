@@ -36,7 +36,8 @@ WARNING="${RED}\xF0\x9F\x9A\xA8${NC}"
 RIGHT_ANGLE="${GREEN}\xE2\x88\x9F${NC}"
 
 # Paths
-VAULT_SECRET_FILE="$HOME/.ansible-vault/vault.secret"
+OP_INSTALLED=false
+OP_AUTHENTICATED=false
 DOTFILES_LOG="$HOME/.dotfiles.log"
 DOTFILES_DIR="$HOME/.dotfiles"
 SSH_DIR="$HOME/.ssh"
@@ -50,7 +51,7 @@ function _task {
   fi
   # set new task title and print
   TASK=$1
-  printf "${LBLACK} [ ]  ${TASK} \n${LRED}"
+  printf "${LIGHTGRAY} [ ]  ${TASK} \n${LRED}"
 }
 
 # _cmd performs commands with error checking
@@ -102,10 +103,30 @@ function fedora_setup() {
   fi
 }
 
-update_ansible_galaxy() {
+function update_ansible_galaxy() {
   _task "Updating Ansible Galaxy"
   _cmd "ansible-galaxy install -r $DOTFILES_DIR/requirements/common.yml"
   _task_done
+}
+
+function confirmVaultAccess() {
+  _task "Checking for 1Password CLI"
+  if ! command -v op >/dev/null 2>&1; then
+    printf "${OVERWRITE} ${RED}[X]  Checking for 1Password CLI\n"
+    printf " ${WARNING}${RED}   1Password CLI is not installed.${NC}\n"
+    installOp
+  fi
+  local op_version
+  op_version=$(op --version)
+  _task "1Password CLI found: [$op_version] -- Authenticating..."
+  if ! _cmd "op --account my.1password.eu vault list"; then exit 1; fi
+  _task_done && printf "${GREEN} [✓] Successfully authenticated with 1Password CLI! ☕\n"
+  return
+}
+
+function installOp() {
+  exit 1
+  # TODO: install password with the ansible role
 }
 
 _task "Loading Setup for Fedora"
@@ -129,8 +150,9 @@ fi
 
 pushd "$DOTFILES_DIR" 2>&1 >/dev/null
 update_ansible_galaxy
+confirmVaultAccess
 
-ansible-playbook "$DOTFILES_DIR/main.yml" --vault-password-file "$VAULT_SECRET_FILE" "$@" -K
+ansible-playbook "$DOTFILES_DIR/main.yml" "$@" -K
 
 popd 2>&1 >/dev/null
 

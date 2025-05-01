@@ -29,7 +29,3 @@
       name: "Whatsapp",
       url: "https://web.whatsapp.com/"
     }
-    - {
-      name: "1Password",
-      url: "https://my.1password.eu/signin"
-    }
