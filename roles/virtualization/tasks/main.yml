@@ -1,0 +1,7 @@
+- name: Gather service facts
+  ansible.builtin.service_facts:
+  become: true
+
+- name: Install virtualization tools if libvirtd is not running
+  ansible.builtin.include_tasks: install.yml
+  when: ('libvirtd' not in services) or (services['libvirtd'].state != 'running')

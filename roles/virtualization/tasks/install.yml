@@ -1,0 +1,33 @@
+- name: Install qemu-kvm virtualization
+  ansible.builtin.package:
+    name:
+      - libvirt
+      - virt-install
+      - qemu-kvm
+      - virt-manager
+      - virt-viewer
+      - guestfs-tools
+    state: present
+  become: true
+
+- name: Update unix_sock_group
+  ansible.builtin.replace:
+    path: /etc/libvirt/libvirtd.conf
+    regexp: '^#?\s*unix_sock_group\s*=.*'
+    replace: 'unix_sock_group = "libvirt"'
+  become: true
+
+- name: Update unix_sock_rw_perms
+  ansible.builtin.replace:
+    path: /etc/libvirt/libvirtd.conf
+    regexp: '^#?\s*unix_sock_rw_perms\s*=.*'
+    replace: 'unix_sock_rw_perms = "0770"'
+  become: true
+
+- name: Add user to the group libvirt
+  ansible.builtin.user:
+    name: "{{ username }}"
+    groups: libvirt
+    append: true
+  become: true
+  notify: Restart libvirtd
