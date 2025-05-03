@@ -1,0 +1,5 @@
+- name: Install blender
+  ansible.builtin.package:
+    name: blender
+    state: present
+  become: true
