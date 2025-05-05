@@ -114,19 +114,33 @@ function confirmVaultAccess() {
   if ! command -v op >/dev/null 2>&1; then
     printf "${OVERWRITE} ${RED}[X]  Checking for 1Password CLI\n"
     printf " ${WARNING}${RED}   1Password CLI is not installed.${NC}\n"
-    installOp
+    _task "Installing 1password"
+    _cmd "ansible-playbook \"$DOTFILES_DIR/main.yml\" -t 1password -K"
+    addOpAccount
   fi
   local op_version
   op_version=$(op --version)
   _task "1Password CLI found: [$op_version] -- Authenticating..."
-  if ! _cmd "op --account my.1password.eu vault list"; then exit 1; fi
+  if ! op --account my.1password.eu vault list >/dev/null 2>&1; then
+    # FIX: send the initial 1Password message to the void
+    addOpAccount
+  fi
   _task_done && printf "${GREEN} [✓] Successfully authenticated with 1Password CLI! ☕\n"
   return
 }
 
-function installOp() {
-  exit 1
-  # TODO: install password with the ansible role
+function addOpAccount() {
+  printf "${OVERWRITE}${WARNING} ${ORANGE}No account configured for use with 1Password CLI${NC}"
+  _task "Adding 1Password account (manual signin required)"
+  echo -e "${YELLOW} [!] You will now be prompted to authenticate with 1Password CLI${NC}"
+  op account add --address my.1password.eu --signin
+  if [ $? -eq 0 ]; then
+    printf "${OVERWRITE}${CHECK_MARK} ${GREEN}1Password CLI setup complete${NC}"
+  else
+    printf "${OVERWRITE}${X_MARK} ${RED}Failed to add 1Password account${NC}"
+    exit 1
+  fi
+  _clear_task
 }
 
 _task "Loading Setup for Fedora"
