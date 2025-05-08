@@ -12,6 +12,17 @@
   changed_when: false
   failed_when: false
 
+- name: Clean up neovim config
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - ~/.config/nvim
+    - ~/.local/share/nvim
+    - ~/.local/state/nvim
+    - ~/.cache/nvim
+  when: neovim.stat.exists == false
+
 - name: Installing neovim
   ansible.builtin.package:
     name: neovim
