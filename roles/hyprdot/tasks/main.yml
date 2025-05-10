@@ -1,3 +1,9 @@
+- name: Install hypr tool
+  ansible.builtin.package:
+    name: hyprlock
+    state: present
+  become: true
+
 - name: Copy hyprland config
   ansible.builtin.copy:
     src: "files/"
