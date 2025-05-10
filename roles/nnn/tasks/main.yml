@@ -1,0 +1,25 @@
+- name: Install nnn
+  ansible.builtin.package:
+    name: nnn
+    state: present
+  become: true
+
+- name: Check plugins
+  ansible.builtin.find:
+    paths: "{{ ansible_user_dir }}/.config/nnn/plugins"
+    file_type: any
+  register: plugins_content
+  changed_when: false
+  failed_when: false
+
+- name: Download plugins install script
+  ansible.builtin.get_url:
+    url: https://raw.githubusercontent.com/jarun/nnn/master/plugins/getplugs
+    dest: /tmp/nnn-getplugs
+    mode: '0755'
+  when: plugins_content.matched == 0
+
+- name: Install nnn plugins
+  ansible.builtin.command: /tmp/nnn-getplugs
+  when: plugins_content.matched == 0
+  notify: Cleanup nnn script

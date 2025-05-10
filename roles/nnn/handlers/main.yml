@@ -1,0 +1,4 @@
+- name: Cleanup nnn script
+  ansible.builtin.file:
+    path: /tmp/nnn-getplugs
+    state: absent
