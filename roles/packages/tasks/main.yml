@@ -29,6 +29,7 @@
       - unzip
       - tar
       - ffmpeg
+      - syncthing
       # Icons
       - papirus-icon-theme
     state: present
