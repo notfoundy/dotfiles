@@ -28,7 +28,7 @@
       - tealdeer
       - unzip
       - tar
-      - ffmpeg
+      - ffmpeg-free
       - syncthing
       # Icons
       - papirus-icon-theme
