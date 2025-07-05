@@ -4,8 +4,8 @@
     state: directory
     mode: '0755'
 
-- name: Ensure Kitty starts with fish
+- name: Copy kitty configuration
   ansible.builtin.copy:
-    src: "files/kitty.conf"
-    dest: "{{ config }}/kitty/kitty.conf"
-
+    src: "files/"
+    dest: "{{ config }}/kitty/"
+    mode: "0644"
