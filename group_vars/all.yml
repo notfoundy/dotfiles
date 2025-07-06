@@ -24,6 +24,7 @@ default_roles:
   - virtualization
   - blender
   - nnn
+  - zellij
 
 op:
   ssh:
