@@ -2,3 +2,6 @@
   community.general.timezone:
     name: Europe/Paris
   become: true
+
+- name: Running boot optimization
+  ansible.builtin.include_tasks: boot_optimize.yml

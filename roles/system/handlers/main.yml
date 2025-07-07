@@ -1,0 +1,6 @@
+- name: Regenerate initramfs
+  ansible.builtin.command:
+   cmd: dracut -f
+  when: ansible_distribution == 'Fedora'
+  changed_when: false
+  become: true

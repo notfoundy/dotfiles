@@ -1,0 +1,16 @@
+- name: Enable and start fstrim.timer
+  ansible.builtin.systemd:
+    name: fstrim.timer
+    enabled: true
+    state: started
+
+- name: Ensure serial modules are blacklisted
+  ansible.builtin.copy:
+    dest: /etc/modprobe.d/blacklist-serial.conf
+    content: |
+      blacklist 8250
+      blacklist 8250_pnp
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Regenerate initramfs
