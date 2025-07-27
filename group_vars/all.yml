@@ -32,3 +32,5 @@ op:
       notfoundy:
         - name: github_key
           vault_path: "op://Private/github_key"
+        - name: n8n_key
+          vault_path: "op://Private/n8n_key"
