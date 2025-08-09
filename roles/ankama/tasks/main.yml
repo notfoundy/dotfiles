@@ -1,0 +1,32 @@
+- name: Checking for the Applications directory
+  ansible.builtin.stat:
+    path: "{{ ansible_user_dir }}/Applications"
+  register: app_dir
+
+- name: Create Applications directory
+  ansible.builtin.file:
+    path: "{{ ansible_user_dir }}/Applications"
+    state: directory
+    mode: "0755"
+  when: not app_dir.stat.exists
+
+- name: Searching Ankama launcher
+  ansible.builtin.find:
+    paths: "{{ ansible_user_dir }}/Applications"
+    patterns: "ankama-launcher"
+  register: ankama_launcher
+
+- name: Download Ankama launcher
+  ansible.builtin.get_url:
+    url: "https://download.ankama.com/launcher-dofus/full/linux"
+    dest: "{{ ansible_user_dir }}/Applications/ankama-launcher"
+    mode: "0755"
+    headers:
+      User-Agent: "Mozilla/5.0"
+  when: ankama_launcher.matched == 0
+
+- name: Add entry desktop for Ankama Launcher
+  ansible.builtin.template:
+    src: templates/app.j2
+    dest: "{{ ansible_user_dir }}/.local/share/applications"
+    mode: "0755"
