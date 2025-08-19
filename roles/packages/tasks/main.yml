@@ -17,7 +17,7 @@
       - httpie
       # Utils
       - zoxide
-      - exa
+      # - exa
       - bat
       - fd-find
       - ripgrep

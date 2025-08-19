@@ -9,6 +9,12 @@
   ansible.builtin.include_tasks: install.yml
   when: hyprpanel_check.stat.exists == false
 
+- name: Ensure .config/hyprpanel exist
+  ansible.builtin.file:
+    path: "{{ ansible_user_dir }}/.config/hyprpanel"
+    state: directory
+    mode: "0755"
+
 - name: Copy hyprpanel configuration
   ansible.builtin.copy:
     src: "files/config.json"

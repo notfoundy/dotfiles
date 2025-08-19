@@ -4,6 +4,12 @@
     state: present
   become: true
 
+- name: Ensure .config/fuzzel exist
+  ansible.builtin.file:
+    path: "{{ ansible_user_dir }}/.config/fuzzel"
+    state: directory
+    mode: "0755"
+
 - name: Copy configuration
   ansible.builtin.copy:
     src: files/fuzzel.ini
