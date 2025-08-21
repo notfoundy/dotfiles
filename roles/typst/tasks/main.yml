@@ -1,0 +1,10 @@
+- name: Checking typst install
+  ansible.builtin.command:
+    cmd: which typst
+  failed_when: false
+  changed_when: false
+  register: typst
+
+- name: Install Typst
+  ansible.builtin.include_tasks: install.yml
+  when: typst.rc != 0

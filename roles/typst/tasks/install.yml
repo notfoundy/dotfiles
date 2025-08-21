@@ -1,0 +1,38 @@
+- name: Query latest version
+  ansible.builtin.uri:
+    url: https://api.github.com/repos/typst/typst/releases/latest?mode=json
+  register: latest_version
+  changed_when: false
+
+- name: "Define ARCH"
+  ansible.builtin.set_fact:
+    arch: "{{ ansible_machine | lower }}"
+
+- name: Show latest version
+  ansible.builtin.debug:
+    var: latest_version,json.tag_name
+
+- name: Show ARCH
+  ansible.builtin.debug:
+    var: arch
+
+- name: Ensure clean download dest
+  ansible.builtin.file:
+    path: "/tmp/typst-{{ arch }}-unknown-linux-musl/"
+    state: absent
+  become: true
+
+- name: Downloading Typst
+  ansible.builtin.unarchive:
+    src: "https://github.com/typst/typst/releases/download/{{ latest_version.json.tag_name }}/typst-{{ arch }}-unknown-linux-musl.tar.xz"
+    dest: "/tmp"
+    remote_src: true
+  notify: Cleanup downloaded typst archive
+  become: true
+
+- name: Installing Typst
+  ansible.builtin.copy:
+    src: "/tmp/typst-{{ arch }}-unknown-linux-musl/typst"
+    dest: "/usr/local/bin/typst"
+    mode: "0755"
+  become: true
