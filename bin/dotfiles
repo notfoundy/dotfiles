@@ -1,178 +1,391 @@
 #!/bin/bash
 
-set -e
+################################################################################
+# Dotfiles Setup Script
+#
+# Description: Automated setup script for dotfiles installation using Ansible
+#
+# This script handles:
+# - System preparation (Fedora)
+# - SSH key generation
+# - Repository cloning/updating
+# - Ansible Galaxy dependencies
+# - 1Password authentication
+# - Ansible playbook execution
+################################################################################
 
-# Color codes
-RESTORE='\033[0m'
-NC='\033[0m'
-BLACK='\033[00;30m'
-RED='\033[00;31m'
-GREEN='\033[00;32m'
-YELLOW='\033[00;33m'
-BLUE='\033[00;34m'
-PURPLE='\033[00;35m'
-CYAN='\033[00;36m'
-SEA="\\033[38;5;49m"
-LIGHTGRAY='\033[00;37m'
-LBLACK='\033[01;30m'
-LRED='\033[01;31m'
-LGREEN='\033[01;32m'
-LYELLOW='\033[01;33m'
-LBLUE='\033[01;34m'
-LPURPLE='\033[01;35m'
-LCYAN='\033[01;36m'
-WHITE='\033[01;37m'
-OVERWRITE='\e[1A\e[K'
+set -euo pipefail
+IFS=$'\n\t'
 
-# Emoji codes
-CHECK_MARK="${GREEN}\xE2\x9C\x94${NC}"
-X_MARK="${RED}\xE2\x9C\x96${NC}"
-PIN="${RED}\xF0\x9F\x93\x8C${NC}"
-CLOCK="${GREEN}\xE2\x8C\x9B${NC}"
-ARROW="${SEA}\xE2\x96\xB6${NC}"
-BOOK="${RED}\xF0\x9F\x93\x8B${NC}"
-HOT="${ORANGE}\xF0\x9F\x94\xA5${NC}"
-WARNING="${RED}\xF0\x9F\x9A\xA8${NC}"
-RIGHT_ANGLE="${GREEN}\xE2\x88\x9F${NC}"
+################################################################################
+# CONFIGURATION
+################################################################################
 
-# Paths
-OP_INSTALLED=false
-OP_AUTHENTICATED=false
-DOTFILES_LOG="$HOME/.dotfiles.log"
-DOTFILES_DIR="$HOME/.dotfiles"
-SSH_DIR="$HOME/.ssh"
-IS_FIRST_RUN="$HOME/.dotfiles_run"
+readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly HOME_DIR="${HOME}"
+readonly DOTFILES_DIR="${HOME_DIR}/.dotfiles"
+readonly DOTFILES_LOG="${HOME_DIR}/.dotfiles.log"
+readonly SSH_DIR="${HOME_DIR}/.ssh"
+readonly FIRST_RUN_MARKER="${HOME_DIR}/.dotfiles_run"
+readonly OP_ACCOUNT_DOMAIN="${OP_ACCOUNT_DOMAIN:-my.1password.eu}"
 
-# _header colorize the given argument with spacing
-function _task {
-  # if _task is called while a task was set, complete the previous
-  if [[ $TASK != "" ]]; then
-    printf "${OVERWRITE}${LGREEN} [✓]  ${LGREEN}${TASK}\n"
+################################################################################
+# COLOR CONSTANTS
+################################################################################
+
+readonly COLOR_RESET='\033[0m'
+readonly COLOR_RED='\033[00;31m'
+readonly COLOR_GREEN='\033[00;32m'
+readonly COLOR_YELLOW='\033[00;33m'
+readonly COLOR_CYAN='\033[00;36m'
+readonly COLOR_LIGHTGRAY='\033[00;37m'
+readonly COLOR_LGREEN='\033[01;32m'
+readonly COLOR_LRED='\033[01;31m'
+readonly COLOR_SEA='\033[38;5;49m'
+
+readonly OVERWRITE='\e[1A\e[K'
+
+# Status symbols
+readonly SYMBOL_CHECK="${COLOR_GREEN}\xE2\x9C\x94${COLOR_RESET}"
+readonly SYMBOL_CROSS="${COLOR_RED}\xE2\x9C\x96${COLOR_RESET}"
+readonly SYMBOL_ARROW="${COLOR_SEA}\xE2\x96\xB6${COLOR_RESET}"
+
+################################################################################
+# GLOBAL STATE
+################################################################################
+
+CURRENT_TASK=""
+
+################################################################################
+# LOGGING AND OUTPUT
+################################################################################
+
+# Initialize log file
+# Globals: DOTFILES_LOG
+# Returns: 0 on success
+function log_init() {
+  if [[ ! -f "${DOTFILES_LOG}" ]]; then
+    touch "${DOTFILES_LOG}"
   fi
-  # set new task title and print
-  TASK=$1
-  printf "${LIGHTGRAY} [ ]  ${TASK} \n${LRED}"
+  : >"${DOTFILES_LOG}"
 }
 
-# _cmd performs commands with error checking
-function _cmd {
-  #create log if it doesn't exist
-  if ! [[ -f $DOTFILES_LOG ]]; then
-    touch $DOTFILES_LOG
-  fi
-  # empty conduro.log
-  >$DOTFILES_LOG
-  # hide stdout, on error we print and exit
-  if eval "$1" 1>/dev/null 2>$DOTFILES_LOG; then
-    return 0 # success
-  fi
-  # read error from log and add spacing
-  printf "${OVERWRITE}${LRED} [X]  ${TASK}${LRED}\n"
-  while read line; do
-    printf "      ${line}\n"
-  done <$DOTFILES_LOG
-  printf "\n"
-  # remove log file
-  rm $DOTFILES_LOG
-  # exit installation
-  exit 1
+# Clear previous output lines
+# Arguments:
+#   $1 - number of lines to clear
+function clear_lines() {
+  local lines="${1:-0}"
+  for ((i = 0; i < lines; i++)); do
+    printf "\e[1A\e[2K"
+  done
 }
 
-function _clear_task {
-  TASK=""
+# Log message to file
+# Arguments:
+#   $1 - message to log
+function log_message() {
+  echo "[$(date +'%Y-%m-%d %H:%M:%S')] $1" >>"${DOTFILES_LOG}"
 }
 
-function _task_done {
-  printf "${OVERWRITE}${LGREEN} [✓]  ${LGREEN}${TASK}\n"
-  _clear_task
+################################################################################
+# TASK MANAGEMENT
+################################################################################
+
+# Start a new task
+# Arguments:
+#   $1 - task description
+# Globals: CURRENT_TASK
+function task_begin() {
+  if [[ -n "${CURRENT_TASK}" ]]; then
+    task_complete
+  fi
+
+  CURRENT_TASK="$1"
+  printf "${COLOR_LIGHTGRAY} [ ]  ${CURRENT_TASK}\n${COLOR_LRED}"
+  log_message "Task started: ${CURRENT_TASK}"
 }
 
-function fedora_setup() {
-  if ! dnf list --installed ansible >/dev/null 2>&1; then
-    _task "Updating system"
-    _cmd "sudo dnf update -y"
-    _task "Installing Ansible"
-    _cmd "sudo dnf install -y ansible"
-  fi
-  if ! dnf list --installed git >/dev/null 2>&1; then
-    _task "Installing Git"
-    _cmd "sudo dnf install -y git"
-  fi
-  if ! dnf list --installed dnf-plugins-core >/dev/null 2>&1; then
-    _task "Installing DNF plugins"
-    _cmd "sudo dnf install -y dnf-plugins-core"
-  fi
+# Mark current task as complete
+# Globals: CURRENT_TASK
+function task_complete() {
+  printf "${OVERWRITE}${COLOR_LGREEN} [✓]  ${COLOR_LGREEN}${CURRENT_TASK}${COLOR_RESET}\n"
+  log_message "Task completed: ${CURRENT_TASK}"
+  CURRENT_TASK=""
 }
 
-function update_ansible_galaxy() {
-  _task "Updating Ansible Galaxy"
-  _cmd "ansible-galaxy install -r $DOTFILES_DIR/requirements/common.yml"
-  _task_done
+# Mark current task as failed
+# Arguments:
+#   $1 - error message (optional)
+# Globals: CURRENT_TASK
+function task_fail() {
+  local error_msg="${1:-Unknown error}"
+  printf "${OVERWRITE}${COLOR_LRED} [X]  ${CURRENT_TASK}${COLOR_RESET}\n"
+  printf "      ${COLOR_RED}Error: ${error_msg}${COLOR_RESET}\n"
+  log_message "Task failed: ${CURRENT_TASK} - ${error_msg}"
+  CURRENT_TASK=""
 }
 
-function confirmVaultAccess() {
-  _task "Checking for 1Password CLI"
-  if ! command -v op >/dev/null 2>&1; then
-    printf "${OVERWRITE} ${RED}[X]  Checking for 1Password CLI\n"
-    printf " ${WARNING}${RED}   1Password CLI is not installed.${NC}\n"
-    _task "Installing 1password"
-    _cmd "ansible-playbook \"$DOTFILES_DIR/main.yml\" -t 1password -K"
-    addOpAccount
-  fi
-  local op_version
-  op_version=$(op --version)
-  _task "1Password CLI found: [$op_version] -- Authenticating..."
-  if ! op --account my.1password.eu vault list >/dev/null 2>&1; then
-    # FIX: send the initial 1Password message to the void
-    addOpAccount
-  fi
-  _task_done && printf "${GREEN} [✓] Successfully authenticated with 1Password CLI! ☕\n"
-  return
-}
+################################################################################
+# COMMAND EXECUTION
+################################################################################
 
-function addOpAccount() {
-  printf "${OVERWRITE}${WARNING} ${ORANGE}No account configured for use with 1Password CLI${NC}"
-  _task "Adding 1Password account (manual signin required)"
-  echo -e "${YELLOW} [!] You will now be prompted to authenticate with 1Password CLI${NC}"
-  op account add --address my.1password.eu --signin
-  if [ $? -eq 0 ]; then
-    printf "${OVERWRITE}${CHECK_MARK} ${GREEN}1Password CLI setup complete${NC}"
+# Execute command with error handling and logging
+# Arguments:
+#   $1 - command to execute
+# Returns: 0 on success, exits on failure
+# Globals: DOTFILES_LOG, CURRENT_TASK
+function execute_command() {
+  local cmd="$1"
+
+  log_init
+  log_message "Executing: ${cmd}"
+
+  if eval "${cmd}" >>"${DOTFILES_LOG}" 2>&1; then
+    local lines
+    lines=$(wc -l <"${DOTFILES_LOG}")
+    clear_lines "${lines}"
+    return 0
   else
-    printf "${OVERWRITE}${X_MARK} ${RED}Failed to add 1Password account${NC}"
+    printf "${OVERWRITE}${COLOR_LRED} [X]  ${CURRENT_TASK}${COLOR_RESET}\n"
+    while IFS= read -r line; do
+      printf "      ${line}\n"
+    done <"${DOTFILES_LOG}"
+    printf "\n"
+
+    log_message "Command failed: ${cmd}"
     exit 1
   fi
-  _clear_task
 }
 
-_task "Loading Setup for Fedora"
-fedora_setup
+################################################################################
+# PACKAGE MANAGEMENT
+################################################################################
 
-if ! [[ -f "$SSH_DIR/authorized_keys" ]]; then
-  _task "Generating SSH keys"
-  _cmd "mkdir -p $SSH_DIR"
-  _cmd "chmod 700 $SSH_DIR"
-  _cmd "ssh-keygen -t ed25519 -f $SSH_DIR/id_ed25519 -N '' -C $USER@$HOSTNAME"
-  _cmd "cat $SSH_DIR/id_ed25519.pub >> $SSH_DIR/authorized_keys"
-fi
+# Check if a package is installed via DNF
+# Arguments:
+#   $1 - package name
+# Returns: 0 if installed, 1 otherwise
+function is_package_installed() {
+  local package="$1"
+  dnf list --installed "${package}" >/dev/null 2>&1
+}
 
-if ! [[ -d "$DOTFILES_DIR" ]]; then
-  _task "Cloning repository"
-  _cmd "git clone --quiet https://github.com/notfoundy/dotfiles.git $DOTFILES_DIR"
-else
-  _task "Updating repository"
-  _cmd "git -C $DOTFILES_DIR pull --quiet"
-fi
+# Install package via DNF
+# Arguments:
+#   $1 - package name
+function install_package() {
+  local package="$1"
 
-pushd "$DOTFILES_DIR" 2>&1 >/dev/null
-update_ansible_galaxy
-confirmVaultAccess
+  if ! is_package_installed "${package}"; then
+    task_begin "Installing ${package}"
+    execute_command "sudo dnf install -y ${package}"
+    task_complete
+  fi
+}
 
-ansible-playbook "$DOTFILES_DIR/main.yml" "$@" -K
+################################################################################
+# SYSTEM SETUP
+################################################################################
 
-popd 2>&1 >/dev/null
+# Setup Fedora system with required packages
+# Dependencies: install_package
+function setup_fedora() {
+  task_begin "Setting up Fedora environment"
 
-if ! [[ -f "$IS_FIRST_RUN" ]]; then
-  echo -e "${CHECK_MARK} ${GREEN}First run complete!${NC}"
-  echo -e "${ARROW} ${CYAN}Please reboot your computer to complete the setup.${NC}"
-  touch "$IS_FIRST_RUN"
-fi
+  if ! is_package_installed "ansible"; then
+    task_begin "Updating system packages"
+    execute_command "sudo dnf update -y"
+    task_complete
+
+    install_package "ansible"
+  fi
+
+  install_package "git"
+  install_package "dnf-plugins-core"
+
+  task_complete
+}
+
+################################################################################
+# SSH MANAGEMENT
+################################################################################
+
+# Generate SSH keys if they don't exist
+# Globals: SSH_DIR, USER, HOSTNAME
+function setup_ssh_keys() {
+  if [[ -f "${SSH_DIR}/authorized_keys" ]]; then
+    return 0
+  fi
+
+  task_begin "Generating SSH keys"
+
+  execute_command "mkdir -p ${SSH_DIR}"
+  execute_command "chmod 700 ${SSH_DIR}"
+  execute_command "ssh-keygen -t ed25519 -f ${SSH_DIR}/id_ed25519 -N '' -C ${USER}@${HOSTNAME}"
+  execute_command "cat ${SSH_DIR}/id_ed25519.pub >> ${SSH_DIR}/authorized_keys"
+
+  task_complete
+}
+
+################################################################################
+# REPOSITORY MANAGEMENT
+################################################################################
+
+# Clone or update dotfiles repository
+# Globals: DOTFILES_DIR
+function setup_repository() {
+  if [[ ! -d "${DOTFILES_DIR}" ]]; then
+    task_begin "Cloning dotfiles repository"
+    execute_command "git clone --quiet https://github.com/notfoundy/dotfiles.git ${DOTFILES_DIR}"
+  else
+    task_begin "Updating dotfiles repository"
+    execute_command "git -C ${DOTFILES_DIR} pull --quiet"
+  fi
+
+  task_complete
+}
+
+################################################################################
+# ANSIBLE MANAGEMENT
+################################################################################
+
+# Update Ansible Galaxy dependencies
+# Globals: DOTFILES_DIR
+function update_ansible_dependencies() {
+  task_begin "Updating Ansible Galaxy dependencies"
+  execute_command "ansible-galaxy install -r ${DOTFILES_DIR}/requirements/common.yml"
+  task_complete
+}
+
+################################################################################
+# 1PASSWORD INTEGRATION
+################################################################################
+
+# Check if 1Password CLI is installed
+# Returns: 0 if installed, 1 otherwise
+function is_onepassword_installed() {
+  command -v op >/dev/null 2>&1
+}
+
+# Install 1Password CLI via Ansible
+# Globals: DOTFILES_DIR
+function install_onepassword() {
+  task_begin "Installing 1Password CLI via Ansible"
+  execute_command "ansible-playbook ${DOTFILES_DIR}/main.yml -t 1password -K"
+  task_complete
+}
+
+# Authenticate with 1Password
+# Globals: OP_ACCOUNT_DOMAIN
+# Note: This function handles multi-line output that needs cleanup
+function authenticate_onepassword() {
+  if op vault list >/dev/null 2>&1; then
+    return 0
+  fi
+
+  printf "${COLOR_LIGHTGRAY}      Signing in to 1Password...${COLOR_RESET}\n"
+
+  local account
+  account=$(op account list 2>/dev/null | awk 'NR>1 {print $1}')
+
+  # Count lines before authentication (task line + signing message)
+  local lines_before=2
+
+  if [[ -z "${account}" ]]; then
+    log_message "Adding new 1Password account"
+    eval "$(op account add --address "${OP_ACCOUNT_DOMAIN}" --signin)"
+  else
+    log_message "Signing in to existing 1Password account: ${account}"
+    eval "$(op signin --account "${account}")"
+  fi
+
+  # Clear all intermediate lines (signing message + password prompt + any 1Password output)
+  # Move up and clear multiple lines to clean everything
+  printf "\e[${lines_before}A"
+  for ((i = 0; i < 10; i++)); do
+    printf "\e[K\e[1B"
+  done
+  printf "\e[10A"
+}
+
+# Setup and verify 1Password access
+function setup_onepassword() {
+  task_begin "Verifying 1Password CLI"
+
+  if ! is_onepassword_installed; then
+    printf "${OVERWRITE}${COLOR_LRED} [X]  1Password CLI not found${COLOR_RESET}\n"
+    install_onepassword
+  fi
+
+  task_complete
+
+  task_begin "Authenticating with 1Password"
+  authenticate_onepassword
+  task_complete
+}
+
+################################################################################
+# MAIN EXECUTION
+################################################################################
+
+# Execute Ansible playbook with provided arguments
+# Arguments:
+#   $@ - arguments to pass to ansible-playbook
+# Globals: DOTFILES_DIR
+function run_ansible_playbook() {
+  ansible-playbook "${DOTFILES_DIR}/main.yml" "$@" -K
+}
+
+# Display first run message
+# Globals: FIRST_RUN_MARKER
+function display_first_run_message() {
+  if [[ ! -f "${FIRST_RUN_MARKER}" ]]; then
+    echo -e "${SYMBOL_CHECK} ${COLOR_GREEN}First run complete!${COLOR_RESET}"
+    echo -e "${SYMBOL_ARROW} ${COLOR_CYAN}Please reboot your computer to complete the setup.${COLOR_RESET}"
+    touch "${FIRST_RUN_MARKER}"
+  fi
+}
+
+# Main setup workflow
+# Arguments:
+#   $@ - arguments to pass to ansible-playbook
+function main() {
+  log_init
+  log_message "=== Dotfiles setup started ==="
+
+  # System preparation
+  task_begin "Loading setup for Fedora"
+  setup_fedora
+
+  # SSH configuration
+  setup_ssh_keys
+
+  # Repository management
+  setup_repository
+
+  # Change to dotfiles directory
+  pushd "${DOTFILES_DIR}" >/dev/null 2>&1 || exit 1
+
+  # Ansible preparation
+  update_ansible_dependencies
+
+  # Secret management
+  setup_onepassword
+
+  # Execute main playbook
+  run_ansible_playbook "$@"
+
+  # Return to original directory
+  popd >/dev/null 2>&1 || exit 1
+
+  # Post-installation
+  display_first_run_message
+
+  log_message "=== Dotfiles setup completed ==="
+}
+
+################################################################################
+# ENTRY POINT
+################################################################################
+
+main "$@"
