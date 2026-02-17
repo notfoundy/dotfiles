@@ -89,8 +89,9 @@ function _task_done {
 
 function fedora_setup() {
   if ! dnf list --installed ansible >/dev/null 2>&1; then
+    _task "Updating system"
+    _cmd "sudo dnf update -y"
     _task "Installing Ansible"
-    _cmd "sudo dnf update"
     _cmd "sudo dnf install -y ansible"
   fi
   if ! dnf list --installed git >/dev/null 2>&1; then
