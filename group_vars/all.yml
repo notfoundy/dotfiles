@@ -14,7 +14,6 @@ default_roles:
   - nvim
   - rust
   - hyprland
-  - hyprpanel
   - hyprdot
   - ghostty
   - fuzzel
@@ -22,9 +21,8 @@ default_roles:
   - app
   - ssh
   - virtualization
-  - blender
+  # - blender
   - nnn
-  - zellij
   - typst
 
 op:
