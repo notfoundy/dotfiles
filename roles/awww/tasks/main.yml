@@ -1,0 +1,50 @@
+- name: Clone or update awww repository
+  ansible.builtin.git:
+    repo: "{{ awww.repos }}"
+    dest: "{{ install_path }}/awww"
+    version: "{{ awww.version }}"
+    update: yes
+  register: git_result
+  become: true
+
+- name: Define build_required
+  ansible.builtin.set_fact:
+    build_required: git_result.before != git_result.after
+
+- name: Build awww (release)
+  ansible.builtin.command: cargo build --release --locked
+  args:
+    chdir: "{{ install_path }}/awww"
+  become: true
+  when: build_required
+
+- name: Install release binaries
+  vars:
+    binaries:
+      - awww
+      - awww-daemon
+  ansible.builtin.copy:
+    src: "{{ install_path }}/awww/target/release/{{ item }}"
+    dest: "{{ bin_path }}/{{ item }}"
+    mode: "0755"
+    remote_src: true
+  loop: "{{ binaries }}"
+  become: true
+  when: build_required
+
+- name: Create awww config directory
+  ansible.builtin.file:
+    path: "{{ config }}/hypr/scripts"
+    state: directory
+
+- name: Copy wallpaper script
+  ansible.builtin.copy:
+    src: "files/wallpaper.sh"
+    dest: "{{ config }}/hypr/scripts/wallpaper.sh"
+    mode: "0755"
+
+- name: Copy wallpapers
+  ansible.builtin.copy:
+    src: "files/wallpapers"
+    dest: "{{ home }}/Pictures/Wallpapers"
+
