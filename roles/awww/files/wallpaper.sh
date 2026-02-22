@@ -1,7 +1,7 @@
 #!/bin/sh
 
-WALLPAPER_DIR="$HOME/.local/share/wallpapers"
-CURRENT_WALLPAPER=$(swww query | awk -F': ' '{print $5}')
+WALLPAPER_DIR="$HOME/Pictures/Wallpapers"
+CURRENT_WALLPAPER=$(awww query | awk -F': ' '{print $5}')
 NEW_WALLPAPER=$(find "$WALLPAPER_DIR" -type f ! -path "$CURRENT_WALLPAPER" | shuf -n 1)
 
 if [ -z "$NEW_WALLPAPER" ]; then
@@ -10,6 +10,5 @@ if [ -z "$NEW_WALLPAPER" ]; then
 fi
 
 swww img $NEW_WALLPAPER \
-    --transition-fps 60 \
-    --transition-type any
-
+  --transition-fps 60 \
+  --transition-type any

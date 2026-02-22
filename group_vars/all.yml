@@ -25,6 +25,12 @@ default_roles:
   - nnn
   - typst
 
+install_path: "/usr/src"
+bin_path: "/usr/local/bin"
+awww:
+  repos: "https://codeberg.org/LGFae/awww.git"
+  version: "main"
+
 op:
   ssh:
     github:

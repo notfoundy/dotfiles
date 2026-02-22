@@ -1,0 +1,8 @@
+- name: Remove build dependencies
+  ansible.builtin.package:
+    pkg:
+      - lz4-devel
+      - wayland-devel
+      - wayland-protocols-devel
+    state: absent
+  become: true
