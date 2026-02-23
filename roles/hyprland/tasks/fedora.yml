@@ -1,4 +1,9 @@
-- name: Install copr
+- name: Enable copr
   community.general.copr:
     name: solopasha/hyprland
+  become: true
+
+- name: Update dnf cache
+  ansible.builtin.dnf:
+    update_cache: true
   become: true

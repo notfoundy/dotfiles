@@ -10,7 +10,7 @@
 
 - name: Check if hyprland is installed
   ansible.builtin.stat:
-    path: /usr/bin/Hyprland
+    path: /usr/bin/start-hyprland
   register: hyprland
   changed_when: false
   failed_when: false
@@ -18,13 +18,3 @@
 - name: Installing Hyprland
   ansible.builtin.include_tasks: ./install.yml
   when: not hyprland.stat.exists
-
-- name: Check if graphical.target is the default target
-  ansible.builtin.shell: systemctl get-default
-  register: systemd_default
-  changed_when: false
-
-- name: Set graphical.target as the default target
-  ansible.builtin.shell: systemctl set-default graphical.target
-  when: systemd_default.stdout != 'graphical.target'
-  become: true
