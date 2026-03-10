@@ -12,5 +12,5 @@
 - name: Copy config files
   ansible.builtin.copy:
     src: "files/"
-    dest: "{{ config }}"
+    dest: "{{ ansible_user_dir }}/.config"
 

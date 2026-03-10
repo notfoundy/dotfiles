@@ -80,8 +80,8 @@
       ansible.builtin.copy:
         src: /tmp/node-v{{ node_latest_version }}-{{ nodeos }}-{{ nodearch }}/
         dest: /usr/local/node/
-        owner: "{{ username }}"
-        group: "{{ username }}"
+        owner: "{{ ansible_user_id }}"
+        group: "{{ ansible_user_id }}"
         remote_src: true
         force: true
       become: true

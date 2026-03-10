@@ -45,17 +45,17 @@
 
 - name: Create awww config directory
   ansible.builtin.file:
-    path: "{{ config }}/hypr/scripts"
+    path: "{{ ansible_user_dir }}/.config/hypr/scripts"
     state: directory
 
 - name: Copy wallpaper script
   ansible.builtin.copy:
     src: "files/wallpaper.sh"
-    dest: "{{ config }}/hypr/scripts/wallpaper.sh"
+    dest: "{{ ansible_user_dir }}/.config/hypr/scripts/wallpaper.sh"
     mode: "0755"
 
 - name: Copy wallpapers
   ansible.builtin.copy:
     src: "files/wallpapers"
-    dest: "{{ home }}/Pictures/Wallpapers"
+    dest: "{{ ansible_user_dir }}/Pictures/Wallpapers"
 

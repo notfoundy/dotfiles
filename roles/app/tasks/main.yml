@@ -1,8 +1,8 @@
 - name: Ensure .local/share/applications exist
   ansible.builtin.file:
     path: "{{ ansible_user_dir }}/.local/share/applications"
-    owner: "{{ username }}"
-    group: "{{ username }}"
+    owner: "{{ ansible_user_id }}"
+    group: "{{ ansible_user_id }}"
     state: directory
     mode: "0755"
 

@@ -14,7 +14,7 @@
 
 - name: Create xdg-desktop-portal-hyprland config directory
   ansible.builtin.file:
-    path: "{{ config }}/xdg-desktop-portal"
+    path: "{{ ansible_user_dir }}/.config/xdg-desktop-portal"
     state: directory
     mode: "755"
   become: true
@@ -22,5 +22,5 @@
 - name: Copy xdg-desktop-portal-hyprland config
   ansible.builtin.copy:
     src: "files/hyprland-portals.conf"
-    dest: "{{ config }}/xdg-desktop-portal/hyprland-portals.conf"
+    dest: "{{ ansible_user_dir }}/.config/xdg-desktop-portal/hyprland-portals.conf"
     mode: "755"

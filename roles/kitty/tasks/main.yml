@@ -1,11 +1,11 @@
 - name: Ensure kitty directory exists in .config
   ansible.builtin.file:
-    path: "{{ config }}/kitty"
+    path: "{{ ansible_user_dir }}/.config/kitty"
     state: directory
     mode: '0755'
 
 - name: Copy kitty configuration
   ansible.builtin.copy:
     src: "files/"
-    dest: "{{ config }}/kitty/"
+    dest: "{{ ansible_user_dir }}/.config/kitty/"
     mode: "0644"

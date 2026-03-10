@@ -6,6 +6,7 @@
 
 - name: Copy hyprland config
   ansible.builtin.copy:
-    src: "files/"
-    dest: "{{ config }}/hypr/"
+    src: files/
+    dest: "{{ ansible_user_dir }}/.config/hypr/"
+
     mode: "0644"
