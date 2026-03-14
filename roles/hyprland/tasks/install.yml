@@ -2,7 +2,7 @@
   ansible.builtin.package:
     pkg:
       - hyprland
-      - hyprpolkitagent
+      - hyprutils
       - qt5-qtwayland
       - qt6-qtwayland
       - dbus-broker
@@ -10,7 +10,7 @@
       - xdg-desktop-portal-gtk
       - mako
   become: true
-  notify: Restart dbus
+  notify: Restart dbus-broker
 
 - name: Create xdg-desktop-portal-hyprland config directory
   ansible.builtin.file:

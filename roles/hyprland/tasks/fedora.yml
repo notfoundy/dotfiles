@@ -1,6 +1,7 @@
 - name: Enable copr
   community.general.copr:
     name: solopasha/hyprland
+    state: enabled
   become: true
 
 - name: Update dnf cache

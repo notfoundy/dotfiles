@@ -17,6 +17,8 @@
       - lz4-devel
       - wayland-devel
       - wayland-protocols-devel
+      - rust
+      - cargo
     state: present
   become: true
   when: build_required

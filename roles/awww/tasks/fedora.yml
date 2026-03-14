@@ -1,5 +1,6 @@
-- name: Install copr
+- name: Disable copr
   community.general.copr:
     name: solopasha/hyprland
-  become: yes
+    state: enabled
+  become: true
 
