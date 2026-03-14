@@ -30,6 +30,10 @@
       - tar
       - ffmpeg-free
       - syncthing
+      # General UI utilities
+      - wl-clipboard
+      - brightnessctl
+      - playerctl
       # Icons
       - papirus-icon-theme
     state: present

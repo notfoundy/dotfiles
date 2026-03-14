@@ -1,0 +1,12 @@
+- name: Install Quickshell dependencies (Fedora)
+  ansible.builtin.dnf:
+    name:
+      - gojq
+      - python3-pillow
+      - python3-pywayland
+      - python3-psutil
+      - hyprpicker
+      - cliphist
+      - ydotool
+    state: present
+  become: true

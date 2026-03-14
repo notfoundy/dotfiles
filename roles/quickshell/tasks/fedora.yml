@@ -1,0 +1,16 @@
+- name: Enable Quickshell COPR
+  community.general.copr:
+    name: errornointernet/quickshell
+    state: enabled
+  become: true
+
+- name: Update dnf cache
+  ansible.builtin.dnf:
+    update_cache: true
+  become: true
+
+- name: Install Quickshell
+  ansible.builtin.dnf:
+    name: quickshell
+    state: present
+  become: true

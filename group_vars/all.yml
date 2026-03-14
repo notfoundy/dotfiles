@@ -16,9 +16,15 @@ default_roles:
   - app
   - ssh
   - virtualization
+  - desktop-shell
   # - blender
   - nnn
   - typst
+
+desktop_shell:
+  repo: "https://github.com/end-4/dots-hyprland.git"
+  version: "main"
+  theme: "kanagawa" # Options: kanagawa, catppuccin, nord, etc.
 
 install_path: "/usr/src"
 bin_path: "/usr/local/bin"
