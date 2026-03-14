@@ -1,7 +1,7 @@
 - name: Install dependencies
   ansible.builtin.package:
     pkg:
-      - hyrpland
+      - hyprland
       - hyprpolkitagent
       - qt5-qtwayland
       - qt6-qtwayland
