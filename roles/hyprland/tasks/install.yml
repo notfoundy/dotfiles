@@ -16,6 +16,8 @@
   ansible.builtin.file:
     path: "{{ ansible_user_dir }}/.config/xdg-desktop-portal"
     state: directory
+    owner: "{{ ansible_user_id }}"
+    group: "{{ ansible_user_id }}"
     mode: "755"
   become: true
 
