@@ -3,3 +3,19 @@
     name: dbus-broker
     state: restarted
 
+- name: Reload systemd daemon
+  ansible.builtin.systemd:
+    daemon_reload: true
+  become: true
+
+- name: Remove hyprpolkitagent build dependencies
+  ansible.builtin.package:
+    name:
+      - qt6-qtbase-devel
+      - qt6-qtwayland-devel
+      - qt6-qtdeclarative-devel
+      - polkit-qt6-1-devel
+      - hyprland-devel
+    state: absent
+  become: true
+

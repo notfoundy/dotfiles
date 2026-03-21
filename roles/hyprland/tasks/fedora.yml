@@ -8,3 +8,20 @@
   ansible.builtin.dnf:
     update_cache: true
   become: true
+
+- name: Install build dependencies for hyprpolkitagent
+  ansible.builtin.package:
+    name:
+      - cmake
+      - ninja-build
+      - gcc-c++
+      - qt6-qtbase-devel
+      - qt6-qtwayland-devel
+      - qt6-qtdeclarative-devel
+      - polkit-qt6-1-devel
+      - hyprland-devel
+      - polkit-devel
+      - pkg-config
+    state: present
+  become: true
+  when: hyprpolkitagent_git_result.before != hyprpolkitagent_git_result.after

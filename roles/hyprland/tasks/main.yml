@@ -4,6 +4,15 @@
   register: distribution_config
   delegate_to: localhost
 
+- name: Clone or update hyprpolkitagent repository
+  ansible.builtin.git:
+    repo: https://github.com/hyprwm/hyprpolkitagent.git
+    dest: "{{ ansible_user_dir }}/.build/hyprpolkitagent"
+    version: main
+    depth: 1
+    update: yes
+  register: hyprpolkitagent_git_result
+
 - name: "Run Tasks for {{ ansible_distribution }}"
   ansible.builtin.include_tasks: "{{ ansible_distribution | lower }}.yml"
   when: distribution_config.stat.exists
@@ -18,3 +27,7 @@
 - name: Installing Hyprland
   ansible.builtin.include_tasks: ./install.yml
   when: not hyprland.stat.exists
+
+- name: Installing hyprpolkitagent from source
+  ansible.builtin.include_tasks: ./hyprpolkitagent.yml
+  when: hyprpolkitagent_git_result.before != hyprpolkitagent_git_result.after

@@ -1,0 +1,34 @@
+- name: Create build directory
+  ansible.builtin.file:
+    path: "{{ ansible_user_dir }}/.build/hyprpolkitagent"
+    state: directory
+    owner: "{{ ansible_user_id }}"
+    group: "{{ ansible_user_id }}"
+    mode: "0755"
+
+- name: Clean build directory
+  ansible.builtin.file:
+    path: "{{ ansible_user_dir }}/.build/hyprpolkitagent/build"
+    state: absent
+  become: true
+
+- name: Configure project with CMake
+  ansible.builtin.command:
+    cmd: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
+    chdir: "{{ ansible_user_dir }}/.build/hyprpolkitagent"
+  become: true
+
+- name: Build hyprpolkitagent
+  ansible.builtin.command:
+    cmd: ninja -C build
+    chdir: "{{ ansible_user_dir }}/.build/hyprpolkitagent"
+  become: true
+
+- name: Install hyprpolkitagent
+  ansible.builtin.command:
+    cmd: ninja -C build install
+    chdir: "{{ ansible_user_dir }}/.build/hyprpolkitagent"
+  become: true
+  notify:
+    - Reload systemd daemon
+    - Remove hyprpolkitagent build dependencies
