@@ -12,6 +12,7 @@
     depth: 1
     update: yes
   register: hyprpolkitagent_git_result
+  changed_when: hyprpolkitagent_git_result.before != hyprpolkitagent_git_result.after
 
 - name: "Run Tasks for {{ ansible_distribution }}"
   ansible.builtin.include_tasks: "{{ ansible_distribution | lower }}.yml"
