@@ -7,3 +7,9 @@
 - name: "Run Tasks for {{ ansible_distribution }}"
   ansible.builtin.include_tasks: "{{ ansible_distribution | lower }}.yml"
   when: distribution_config.stat.exists
+
+- name: Install Quickshell
+  ansible.builtin.dnf:
+    name: quickshell-git
+    state: present
+  become: true
