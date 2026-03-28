@@ -8,7 +8,12 @@
       - hyprpicker
       - cliphist
       - ydotool
-      # End 4 Shell dependencies
       - qt6-qt5compat
+      - polkit-qt6-1-devel
+      - qt6-qtbase-devel 
+      - qt6-qtdeclarative-devel
+      - qt6-qtpositioning
+      - kf6-syntax-highlighting
+      - kf6-kirigami
     state: present
   become: true
