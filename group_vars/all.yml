@@ -22,8 +22,6 @@ default_roles:
   - typst
 
 desktop_shell:
-  repo: "https://github.com/end-4/dots-hyprland.git"
-  version: "main"
   theme: "kanagawa" # Options: kanagawa, catppuccin, nord, etc.
 
 install_path: "/usr/src"

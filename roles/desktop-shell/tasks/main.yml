@@ -8,35 +8,22 @@
   ansible.builtin.include_tasks: "{{ ansible_distribution | lower }}.yml"
   when: distribution_config.stat.exists
 
-- name: Create build directory for end-4 dots
-  ansible.builtin.file:
-    path: "{{ ansible_user_dir }}/.build/end-4-dots"
-    state: directory
-    mode: "0755"
-
 - name: Clone end-4 dots (shallow clone)
   ansible.builtin.git:
-    repo: "{{ desktop_shell.repo }}"
-    dest: "{{ ansible_user_dir }}/.build/end-4-dots"
-    version: "{{ desktop_shell.version }}"
+    repo: "https://github.com/end-4/dots-hyprland.git"
+    dest: "/tmp/end-4-dots"
+    version: "main"
     depth: 1
-    update: yes
-
-- name: Ensure .config/quickshell exists
-  ansible.builtin.file:
-    path: "{{ ansible_user_dir }}/.config/quickshell"
-    state: directory
-    mode: "0755"
+    force: true
+  register: end4_quickshell
 
 - name: Copy Quickshell and scripts from end-4 build
   ansible.builtin.copy:
-    src: "{{ ansible_user_dir }}/.build/end-4-dots/.config/{{ item }}"
+    src: "/tmp/end-4-dots/dots/.config/quickshell"
     dest: "{{ ansible_user_dir }}/.config/"
     remote_src: true
     force: true
-  loop:
-    - quickshell
-    - hypr/scripts
+  when: end4_quickshell.before != end4_quickshell.after
 
 - name: Deploy static theme file ({{ desktop_shell.theme }})
   ansible.builtin.copy:
@@ -50,4 +37,5 @@
     regexp: '^local colors = .*'
     line: 'local colors = require("theme")'
     state: present
+  when: end4_quickshell.before != end4_quickshell.after
   failed_when: false # On ne veut pas que le playbook échoue si le shell.lua est déjà configuré différemment.

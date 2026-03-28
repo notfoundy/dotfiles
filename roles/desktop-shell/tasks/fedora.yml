@@ -8,5 +8,7 @@
       - hyprpicker
       - cliphist
       - ydotool
+      # End 4 Shell dependencies
+      - qt6-qt5compat
     state: present
   become: true
