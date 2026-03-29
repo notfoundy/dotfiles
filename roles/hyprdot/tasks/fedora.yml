@@ -1,0 +1,10 @@
+- name: Enable copr
+  community.general.copr:
+    name: deltacopy/darkly/
+    state: enabled
+  become: true
+
+- name: Update dnf cache
+  ansible.builtin.dnf:
+    update_cache: true
+  become: true
