@@ -17,3 +17,27 @@
       - kf6-kirigami
     state: present
   become: true
+
+- name: Enable Copr
+  community.general.copr:
+    name: "ririko66z/dots-hyprland"
+    state: enabled
+  become: true
+
+- name: Update dnf cache
+  ansible.builtin.dnf:
+    update_cache: true
+  become: true
+
+- name: Install build dependencies from end-4 copr
+  ansible.builtin.package:
+    name:
+      - bibata-cursor-theme
+      - breeze-plus-icon-theme
+      - florian-karsten-space-grotesk-fonts
+      - google-material-symbols-vf-rounded-fonts
+      - google-rubik-vf-fonts
+      - google-sans-flex-vf-fonts
+      - readex-pro-fonts-all 
+    state: present
+  become: true
