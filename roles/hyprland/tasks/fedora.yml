@@ -1,6 +1,12 @@
-- name: Enable copr
+- name: Disable outdated copr
   community.general.copr:
     name: solopasha/hyprland
+    state: disabled
+  become: true
+
+- name: Enable copr
+  community.general.copr:
+    name: sdegler/hyprland
     state: enabled
   become: true
 
