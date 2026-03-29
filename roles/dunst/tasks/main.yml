@@ -1,6 +1,6 @@
 - name: Install dunst
   ansible.builtin.package:
     name: dunst
-    state: present
+    state: absent
   become: yes
  
