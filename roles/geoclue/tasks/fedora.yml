@@ -1,0 +1,6 @@
+- name: Install geoclue2
+  ansible.builtin.dnf:
+    name: geoclue2
+    state: present
+    install_weak_deps: false
+  become: true
