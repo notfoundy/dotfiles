@@ -4,12 +4,22 @@
     dest: "/usr/src/awww"
     version: "main"
     update: yes
-  register: git_result
+  register: awww_git_result
   become: true
 
-- name: Define build_required
+- name: Define awww_build_required
   ansible.builtin.set_fact:
-    build_required: git_result.before != git_result.after
+    awww_build_required: "{{ awww_git_result.before != awww_git_result.after }}"
+
+- name: "Checking config for {{ ansible_distribution }}"
+  ansible.builtin.stat:
+    path: "{{ role_path }}/tasks/{{ ansible_distribution | lower }}.yml"
+  register: distribution_config
+  delegate_to: localhost
+
+- name: "Run Tasks for {{ ansible_distribution }}"
+  ansible.builtin.include_tasks: "{{ ansible_distribution | lower }}.yml"
+  when: distribution_config.stat.exists
 
 - name: Build awww (release)
   ansible.builtin.command: cargo build --release --locked
@@ -17,7 +27,7 @@
     chdir: "/usr/src/awww"
   become: true
   notify: Remove build dependencies
-  when: build_required
+  when: awww_build_required
 
 - name: Install release binaries
   vars:
@@ -31,7 +41,7 @@
     remote_src: true
   loop: "{{ binaries }}"
   become: true
-  when: build_required
+  when: awww_build_required
 
 - name: Create awww config directory
   ansible.builtin.file:

@@ -6,4 +6,4 @@
       - wayland-protocols-devel
     state: present
   become: true
-  when: build_required
+  when: awww_build_required
