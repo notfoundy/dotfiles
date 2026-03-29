@@ -1,8 +1,8 @@
 - name: Clone or update awww repository
   ansible.builtin.git:
-    repo: "{{ awww.repos }}"
-    dest: "{{ install_path }}/awww"
-    version: "{{ awww.version }}"
+    repo: "https://codeberg.org/LGFae/awww.git"
+    dest: "/usr/src/awww"
+    version: "main"
     update: yes
   register: git_result
   become: true
@@ -11,22 +11,10 @@
   ansible.builtin.set_fact:
     build_required: git_result.before != git_result.after
 
-- name: Install build dependencies
-  ansible.builtin.package:
-    pkg:
-      - lz4-devel
-      - wayland-devel
-      - wayland-protocols-devel
-      - rust
-      - cargo
-    state: present
-  become: true
-  when: build_required
-
 - name: Build awww (release)
   ansible.builtin.command: cargo build --release --locked
   args:
-    chdir: "{{ install_path }}/awww"
+    chdir: "/usr/src/awww"
   become: true
   notify: Remove build dependencies
   when: build_required
@@ -37,8 +25,8 @@
       - awww
       - awww-daemon
   ansible.builtin.copy:
-    src: "{{ install_path }}/awww/target/release/{{ item }}"
-    dest: "{{ bin_path }}/{{ item }}"
+    src: "/usr/src/awww/target/release/{{ item }}"
+    dest: "/usr/local/bin/{{ item }}"
     mode: "0755"
     remote_src: true
   loop: "{{ binaries }}"

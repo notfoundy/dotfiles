@@ -24,12 +24,6 @@ default_roles:
 desktop_shell:
   theme: "kanagawa" # Options: kanagawa, catppuccin, nord, etc.
 
-install_path: "/usr/src"
-bin_path: "/usr/local/bin"
-awww:
-  repos: "https://codeberg.org/LGFae/awww.git"
-  version: "main"
-
 op:
   ssh:
     github:
