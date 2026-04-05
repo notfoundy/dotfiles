@@ -8,3 +8,9 @@
   ansible.builtin.dnf:
     update_cache: true
   become: true
+
+- name: Install dependencies
+  ansible.builtin.dnf:
+    name: microtex
+    state: present
+  become: true
