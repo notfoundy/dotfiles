@@ -7,3 +7,12 @@ alias vim=nvim
 
 # System update
 alias update="sudo dnf update -y && flatpak update -y"
+
+# Podman
+alias pp="podman ps"
+alias pcu="podman compose up"
+alias pcd="podman compose down"
+alias pl="podman logs"
+alias pv="podman volume"
+alias pe="podman exec"
+alais pei="podman exec -it"
