@@ -6,7 +6,7 @@
 
 - name: "Define ARCH"
   ansible.builtin.set_fact:
-    arch: "{{ ansible_machine | lower }}"
+    arch: "{{ ansible_facts['machine'] | lower }}"
 
 - name: Show latest version
   ansible.builtin.debug:

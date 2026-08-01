@@ -28,6 +28,6 @@
     name: typescript
     global: yes
   environment:
-    PATH: "{{ node_bin }}:{{ ansible_env.PATH }}"
+    PATH: "{{ node_bin }}:{{ ansible_facts['env']['PATH'] }}"
   when: tsc_version.stdout != last_tsc_version
 

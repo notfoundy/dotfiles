@@ -6,7 +6,7 @@
 
 - name: Check plugins
   ansible.builtin.find:
-    paths: "{{ ansible_user_dir }}/.config/nnn/plugins"
+    paths: "{{ ansible_facts['user_dir'] }}/.config/nnn/plugins"
     file_type: any
   register: plugins_content
   changed_when: false

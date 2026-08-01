@@ -32,6 +32,6 @@
     name: sass
     global: yes
   environment:
-    PATH: "{{ node_bin }}:{{ ansible_env.PATH }}"
+    PATH: "{{ node_bin }}:{{ ansible_facts['env']['PATH'] }}"
   when: current_sass_version != last_sass_version
 

@@ -21,11 +21,11 @@
 
 - name: Define NodeOS
   ansible.builtin.set_fact:
-    nodeos: "{{ (ansible_system | lower).replace('windows', 'win') }}"
+    nodeos: "{{ (ansible_facts['system'] | lower).replace('windows', 'win') }}"
 
 - name: Define NodeArch
   ansible.builtin.set_fact:
-    nodearch: "{{ ansible_machine | replace('x86_64', 'x64') | replace('aarch64', 'arm64') }}"
+    nodearch: "{{ ansible_facts['machine'] | replace('x86_64', 'x64') | replace('aarch64', 'arm64') }}"
 
 - name: Define node file
   ansible.builtin.set_fact:
@@ -80,8 +80,8 @@
       ansible.builtin.copy:
         src: /tmp/node-v{{ node_latest_version }}-{{ nodeos }}-{{ nodearch }}/
         dest: /usr/local/node/
-        owner: "{{ ansible_user_id }}"
-        group: "{{ ansible_user_id }}"
+        owner: "{{ ansible_facts['user_id'] }}"
+        group: "{{ ansible_facts['user_id'] }}"
         remote_src: true
         force: true
       become: true

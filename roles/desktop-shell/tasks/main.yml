@@ -1,11 +1,11 @@
-- name: "Checking config for {{ ansible_distribution }}"
+- name: "Checking config for {{ ansible_facts['distribution'] }}"
   ansible.builtin.stat:
-    path: "{{ role_path }}/tasks/{{ ansible_distribution | lower }}.yml"
+    path: "{{ role_path }}/tasks/{{ ansible_facts['distribution'] | lower }}.yml"
   register: distribution_config
   delegate_to: localhost
 
-- name: "Run Tasks for {{ ansible_distribution }}"
-  ansible.builtin.include_tasks: "{{ ansible_distribution | lower }}.yml"
+- name: "Run Tasks for {{ ansible_facts['distribution'] }}"
+  ansible.builtin.include_tasks: "{{ ansible_facts['distribution'] | lower }}.yml"
   when: distribution_config.stat.exists
 
 - name: Clone end-4 dots (shallow clone)
@@ -20,7 +20,7 @@
 - name: Copy Quickshell and scripts from end-4 build
   ansible.builtin.copy:
     src: "/tmp/end-4-dots/dots/.config/quickshell"
-    dest: "{{ ansible_user_dir }}/.config/"
+    dest: "{{ ansible_facts['user_dir'] }}/.config/"
     remote_src: true
     force: true
   when: end4_quickshell.before != end4_quickshell.after
@@ -28,12 +28,12 @@
 - name: Deploy static theme file ({{ desktop_shell.theme }})
   ansible.builtin.copy:
     src: "themes/{{ desktop_shell.theme }}.lua"
-    dest: "{{ ansible_user_dir }}/.config/quickshell/theme.lua"
+    dest: "{{ ansible_facts['user_dir'] }}/.config/quickshell/theme.lua"
     mode: "0644"
 
 - name: Fix Quickshell color loading (Force static theme)
   ansible.builtin.lineinfile:
-    path: "{{ ansible_user_dir }}/.config/quickshell/shell.lua"
+    path: "{{ ansible_facts['user_dir'] }}/.config/quickshell/shell.lua"
     regexp: '^local colors = .*'
     line: 'local colors = require("theme")'
     state: present

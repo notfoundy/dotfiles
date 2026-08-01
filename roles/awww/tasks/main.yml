@@ -11,14 +11,14 @@
   ansible.builtin.set_fact:
     awww_build_required: "{{ awww_git_result.before != awww_git_result.after }}"
 
-- name: "Checking config for {{ ansible_distribution }}"
+- name: "Checking config for {{ ansible_facts['distribution'] }}"
   ansible.builtin.stat:
-    path: "{{ role_path }}/tasks/{{ ansible_distribution | lower }}.yml"
+    path: "{{ role_path }}/tasks/{{ ansible_facts['distribution'] | lower }}.yml"
   register: distribution_config
   delegate_to: localhost
 
-- name: "Run Tasks for {{ ansible_distribution }}"
-  ansible.builtin.include_tasks: "{{ ansible_distribution | lower }}.yml"
+- name: "Run Tasks for {{ ansible_facts['distribution'] }}"
+  ansible.builtin.include_tasks: "{{ ansible_facts['distribution'] | lower }}.yml"
   when: distribution_config.stat.exists
 
 - name: Build awww (release)
@@ -45,17 +45,17 @@
 
 - name: Create awww config directory
   ansible.builtin.file:
-    path: "{{ ansible_user_dir }}/.config/hypr/scripts"
+    path: "{{ ansible_facts['user_dir'] }}/.config/hypr/scripts"
     state: directory
 
 - name: Copy wallpaper script
   ansible.builtin.copy:
     src: "files/wallpaper.sh"
-    dest: "{{ ansible_user_dir }}/.config/hypr/scripts/wallpaper.sh"
+    dest: "{{ ansible_facts['user_dir'] }}/.config/hypr/scripts/wallpaper.sh"
     mode: "0755"
 
 - name: Copy wallpapers
   ansible.builtin.copy:
     src: "files/wallpapers"
-    dest: "{{ ansible_user_dir }}/Pictures/Wallpapers"
+    dest: "{{ ansible_facts['user_dir'] }}/Pictures/Wallpapers"
 
