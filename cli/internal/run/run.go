@@ -198,17 +198,21 @@ func setupOnePassword(log *config.Logger, p *ui.Printer, root string, cfg *confi
 		return nil, err
 	}
 
+	// Announced before signing in: op takes the terminal over to ask for the
+	// master password, and the step it belongs to has to be on screen by then.
+	task := p.StartInteractive("1Password session")
 	session, err := client.SignIn(account)
 	if err != nil {
+		task.Fail()
 		return nil, err
 	}
+	task.Done()
 
 	var env []string
 	if session != "" {
 		env = append(env, session)
 	}
 
-	p.Start("1Password session").Done()
 	return env, verifySecrets(p, client, cfg, env)
 }
 
