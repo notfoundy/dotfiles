@@ -6,6 +6,7 @@ hl.dsp.submap("global")
 
 -- Sources
 require("env")
+require("variables")
 require("execs")
 require("general")
 require("rules")

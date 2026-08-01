@@ -5,7 +5,7 @@ local home = os.getenv("HOME")
 hl.on("hyprland.start", function()
 	-- Bar / wallpaper / services
 	hl.exec_cmd(home .. "/.config/hypr/scripts/start_geoclue_agent.sh")
-	hl.exec_cmd("qs -c " .. qsConfig)
+	hl.exec_cmd("qs -c $qsConfig")
 	hl.exec_cmd(home .. "/.config/hypr/scripts/__restore_video_wallpaper.sh")
 
 	-- Core components
