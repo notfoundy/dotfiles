@@ -1,0 +1,7 @@
+# Route key handling through the 1Password SSH agent: private keys stay in the
+# vault and every use asks for confirmation.
+#
+# This does not disable the default identity files, so the locally generated
+# ~/.ssh/id_ed25519 keeps working for localhost.
+Host *
+  IdentityAgent ~/.1password/agent.sock

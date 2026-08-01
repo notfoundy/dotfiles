@@ -1,3 +1,15 @@
+- name: Ensure .ssh exists
+  ansible.builtin.file:
+    path: "{{ ansible_facts['user_dir'] }}/.ssh"
+    state: directory
+    mode: "0700"
+
+- name: Copy ssh config
+  ansible.builtin.copy:
+    src: "files/config"
+    dest: "{{ ansible_facts['user_dir'] }}/.ssh/config"
+    mode: "0600"
+
 - name: Deploy SSH keys from Vault
   ansible.builtin.include_tasks: ssh_keys.yml
   with_items: "{{ op.ssh.github.notfoundy }}"

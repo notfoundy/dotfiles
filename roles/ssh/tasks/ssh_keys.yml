@@ -1,27 +1,18 @@
-- name: "Get key from Vault: [{{ item.name }}]"
-  ansible.builtin.command: "op read --account my.1password.eu '{{ item.vault_path }}/private_key?ssh-format=openssh'"
-  register: op_private_key
-  changed_when: false
-  no_log: true
-
 - name: "Get public key from Vault: [{{ item.name }}]"
   ansible.builtin.command: "op read --account my.1password.eu '{{ item.vault_path }}/public_key'"
   register: op_public_key
   changed_when: false
-  no_log: true
 
-- name: "Copy SSH keys"
-  block:
-    - name: "Deploy private key: [{{ item.name }}]"
-      ansible.builtin.copy:
-        dest: "{{ ansible_user_dir }}/.ssh/{{ item.name }}"
-        content: "{{ op_private_key.stdout }}\n"
-        mode: "0600"
-      no_log: true
+- name: "Deploy public key: [{{ item.name }}]"
+  ansible.builtin.copy:
+    dest: "{{ ansible_facts['user_dir'] }}/.ssh/{{ item.name }}.pub"
+    content: "{{ op_public_key.stdout }}"
+    mode: "0644"
 
-    - name: "Deploy public key: [{{ item.name }}]"
-      ansible.builtin.copy:
-        dest: "{{ ansible_user_dir }}/.ssh/{{ item.name }}.pub"
-        content: "{{ op_public_key.stdout }}"
-        mode: "0644"
-      no_log: true
+# The private key is served by the 1Password agent, so a copy on disk is both
+# redundant and readable by anything running as this user. Remove the one
+# earlier runs of this role left behind.
+- name: "Remove on-disk private key: [{{ item.name }}]"
+  ansible.builtin.file:
+    path: "{{ ansible_facts['user_dir'] }}/.ssh/{{ item.name }}"
+    state: absent

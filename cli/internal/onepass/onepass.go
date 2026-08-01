@@ -21,8 +21,9 @@ const DefaultDomain = "my.1password.eu"
 // secretFields are the field references roles/ssh/tasks/ssh_keys.yml reads for
 // each key. `op read` only resolves a full op://vault/item/field reference, so
 // verifying these is both correct and a dry run of what the playbook will do.
-// Keep in sync with that role.
-var secretFields = []string{"private_key?ssh-format=openssh", "public_key"}
+// Keep in sync with that role: the private key is served by the 1Password agent
+// and never read, so verification does not pull it into memory either.
+var secretFields = []string{"public_key"}
 
 // Account is one entry of `op account list --format=json`.
 type Account struct {

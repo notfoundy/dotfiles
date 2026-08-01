@@ -4,7 +4,7 @@
     state: present
   become: true
 
-- name: "Add APT Repo"
+- name: "Add DNF Repo"
   ansible.builtin.yum_repository:
     name: 1password
     description: 1Password Stable Channel
@@ -16,9 +16,13 @@
     state: present
   become: true
 
+# The desktop app is what provides the SSH agent (~/.1password/agent.sock) and
+# the commit signing helper (/opt/1Password/op-ssh-sign); the CLI alone does not.
 - name: "Install 1Password"
   ansible.builtin.dnf5:
-    name: 1password-cli
+    name:
+      - 1password
+      - 1password-cli
     state: present
     update_cache: true
   become: true

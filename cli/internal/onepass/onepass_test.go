@@ -69,7 +69,6 @@ func TestReferences(t *testing.T) {
 			name:   "one reference per field",
 			secret: config.Secret{Name: "github_key", VaultPath: "op://Private/github_key"},
 			want: []string{
-				"op://Private/github_key/private_key?ssh-format=openssh",
 				"op://Private/github_key/public_key",
 			},
 		},

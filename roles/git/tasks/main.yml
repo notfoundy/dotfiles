@@ -4,3 +4,21 @@
     state: present
   become: yes
 
+# Sign commits with the SSH key held in 1Password. git_config touches only the
+# listed keys, so a hand-written ~/.gitconfig survives.
+- name: Configure commit signing
+  community.general.git_config:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    scope: global
+  loop:
+    - name: gpg.format
+      value: ssh
+    - name: gpg.ssh.program
+      value: /opt/1Password/op-ssh-sign
+    - name: user.signingkey
+      value: "{{ ansible_facts['user_dir'] }}/.ssh/{{ op.git.signing_key }}.pub"
+    - name: commit.gpgsign
+      value: "true"
+    - name: tag.gpgsign
+      value: "true"

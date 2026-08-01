@@ -25,6 +25,9 @@ desktop_shell:
   theme: "kanagawa" # Options: kanagawa, catppuccin, nord, etc.
 
 op:
+  git:
+    # Which deployed public key signs commits, by `name` in op.ssh below.
+    signing_key: github_key
   ssh:
     github:
       notfoundy:
