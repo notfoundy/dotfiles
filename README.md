@@ -55,6 +55,31 @@ Two steps the playbook cannot do for you:
 
 Which key signs is set by `op.git.signing_key` in `group_vars/all.yml`.
 
+## Releases
+
+`dotfiles self-update` downloads the latest release published on GitHub, checks its
+SHA-256 and swaps the running binary. Until a release exists it stops with
+_no release published yet_ — there is nothing to update to.
+
+Cutting one is a tag away; pushing it runs GoReleaser through
+`.github/workflows/release.yml`:
+
+```bash
+git tag -a v0.1.0 -m "v0.1.0"
+git push origin v0.1.0
+```
+
+Assets are published **without a version in their name** (`dotfiles_linux_amd64.tar.gz`,
+`checksums.txt`). That is deliberate: it keeps the `/releases/latest/download/` URLs
+stable, so `self-update` needs no GitHub API call. Renaming them in `.goreleaser.yaml`
+breaks `cli/internal/selfupdate`.
+
+To rehearse a release without publishing anything:
+
+```bash
+goreleaser release --snapshot --clean --skip=publish
+```
+
 ---
 
 If you have any questions, suggestions, or just want to chat about life, feel free to open an issue or drop me a message.

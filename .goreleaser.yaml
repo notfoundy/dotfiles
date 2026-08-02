@@ -1,0 +1,51 @@
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
+#
+# The archive and checksum names deliberately carry no version: it is what makes
+# the /releases/latest/download/ URLs stable, so `dotfiles self-update` needs
+# neither a GitHub API call nor jq. See cli/internal/selfupdate.
+version: 2
+
+project_name: dotfiles
+
+before:
+  hooks:
+    - go mod tidy -C cli
+    - go test -C cli ./...
+
+builds:
+  - id: dotfiles
+    dir: cli
+    main: .
+    binary: dotfiles
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w -X main.version={{ .Version }}
+
+archives:
+  - id: dotfiles
+    formats:
+      - tar.gz
+    name_template: dotfiles_{{ .Os }}_{{ .Arch }}
+    files:
+      - README.md
+
+checksum:
+  name_template: checksums.txt
+
+changelog:
+  use: github
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^chore:"
+
+release:
+  prerelease: auto
