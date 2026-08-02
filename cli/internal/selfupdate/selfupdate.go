@@ -14,6 +14,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"path"
 	"path/filepath"
@@ -51,9 +52,25 @@ func LatestVersion() (string, error) {
 		return "", fmt.Errorf("checking for the latest release: unexpected status %s", resp.Status)
 	}
 
-	// The redirect lands on .../releases/tag/vX.Y.Z
-	tag := path.Base(resp.Request.URL.Path)
-	if tag == "" || tag == "latest" {
+	return tagFromURL(resp.Request.URL)
+}
+
+// tagFromURL reads the tag off the page the "latest" redirect lands on.
+//
+// GitHub answers with .../releases/tag/vX.Y.Z, but a repository without a
+// single release quietly falls back to the .../releases listing. Matching the
+// tag path explicitly is what keeps that case from being mistaken for a release
+// named "releases", which only surfaced later as a 404 on the assets.
+func tagFromURL(u *url.URL) (string, error) {
+	const marker = "/releases/tag/"
+
+	i := strings.Index(u.Path, marker)
+	if i < 0 {
+		return "", fmt.Errorf("no release published for %s yet", repo)
+	}
+
+	tag := strings.Trim(u.Path[i+len(marker):], "/")
+	if tag == "" {
 		return "", fmt.Errorf("could not determine the latest release tag")
 	}
 	return tag, nil
