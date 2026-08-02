@@ -24,22 +24,45 @@ At the moment, it’s probably not fully automated, but I’ll live with it. May
 > For now, only Fedora is supported because it’s the only distribution I use.
 > I'm not a distro hopper, so it might stay this way.
 
-This playbook includes a shell script located at `bin/dotfiles`. This script makes sure any Ansible dependencies are installed and updated and initializes your environment.
-Ansible will take care of everything (or almost). You just need to grab a coffee while it works!
+Everything runs through the `dotfiles` command, a small Go program living in `cli/`.
+It prepares the host, makes sure the Ansible dependencies are installed and updated,
+refreshes the checkout in `~/.dotfiles`, then hands the terminal over to
+`ansible-playbook`.
+Ansible will take care of the rest (or almost). You just need to grab a coffee while it works!
 
 ### On a fresh installation
 
+Drop the latest release somewhere on your `PATH` and let it do the rest:
+
 ```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/notfoundy/dotfiles/main/bin/dotfiles)"
+mkdir -p ~/.local/bin
+curl -fsSL https://github.com/notfoundy/dotfiles/releases/latest/download/dotfiles_linux_amd64.tar.gz \
+  | tar -xz -C ~/.local/bin dotfiles
+~/.local/bin/dotfiles
+```
+
+Swap `amd64` for `arm64` if that is what you are running. The first run clones the
+repository to `~/.dotfiles` and asks you to reboot once it is done.
+
+To build it from a clone instead:
+
+```bash
+go build -C cli -o ~/.local/bin/dotfiles .
 ```
 
 ### Otherwise
 
-To update your environment run the `dotfiles` command in your shell
-
 ```bash
-dotfiles
+dotfiles                        # every default role, as listed by default_roles in group_vars/all.yml
+dotfiles -t nvim,go             # only those roles
+dotfiles --select               # pick them interactively
+dotfiles --skip-update          # leave the checkout alone
+dotfiles --repo . -- --check    # run against this clone; anything after -- goes to ansible-playbook
 ```
+
+`dotfiles --help` lists the rest, and `dotfiles self-update` fetches the latest
+release. Every run is appended to `~/.local/state/dotfiles/dotfiles.log`, so a role
+that failed can be read back afterwards.
 
 ## 1Password
 
