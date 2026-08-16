@@ -2,7 +2,7 @@
   ansible.builtin.package:
     name: git
     state: present
-  become: yes
+  become: true
 
 # Sign commits with the SSH key held in 1Password. git_config touches only the
 # listed keys, so a hand-written ~/.gitconfig survives.
@@ -20,5 +20,9 @@
       value: "{{ ansible_facts['user_dir'] }}/.ssh/{{ op.git.signing_key }}.pub"
     - name: commit.gpgsign
       value: "true"
-    - name: tag.gpgsign
-      value: "true"
+
+- name: Drop tag signing
+  community.general.git_config:
+    name: tag.gpgsign
+    scope: global
+    state: absent
