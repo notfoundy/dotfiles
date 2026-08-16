@@ -1,7 +1,10 @@
 - name: Disable outdated copr
-  community.general.copr:
-    name: solopasha/hyprland
-    state: disabled
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/yum.repos.d/_copr:copr.fedorainfracloud.org:solopasha:hyprland.repo
+    - /etc/yum.repos.d/_copr_solopasha-hyprland.repo
   become: true
 
 - name: Enable copr
