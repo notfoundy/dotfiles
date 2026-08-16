@@ -1,11 +1,11 @@
 - name: "Checking for Distribution Config: {{ ansible_facts['distribution'] }}"
   ansible.builtin.stat:
     path: "{{ role_path }}/tasks/{{ ansible_facts['distribution'] | lower }}.yml"
-  register: distribution_config
+  register: onepassword_distribution_config
 
 - name: "Run Tasks: {{ ansible_facts['distribution'] }}"
   ansible.builtin.include_tasks: "{{ ansible_facts['distribution'] | lower }}.yml"
-  when: distribution_config.stat.exists
+  when: onepassword_distribution_config.stat.exists
 
 - name: "Ensure config dir exists"
   ansible.builtin.file:

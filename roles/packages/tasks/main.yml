@@ -1,12 +1,12 @@
 - name: "Checking config for {{ ansible_facts['distribution'] }}"
   ansible.builtin.stat:
     path: "{{ role_path }}/tasks/{{ ansible_facts['distribution'] | lower }}.yml"
-  register: distribution_config
+  register: packages_distribution_config
   delegate_to: localhost
 
 - name: "Run Tasks for {{ ansible_facts['distribution'] }}"
   ansible.builtin.include_tasks: "{{ ansible_facts['distribution'] | lower }}.yml"
-  when: distribution_config.stat.exists
+  when: packages_distribution_config.stat.exists
 
 - name: Install packages
   ansible.builtin.package:
