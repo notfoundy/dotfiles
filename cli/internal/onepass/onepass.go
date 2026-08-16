@@ -76,6 +76,9 @@ func (c *Client) Authenticated() bool {
 func (c *Client) Accounts() ([]Account, error) {
 	out, err := shell.Capture(c.log, shell.Cmd{Name: "op", Args: []string{"account", "list", "--format=json"}})
 	if err != nil {
+		if reason := shell.Output(err); reason != "" {
+			return nil, fmt.Errorf("listing 1Password accounts: %s", reason)
+		}
 		return nil, err
 	}
 
