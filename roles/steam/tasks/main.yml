@@ -1,0 +1,13 @@
+- name: "Checking config for {{ ansible_facts['distribution'] }}"
+  ansible.builtin.stat:
+    path: "{{ role_path }}/tasks/{{ ansible_facts['distribution'] | lower }}.yml"
+  register: steam_distribution_config
+  delegate_to: localhost
+
+- name: "Run Tasks for {{ ansible_facts['distribution'] }}"
+  ansible.builtin.include_tasks: "{{ ansible_facts['distribution'] | lower }}.yml"
+  when: steam_distribution_config.stat.exists
+
+- name: Verify the graphics stack
+  ansible.builtin.include_tasks: verify.yml
+  when: steam_distribution_config.stat.exists

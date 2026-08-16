@@ -14,6 +14,7 @@ default_roles:
   - fuzzel
   - flatpak
   - app
+  - steam
   - ssh
   - virtualization
   - desktop-shell

@@ -1,0 +1,41 @@
+- name: List the Vulkan drivers seen by the loader
+  ansible.builtin.command:
+    cmd: vulkaninfo --summary
+  register: steam_vulkaninfo
+  changed_when: false
+  failed_when: false
+
+- name: Assert a hardware Vulkan driver is available
+  ansible.builtin.assert:
+    that:
+      - steam_vulkaninfo.rc == 0
+      - >-
+        steam_vulkaninfo.stdout_lines
+        | select('search', 'driverName')
+        | reject('search', 'llvmpipe')
+        | list | length > 0
+    fail_msg: >-
+      Only llvmpipe answered, so every game would fall back to software rendering.
+      Check that the Mesa drivers match the running kernel.
+    success_msg: >-
+      Hardware Vulkan driver detected:
+      {{ steam_vulkaninfo.stdout_lines
+         | select('search', 'deviceName')
+         | reject('search', 'llvmpipe')
+         | map('regex_replace', '^\s*deviceName\s*=\s*', '')
+         | join(', ') }}
+
+- name: Look for the 32-bit Vulkan drivers
+  ansible.builtin.find:
+    paths: /usr/share/vulkan/icd.d
+    patterns: "*.i686.json"
+  register: steam_vulkan_icd32
+
+- name: Assert the 32-bit Vulkan drivers are installed
+  ansible.builtin.assert:
+    that:
+      - steam_vulkan_icd32.matched > 0
+    fail_msg: >-
+      No 32-bit ICD in /usr/share/vulkan/icd.d, so 32-bit Proton titles will not
+      start. Reinstall mesa-vulkan-drivers.i686.
+    success_msg: "32-bit Vulkan drivers installed"

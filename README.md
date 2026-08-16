@@ -78,6 +78,24 @@ Two steps the playbook cannot do for you:
 
 Which key signs is set by `op.git.signing_key` in `group_vars/all.yml`.
 
+## Gaming
+
+The `steam` role enables RPM Fusion, installs Steam along with `gamescope`, `mangohud` and
+`vulkan-tools`, and pulls the 32-bit Mesa drivers that Proton titles need. It then asserts
+that the loader actually sees a hardware Vulkan driver — if only `llvmpipe` answers, games
+would silently render on the CPU — and that a 32-bit ICD is present.
+
+Steam Play is enabled by default by recent Steam clients, so nothing else is required.
+For titles that need a community Proton build, drop GE-Proton into
+`~/.steam/root/compatibilitytools.d/`.
+
+To run a game upscaled instead of at native resolution, pass it through `gamescope` in the
+launch options:
+
+```
+gamescope -W 1280 -H 720 -w 1920 -h 1080 -F fsr -f -- %command%
+```
+
 ## Releases
 
 `dotfiles self-update` downloads the latest release published on GitHub, checks its
