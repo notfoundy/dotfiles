@@ -18,5 +18,14 @@
   ansible.builtin.copy:
     src: files/
     dest: "{{ ansible_facts['user_dir'] }}/.config/hypr/"
-
     mode: "0644"
+
+- name: Copy hyprland executable scripts
+  ansible.builtin.copy:
+    src: "files/{{ item }}"
+    dest: "{{ ansible_facts['user_dir'] }}/.config/hypr/{{ item }}"
+    mode: "0755"
+  loop:
+    - scripts/
+    - hyprlock/check-capslock.sh
+    - hyprlock/status.sh
