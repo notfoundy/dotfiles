@@ -3,9 +3,9 @@ font-family = "JetBrains Mono"
 font-family-bold = "JetBrains Mono"
 font-family-italic = "Maple Mono"
 font-family-bold-italic = "Maple Mono"
-font-family = "Symbols Nerd Font Mono"
 font-size = 12
 adjust-underline-position = 4
+adjust-cell-height = 10%
 
 # Mouse
 mouse-hide-while-typing = true
@@ -13,18 +13,40 @@ mouse-hide-while-typing = true
 
 # Theme
 cursor-invert-fg-bg = true
+cursor-style = block
+cursor-style-blink = false
 background-opacity = 0.92
+minimum-contrast = 1.1
+unfocused-split-opacity = 0.75
+unfocused-split-fill = #101014
 window-theme = ghostty
 
 # Window
 gtk-single-instance = true
 gtk-tabs-location = bottom
 gtk-wide-tabs = false
-window-padding-y = 2,0
+window-padding-x = 10
+window-padding-y = 6
 window-padding-balance = true
+window-padding-color = extend
 window-decoration = false
+resize-overlay = never
 
 # Other
 copy-on-select = clipboard
+clipboard-read = allow
+clipboard-write = allow
+scrollback-limit = 100000000
 shell-integration-features = cursor,sudo,no-title
 
+# Keybinds
+keybind = ctrl+shift+enter=new_split:right
+keybind = ctrl+shift+backslash=new_split:down
+keybind = alt+h=goto_split:left
+keybind = alt+j=goto_split:down
+keybind = alt+k=goto_split:up
+keybind = alt+l=goto_split:right
+keybind = alt+z=toggle_split_zoom
+keybind = alt+equal=equalize_splits
+keybind = ctrl+shift+s=write_scrollback_file:open
+keybind = ctrl+shift+r=reload_config
