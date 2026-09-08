@@ -54,11 +54,11 @@ hl.config({
 		gaps_out = 5,
 		gaps_workspaces = 50,
 
-		border_size = 1,
+		border_size = 2,
 
 		col = {
-			active_border = "rgba(0DB7D455)",
-			inactive_border = "rgba(31313600)",
+			active_border = { colors = { "rgba(0DB7D4FF)", "rgba(0D74D4FF)" }, angle = 45 },
+			inactive_border = "rgba(31313666)",
 		},
 		resize_on_border = true,
 
@@ -103,7 +103,7 @@ hl.config({
 		},
 		-- Dim
 		dim_inactive = true,
-		dim_strength = 0.05,
+		dim_strength = 0.12,
 		dim_special = 0.2,
 	},
 	animations = {
