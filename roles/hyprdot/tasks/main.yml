@@ -8,9 +8,11 @@
   ansible.builtin.include_tasks: "{{ ansible_facts['distribution'] | lower }}.yml"
   when: hyprdot_distribution_config.stat.exists
 
-- name: Install hypr tool
+- name: Install hypr tools
   ansible.builtin.package:
-    name: hyprlock
+    name:
+      - hyprlock
+      - hypridle
     state: present
   become: true
 
