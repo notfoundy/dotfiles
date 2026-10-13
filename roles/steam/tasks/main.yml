@@ -8,6 +8,35 @@
   ansible.builtin.include_tasks: "{{ ansible_facts['distribution'] | lower }}.yml"
   when: steam_distribution_config.stat.exists
 
-- name: Verify the graphics stack
-  ansible.builtin.include_tasks: verify.yml
-  when: steam_distribution_config.stat.exists
+- name: Install Steam
+  community.general.flatpak:
+    name: com.valvesoftware.Steam
+    state: present
+    method: user
+
+- name: Read the Steam runtime
+  ansible.builtin.command:
+    cmd: flatpak info --user --show-runtime com.valvesoftware.Steam
+  register: steam_runtime
+  changed_when: false
+
+- name: Keep the runtime branch
+  ansible.builtin.set_fact:
+    steam_runtime_branch: "{{ steam_runtime.stdout | trim | split('/') | last }}"
+
+- name: Check the Vulkan layers
+  ansible.builtin.command:
+    cmd: "flatpak info --user {{ item }}//{{ steam_runtime_branch }}"
+  loop:
+    - org.freedesktop.Platform.VulkanLayer.gamescope
+    - org.freedesktop.Platform.VulkanLayer.MangoHud
+  register: steam_vulkan_layers_info
+  changed_when: false
+  failed_when: false
+
+- name: Install the Vulkan layers
+  ansible.builtin.command:
+    cmd: "flatpak install --user --noninteractive flathub {{ item.item }}//{{ steam_runtime_branch }}"
+  loop: "{{ steam_vulkan_layers_info.results | selectattr('rc', '!=', 0) }}"
+  loop_control:
+    label: "{{ item.item }}"

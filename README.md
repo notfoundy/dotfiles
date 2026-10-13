@@ -143,14 +143,16 @@ Which key signs is set by `op.git.signing_key` in `group_vars/all.yml`.
 
 ## Gaming
 
-The `steam` role enables RPM Fusion, installs Steam along with `gamescope`, `mangohud` and
-`vulkan-tools`, and pulls the 32-bit Mesa drivers that Proton titles need. It then asserts
-that the loader actually sees a hardware Vulkan driver — if only `llvmpipe` answers, games
-would silently render on the CPU — and that a 32-bit ICD is present.
+The `steam` role installs Steam from Flathub (`com.valvesoftware.Steam`, user install) along
+with the `gamescope` and `MangoHud` Vulkan layers, on the same branch as Steam's runtime. The
+sandbox ships its own Mesa, including the 32-bit drivers Proton needs, so the host needs
+neither RPM Fusion nor multilib packages. On Fedora it adds `steam-devices` from the official
+repositories, for the udev rules controllers and VR headsets need.
 
 Steam Play is enabled by default by recent Steam clients, so nothing else is required.
 For titles that need a community Proton build, drop GE-Proton into
-`~/.steam/root/compatibilitytools.d/`.
+`~/.var/app/com.valvesoftware.Steam/data/Steam/compatibilitytools.d/`, or install the
+`com.valvesoftware.Steam.CompatibilityTool.Proton-GE` flatpak.
 
 To run a game upscaled instead of at native resolution, pass it through `gamescope` in the
 launch options:

@@ -1,28 +1,5 @@
-- name: Check if RPM Fusion is enabled
-  ansible.builtin.stat:
-    path: /etc/yum.repos.d/rpmfusion-nonfree.repo
-  register: steam_rpmfusion
-
-- name: Enable the RPM Fusion repositories
+- name: Install the Steam udev rules
   ansible.builtin.dnf:
-    name:
-      - "https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-{{ ansible_facts['distribution_major_version'] }}.noarch.rpm"
-      - "https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-{{ ansible_facts['distribution_major_version'] }}.noarch.rpm"
-    disable_gpg_check: true
+    name: steam-devices
     state: present
-  when: not steam_rpmfusion.stat.exists
-  become: true
-
-- name: Install Steam and the gaming tools
-  ansible.builtin.dnf:
-    name:
-      - steam
-      - gamescope
-      - mangohud
-      - vulkan-tools
-      - mangohud.i686
-      - mesa-dri-drivers.i686
-      - mesa-vulkan-drivers.i686
-    state: present
-    update_cache: "{{ not steam_rpmfusion.stat.exists }}"
   become: true
