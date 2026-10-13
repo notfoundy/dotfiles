@@ -15,7 +15,7 @@ _zellij_launcher() {
 
   SESSION_NAME=$(basename "$SELECTED" | tr ' ' '_' | tr . _)
 
-  if zellij list-sessions | rg -q $SESSION_NAME; then
+  if zellij list-sessions | rg -qF "$SESSION_NAME"; then
     command zellij attach "$SESSION_NAME"
   else
     cd "$SELECTED" || return

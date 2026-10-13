@@ -1,12 +1,8 @@
 ---@diagnostic disable: undefined-global
 
-local home = os.getenv("HOME")
-
 hl.on("hyprland.start", function()
-	-- Bar / wallpaper / services
-	hl.exec_cmd(home .. "/.config/hypr/scripts/start_geoclue_agent.sh")
+	-- Shell
 	hl.exec_cmd("noctalia")
-	hl.exec_cmd(home .. "/.config/hypr/scripts/__restore_video_wallpaper.sh")
 
 	-- Core components
 	hl.exec_cmd("gnome-keyring-daemon --start --components=secrets")

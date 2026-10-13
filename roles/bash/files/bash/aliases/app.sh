@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 # App but better...
 alias cl=clear
 alias cat=bat

@@ -16,6 +16,3 @@ require("keybinds")
 -- nwg-displays support
 require("workspaces")
 require("monitors")
-
--- Shell Overides
-require("shellOverides/main")

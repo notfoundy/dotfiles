@@ -15,8 +15,5 @@ hl.env("QT_QPA_PLATFORM", "wayland")
 hl.env("QT_QPA_PLATFORMTHEME", "kde")
 hl.env("XDG_MENU_PREFIX", "plasma-")
 
--- Virtual environment
-hl.env("ILLOGICAL_IMPULSE_VIRTUAL_ENV", os.getenv("HOME") .. "/.local/state/quickshell/.venv")
-
 -- Terminal application
 hl.env("TERMINAL", "ghostty")

@@ -2,15 +2,11 @@
 
 # Get the aliases and functions
 if [ -f ~/.bashrc ]; then
+    # shellcheck source=/dev/null
     . ~/.bashrc
 fi
 
 # User specific environment and startup programs
 if uwsm check may-start; then
     exec uwsm start hyprland.desktop
-fi
-
-# Hyprland startup
-if uwsm check may-start; then
-  exec uwsm start hyprland.desktop
 fi

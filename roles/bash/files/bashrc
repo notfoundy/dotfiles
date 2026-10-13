@@ -1,12 +1,14 @@
 # .bashrc
+# shellcheck shell=bash
 
 # Don't put duplicate lines in the history. See bash(1) for more options
 export HISTCONTROL=ignoredups
 
 # Source files
-for file in $(find $HOME/.config/bash/ -type f -name "*.sh"); do
+while IFS= read -r -d '' file; do
+  # shellcheck source=/dev/null
   source "$file"
-done
+done < <(find "$HOME/.config/bash/" -type f -name "*.sh" -print0)
 
 PATHS=(
   "/usr/local/go/bin"
@@ -18,7 +20,7 @@ PATHS=(
 
 # PATH
 for p in "${PATHS[@]}"; do
-  if [[ -d "$p" && ! "$PATH" =~ "(^|:)$p(:|$)" ]]; then
+  if [[ -d "$p" && ":$PATH:" != *":$p:"* ]]; then
     export PATH="$PATH:$p"
   fi
 done

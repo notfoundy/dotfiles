@@ -17,10 +17,3 @@
   ansible.builtin.dnf:
     update_cache: true
   become: true
-
-- name: Install hyprpolkitagent
-  ansible.builtin.package:
-    name: hyprpolkitagent
-    state: present
-  become: true
-  notify: Reload systemd daemon

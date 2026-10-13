@@ -1,9 +1,0 @@
-- name: Install build dependencies
-  ansible.builtin.package:
-    pkg:
-      - lz4-devel
-      - wayland-devel
-      - wayland-protocols-devel
-    state: present
-  become: true
-  when: awww_build_required

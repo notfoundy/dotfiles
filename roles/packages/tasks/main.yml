@@ -19,6 +19,7 @@
       - zoxide
       # - exa
       - bat
+      - fzf
       - fd-find
       - ripgrep
       - aspell

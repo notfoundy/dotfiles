@@ -1,5 +1,3 @@
 dependencies:
   - starship
   - kitty
-  - awww
-  - geoclue
