@@ -68,10 +68,6 @@ hl.window_rule({
 })
 
 -- Move
--- kde-material-you-colors spawns a window when changing dark/light theme. This is to make sure it doesn't interfere at all.
-hl.window_rule({ match = { class = "^(plasma-changeicons)$" }, float = true })
-hl.window_rule({ match = { class = "^(plasma-changeicons)$" }, no_initial_focus = true })
-hl.window_rule({ match = { class = "^(plasma-changeicons)$" }, move = { 999999, 999999 } })
 -- stupid dolphin copy
 hl.window_rule({ match = { title = "^(Copying — Dolphin)$" }, move = { 40, 80 } })
 
@@ -161,43 +157,15 @@ hl.layer_rule({ match = { namespace = "indicator.*" }, ignore_alpha = 0.6 })
 hl.layer_rule({ match = { namespace = "osk[0-9]*" }, blur = true })
 hl.layer_rule({ match = { namespace = "osk[0-9]*" }, ignore_alpha = 0.6 })
 
--- Quickshell
--- Quickshell: illogical-impulse
-hl.layer_rule({ match = { namespace = "quickshell:.*" }, blur_popups = true })
-hl.layer_rule({ match = { namespace = "quickshell:.*" }, blur = true })
-hl.layer_rule({ match = { namespace = "quickshell:.*" }, ignore_alpha = 0.79 })
-hl.layer_rule({ match = { namespace = "quickshell:bar" }, animation = "slide" })
-hl.layer_rule({ match = { namespace = "quickshell:actionCenter" }, no_anim = true })
-hl.layer_rule({ match = { namespace = "quickshell:cheatsheet" }, animation = "slide bottom" })
-hl.layer_rule({ match = { namespace = "quickshell:dock" }, animation = "slide bottom" })
-hl.layer_rule({ match = { namespace = "quickshell:screenCorners" }, animation = "popin 120%" })
-hl.layer_rule({ match = { namespace = "quickshell:lockWindowPusher" }, no_anim = true })
-hl.layer_rule({ match = { namespace = "quickshell:notificationPopup" }, animation = "fade" })
-hl.layer_rule({ match = { namespace = "quickshell:overlay" }, no_anim = true })
-hl.layer_rule({ match = { namespace = "quickshell:overlay" }, ignore_alpha = 1 })
-hl.layer_rule({ match = { namespace = "quickshell:overview" }, no_anim = true })
-hl.layer_rule({ match = { namespace = "quickshell:osk" }, animation = "slide bottom" })
-hl.layer_rule({ match = { namespace = "quickshell:polkit" }, no_anim = true })
-hl.layer_rule({ match = { namespace = "quickshell:popup" }, xray = false }) -- No weird color for bar tooltips (this in theory should suffice)
-hl.layer_rule({ match = { namespace = "quickshell:popup" }, ignore_alpha = 1 }) -- No weird color for bar tooltips (but somehow this is necessary)
-hl.layer_rule({ match = { namespace = "quickshell:mediaControls" }, ignore_alpha = 1 }) -- Same as above
-hl.layer_rule({ match = { namespace = "quickshell:reloadPopup" }, animation = "slide" })
-hl.layer_rule({ match = { namespace = "quickshell:regionSelector" }, no_anim = true })
-hl.layer_rule({ match = { namespace = "quickshell:screenshot" }, no_anim = true })
-hl.layer_rule({ match = { namespace = "quickshell:session" }, blur = true })
-hl.layer_rule({ match = { namespace = "quickshell:session" }, no_anim = true })
-hl.layer_rule({ match = { namespace = "quickshell:session" }, ignore_alpha = 0 })
-hl.layer_rule({ match = { namespace = "quickshell:sidebarRight" }, animation = "slide right" })
-hl.layer_rule({ match = { namespace = "quickshell:sidebarLeft" }, animation = "slide left" })
-hl.layer_rule({ match = { namespace = "quickshell:verticalBar" }, animation = "slide" })
-hl.layer_rule({ match = { namespace = "quickshell:osk" }, order = -1 })
--- Quickshell: waffles
-hl.layer_rule({ match = { namespace = "quickshell:wallpaperSelector" }, animation = "slide top" })
-hl.layer_rule({ match = { namespace = "quickshell:wNotificationCenter" }, no_anim = true })
-hl.layer_rule({ match = { namespace = "quickshell:wOnScreenDisplay" }, no_anim = true })
-hl.layer_rule({ match = { namespace = "quickshell:wStartMenu" }, no_anim = true })
-hl.layer_rule({ match = { namespace = "quickshell:wTaskView" }, ignore_alpha = 0 })
-hl.layer_rule({ match = { namespace = "quickshell:wTaskView" }, no_anim = true })
+-- Noctalia
+hl.layer_rule({
+	match = { namespace = "^noctalia-(bar-.+|notification|dock|panel|attached-panel|osd|window-switcher)$" },
+	no_anim = true,
+	ignore_alpha = 0.5,
+	blur = true,
+	blur_popups = true,
+})
+hl.window_rule({ match = { class = "dev.noctalia.Noctalia" }, float = true, size = { 1080, 920 } })
 
 -- Launchers need to be FAST
 hl.layer_rule({ match = { namespace = "gtk4-layer-shell" }, no_anim = true })

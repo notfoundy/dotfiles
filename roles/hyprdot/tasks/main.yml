@@ -11,8 +11,11 @@
 - name: Install hypr tools
   ansible.builtin.package:
     name:
-      - hyprlock
-      - hypridle
+      - hyprpicker
+      - grim
+      - slurp
+      - tesseract
+      - wtype
     state: present
   become: true
 
@@ -29,5 +32,3 @@
     mode: "0755"
   loop:
     - scripts/
-    - hyprlock/check-capslock.sh
-    - hyprlock/status.sh

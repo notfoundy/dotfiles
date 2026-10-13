@@ -8,7 +8,7 @@ import (
 
 func testConfig() *Config {
 	return &Config{
-		Available:    []string{"bash", "blender", "go", "nvim", "quickshell", "system"},
+		Available:    []string{"bash", "blender", "go", "kitty", "nvim", "system"},
 		DefaultRoles: []string{"system", "bash", "go", "nvim"},
 	}
 }
@@ -57,8 +57,8 @@ func TestResolveSubsetIsExplicit(t *testing.T) {
 }
 
 func TestResolveAcceptsRolesOutsideDefaults(t *testing.T) {
-	// blender and quickshell are not in default_roles but must stay reachable.
-	if _, err := testConfig().Resolve([]string{"blender", "quickshell"}); err != nil {
+	// blender and kitty are not in default_roles but must stay reachable.
+	if _, err := testConfig().Resolve([]string{"blender", "kitty"}); err != nil {
 		t.Errorf("Resolve() error = %v, want nil", err)
 	}
 }

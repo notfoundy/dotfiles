@@ -8,7 +8,6 @@
       - dbus-broker
       - xdg-desktop-portal-hyprland
       - xdg-desktop-portal-gtk
-      - mako
   become: true
   notify: Restart dbus-broker
 

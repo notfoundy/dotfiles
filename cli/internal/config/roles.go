@@ -16,7 +16,7 @@ type Selection struct {
 	// filtering entirely — the behaviour of a bare `dotfiles`. Passing the full
 	// list via -t would instead switch Ansible into filtering mode, where role
 	// dependencies pulled in through meta/main.yml (hyprdot -> starship, kitty,
-	// awww, geoclue; desktop-shell -> quickshell) are subject to the filter.
+	// awww, geoclue) are subject to the filter.
 	Explicit bool
 }
 

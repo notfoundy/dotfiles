@@ -64,6 +64,16 @@ dotfiles --repo . -- --check    # run against this clone; anything after -- goes
 release. Every run is appended to `~/.local/state/dotfiles/dotfiles.log`, so a role
 that failed can be read back afterwards.
 
+## Desktop shell
+
+The `noctalia` role installs [Noctalia](https://docs.noctalia.dev) from the official Fedora
+repositories; Hyprland starts it and every shell keybind goes through `noctalia msg`.
+It also handles notifications, the lock screen and idle, so there is no mako, hyprlock or
+hypridle.
+
+Its idle behaviours (lock, screen off, suspend) ship **disabled**: turn them on once in
+Noctalia's settings (`SUPER + I`). Its configuration is not tracked here yet.
+
 ## 1Password
 
 SSH authentication and commit signing both go through the 1Password SSH agent. Private keys

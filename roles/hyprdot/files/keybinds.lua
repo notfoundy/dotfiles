@@ -2,133 +2,83 @@
 
 require("variables")
 
-local qsScripts = "$HOME/.config/quickshell/$qsConfig/scripts"
-local hyprScripts = "$HOME/.config/hypr/hyprland/scripts"
-local qsIpcCall = "qs -c $qsConfig ipc call"
-local qsIsAlive = qsIpcCall .. " TEST_ALIVE"
+local hyprScripts = "$HOME/.config/hypr/scripts"
+local ipc = "noctalia msg "
 
 -- General
-hl.bind("SUPER + D", hl.dsp.global("quickshell:searchToggle"), { description = "Widgets:Toggle search" })
-hl.bind("SUPER + D", hl.dsp.exec_cmd(qsIsAlive .. " || pkill fuzzel || fuzzel"))
-
-hl.bind("SUPER_L", hl.dsp.global("quickshell:workspaceNumber"), { ignore_mods = true, transparent = true })
-hl.bind("SUPER_R", hl.dsp.global("quickshell:workspaceNumber"), { ignore_mods = true, transparent = true })
+hl.bind("SUPER + D", hl.dsp.exec_cmd(ipc .. "panel-toggle launcher"), { description = "Widgets:Toggle launcher" })
 hl.bind(
-	"SUPER_L",
-	hl.dsp.global("quickshell:workspaceNumber"),
-	{ ignore_mods = true, transparent = true, release = true }
+	"SUPER + N",
+	hl.dsp.exec_cmd(ipc .. "panel-toggle control-center"),
+	{ description = "Widgets:Toggle control center" }
 )
-hl.bind(
-	"SUPER_R",
-	hl.dsp.global("quickshell:workspaceNumber"),
-	{ ignore_mods = true, transparent = true, release = true }
-)
-hl.bind(
-	"SUPER + SHIFT + Tab",
-	hl.dsp.global("quickshell:overviewWorkspacesToggle"),
-	{ description = "Widgets:Toggle overview" }
-)
-hl.bind("SUPER + A", hl.dsp.global("quickshell:sidebarLeftToggle"), { description = "Widgets:Toggle left sidebar" })
-hl.bind(
-	"SUPER + ALT + A",
-	hl.dsp.global("quickshell:sidebarLeftToggleDetach"),
-	{ description = "Widgets:Toggle left sidebar (detached)" }
-)
-hl.bind("SUPER + B", hl.dsp.global("quickshell:sidebarLeftToggle"))
-hl.bind("SUPER + N", hl.dsp.global("quickshell:sidebarRightToggle"), { description = "Widgets:Toggle right sidebar" })
-hl.bind("SUPER + Slash", hl.dsp.global("quickshell:cheatsheetToggle"), { description = "Help:Toggle cheatsheet" })
-hl.bind("SUPER + K", hl.dsp.global("quickshell:oskToggle"), { description = "Widgets:Toggle on-screen keyboard" })
-hl.bind("SUPER + M", hl.dsp.global("quickshell:mediaControlsToggle"), { description = "Media:Toggle media controls" })
-hl.bind("SUPER + Tab", hl.dsp.global("quickshell:overlayToggle"), { description = "Widgets:Toggle widget overlay" })
 hl.bind(
 	"CTRL + ALT + Delete",
-	hl.dsp.global("quickshell:sessionToggle"),
+	hl.dsp.exec_cmd(ipc .. "panel-toggle session"),
 	{ description = "Session:Toggle session menu" }
 )
--- hl.bind("CTRL + ALT + Delete", hl.dsp.exec_cmd(qsIsAlive .. " || pkill wlogout || wlogout -p layer-shell"))
-hl.bind("SUPER + SHIFT + Space", hl.dsp.global("quickshell:barToggle"), { description = "Widgets:Toggle bar" })
-hl.bind(
-	"SHIFT + SUPER + ALT + Slash",
-	hl.dsp.exec_cmd("qs -p $HOME/.config/quickshell/$qsConfig/welcome.qml"),
-	{ description = "Help:Open the welcome page" }
-)
+hl.bind("SUPER + SHIFT + Space", hl.dsp.exec_cmd(ipc .. "bar-toggle"), { description = "Widgets:Toggle bar" })
 
 hl.bind(
 	"XF86MonBrightnessUp",
-	hl.dsp.exec_cmd(qsIpcCall .. " brightness increment || brightnessctl s 5%+"),
+	hl.dsp.exec_cmd(ipc .. "brightness-up"),
 	{ locked = true, repeating = true, description = "Screen:Increase brightness" }
 )
 hl.bind(
 	"XF86MonBrightnessDown",
-	hl.dsp.exec_cmd(qsIpcCall .. " brightness decrement || brightnessctl s 5%-"),
+	hl.dsp.exec_cmd(ipc .. "brightness-down"),
 	{ locked = true, repeating = true, description = "Screen:Decrease brightness" }
 )
 hl.bind(
 	"XF86AudioRaiseVolume",
-	hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 2%+ -l 1.5"),
+	hl.dsp.exec_cmd(ipc .. "volume-up"),
 	{ locked = true, repeating = true, description = "Audio:Raise volume" }
 )
 hl.bind(
 	"XF86AudioLowerVolume",
-	hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 2%-"),
+	hl.dsp.exec_cmd(ipc .. "volume-down"),
 	{ locked = true, repeating = true, description = "Audio:Lower volume" }
 )
 
-hl.bind("XF86AudioMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_SINK@ toggle"), { locked = true })
+hl.bind("XF86AudioMute", hl.dsp.exec_cmd(ipc .. "volume-mute"), { locked = true })
 hl.bind(
 	"SUPER + SHIFT + M",
-	hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_SINK@ toggle"),
+	hl.dsp.exec_cmd(ipc .. "volume-mute"),
 	{ locked = true, description = "Audio:Toggle mute" }
 )
-hl.bind("ALT + XF86AudioMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_SOURCE@ toggle"), { locked = true })
-hl.bind("XF86AudioMicMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_SOURCE@ toggle"), { locked = true })
+hl.bind("ALT + XF86AudioMute", hl.dsp.exec_cmd(ipc .. "mic-mute"), { locked = true })
+hl.bind("XF86AudioMicMute", hl.dsp.exec_cmd(ipc .. "mic-mute"), { locked = true })
 hl.bind(
 	"SUPER + ALT + M",
-	hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_SOURCE@ toggle"),
+	hl.dsp.exec_cmd(ipc .. "mic-mute"),
 	{ locked = true, description = "Audio:Toggle mic" }
 )
 hl.bind(
 	"CTRL + SUPER + T",
-	hl.dsp.global("quickshell:wallpaperSelectorToggle"),
+	hl.dsp.exec_cmd(ipc .. "panel-toggle wallpaper"),
 	{ description = "Wallpaper:Toggle wallpaper selector" }
 )
 hl.bind(
 	"CTRL + SUPER + ALT + T",
-	hl.dsp.global("quickshell:wallpaperSelectorRandom"),
+	hl.dsp.exec_cmd(ipc .. "wallpaper-random"),
 	{ description = "Wallpaper:Select random wallpaper" }
 )
-hl.bind("CTRL + SUPER + T", hl.dsp.exec_cmd(qsIsAlive .. " || " .. qsScripts .. "/colors/switchwall.sh"))
 hl.bind(
 	"CTRL + SUPER + R",
-	hl.dsp.exec_cmd("killall ydotool qs quickshell; qs -c $qsConfig &"),
-	{ description = "Widgets:Restart widgets" }
-)
-hl.bind(
-	"CTRL + SUPER + P",
-	hl.dsp.global("quickshell:panelFamilyCycle"),
-	{ description = "Widgets:Cycle panel family" }
+	hl.dsp.exec_cmd("pkill noctalia; noctalia"),
+	{ description = "Widgets:Restart shell" }
 )
 
 -- Clipboard history
 hl.bind(
 	"SUPER + V",
-	hl.dsp.global("quickshell:overviewClipboardToggle"),
+	hl.dsp.exec_cmd(ipc .. "panel-toggle clipboard"),
 	{ description = "Clipboard:History >> clipboard" }
 )
 hl.bind(
 	"SUPER + Period",
-	hl.dsp.global("quickshell:overviewEmojiToggle"),
+	hl.dsp.exec_cmd("pkill fuzzel || " .. hyprScripts .. "/fuzzel-emoji.sh"),
 	{ description = "Clipboard:Emoji >> clipboard" }
-)
-hl.bind(
-	"SUPER + V",
-	hl.dsp.exec_cmd(
-		qsIsAlive .. " || pkill fuzzel || cliphist list | fuzzel --match-mode fzf --dmenu | cliphist decode | wl-copy"
-	)
-)
-hl.bind(
-	"SUPER + Period",
-	hl.dsp.exec_cmd(qsIsAlive .. " || pkill fuzzel || " .. hyprScripts .. "/fuzzel-emoji.sh")
 )
 
 -- Color picker
@@ -141,59 +91,24 @@ hl.bind(
 -- Screenshot
 hl.bind(
 	"SUPER + SHIFT + S",
-	hl.dsp.global("quickshell:regionScreenshot"),
+	hl.dsp.exec_cmd(ipc .. "screenshot-region"),
 	{ description = "Screenshot:Region snip >> clipboard" }
-)
-hl.bind(
-	"SUPER + SHIFT + S",
-	hl.dsp.exec_cmd(qsIsAlive .. " || pidof slurp || hyprshot --freeze --clipboard-only --mode region --silent")
 )
 
 -- AI
-hl.bind("SUPER + SHIFT + A", hl.dsp.global("quickshell:regionSearch"), { description = "AI:Google Lens" })
-hl.bind("SUPER + SHIFT + A", hl.dsp.exec_cmd(qsIsAlive .. " || pidof slurp || " .. hyprScripts .. "/snip_to_search.sh"))
+hl.bind(
+	"SUPER + SHIFT + A",
+	hl.dsp.exec_cmd("pidof slurp || " .. hyprScripts .. "/snip_to_search.sh"),
+	{ description = "AI:Google Lens" }
+)
 
 -- OCR
 hl.bind(
 	"SUPER + SHIFT + X",
-	hl.dsp.global("quickshell:regionOcr"),
-	{ description = "OCR:Character recognition >> clipboard" }
-)
-hl.bind(
-	"SUPER + SHIFT + X",
 	hl.dsp.exec_cmd(
-		qsIsAlive
-			.. " || pidof slurp || grim -g \"$(slurp $SLURP_ARGS)\" \"/tmp/ocr_image.png\" && tesseract \"/tmp/ocr_image.png\" stdout -l $(tesseract --list-langs | awk 'NR>1{print $1}' | tr '\\\\n' '+' | sed 's/\\\\+$/\\\\n/') | wl-copy && rm \"/tmp/ocr_image.png\""
-	)
-)
-hl.bind(
-	"SUPER + SHIFT + T",
-	hl.dsp.global("quickshell:screenTranslate"),
-	{ description = "OCR:Translate screen content" }
-)
-
--- Recording stuff
-hl.bind(
-	"SUPER + SHIFT + R",
-	hl.dsp.global("quickshell:regionRecord"),
-	{ locked = true, description = "Recording:Record region (no sound)" }
-)
-hl.bind(
-	"SUPER + SHIFT + R",
-	hl.dsp.exec_cmd(qsIsAlive .. " || " .. qsScripts .. "/videos/record.sh"),
-	{ locked = true }
-)
-hl.bind("SUPER + ALT + R", hl.dsp.global("quickshell:regionRecord"), { locked = true })
-hl.bind("SUPER + ALT + R", hl.dsp.exec_cmd(qsIsAlive .. " || " .. qsScripts .. "/videos/record.sh"), { locked = true })
-hl.bind(
-	"CTRL + ALT + R",
-	hl.dsp.exec_cmd(qsScripts .. "/videos/record.sh --fullscreen"),
-	{ locked = true, description = "Recording:Record screen (no sound)" }
-)
-hl.bind(
-	"SUPER + SHIFT + ALT + R",
-	hl.dsp.exec_cmd(qsScripts .. "/videos/record.sh --fullscreen --sound"),
-	{ locked = true, description = "Recording:Record screen (with sound)" }
+		"pidof slurp || grim -g \"$(slurp $SLURP_ARGS)\" \"/tmp/ocr_image.png\" && tesseract \"/tmp/ocr_image.png\" stdout -l $(tesseract --list-langs | awk 'NR>1{print $1}' | tr '\\\\n' '+' | sed 's/\\\\+$/\\\\n/') | wl-copy && rm \"/tmp/ocr_image.png\""
+	),
+	{ description = "OCR:Character recognition >> clipboard" }
 )
 
 -- Fullscreen screenshot
@@ -213,14 +128,6 @@ hl.bind(
 	{ locked = true, non_consuming = true, description = "Screenshot:Fullscreen >> clipboard & file" }
 )
 hl.bind("CTRL + Print", hl.dsp.exec_cmd(grimhyprctl .. " - | wl-copy"), { locked = true, non_consuming = true })
-
--- AI
-hl.bind(
-	"SUPER + SHIFT + ALT + mouse:273",
-	hl.dsp.exec_cmd(hyprScripts .. "/ai/primary-buffer-query.sh"),
-	{ description = "AI:Generate AI summary for selected text" }
-)
--- (requires a running ollama model)
 
 -- Window
 -- Focusing
@@ -403,10 +310,10 @@ hl.bind(
 ) -- # [hidden]
 
 --##! Session
-hl.bind("CTRL + SUPER + L", hl.dsp.exec_cmd("loginctl lock-session"), { description = "Session:Lock" })
+hl.bind("CTRL + SUPER + L", hl.dsp.exec_cmd(ipc .. "session lock"), { description = "Session:Lock" })
 hl.bind(
 	"SUPER + SHIFT + L",
-	hl.dsp.exec_cmd("systemctl suspend || loginctl suspend"),
+	hl.dsp.exec_cmd(ipc .. "session lock-and-suspend"),
 	{ locked = true, description = "Session:Suspend system" }
 ) -- Sleep
 -- hl.bind("switch:on:Lid Switch", hl.dsp.exec_cmd("systemctl suspend || loginctl suspend"), {locked = true} ) -- # [hidden] Suspend when laptop lid is closed, uncomment if for whatever reason it's not the default behavior

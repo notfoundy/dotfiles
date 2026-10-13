@@ -17,13 +17,10 @@ default_roles:
   - steam
   - ssh
   - virtualization
-  - desktop-shell
+  - noctalia
   # - blender
   - nnn
   - typst
-
-desktop_shell:
-  theme: "kanagawa" # Options: kanagawa, catppuccin, nord, etc.
 
 op:
   git:

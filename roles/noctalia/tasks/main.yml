@@ -1,0 +1,5 @@
+- name: Install Noctalia
+  ansible.builtin.package:
+    name: noctalia
+    state: present
+  become: true
