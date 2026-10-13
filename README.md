@@ -94,6 +94,39 @@ first.
 The wallpapers in `roles/noctalia/files/wallpapers/` are copied to `~/Pictures/Wallpapers`,
 which `config.toml` sets as Noctalia's wallpaper folder.
 
+### Look
+
+The shell aims to be quiet: one typeface, one colour source, no outlines.
+
+- **Colours** come from the current wallpaper (`muted` scheme), so changing the wallpaper
+  re-themes the whole system without ever turning loud. Noctalia's built-in templates push the
+  palette to Hyprland's borders, Ghostty and GTK 3/4.
+- **Inter** is the shell font; the `font` role installs it from the Fedora repositories.
+- **No borders.** Panels, OSDs and notifications are separated by contrast and Hyprland's blur,
+  not outlines.
+- **Wallpaper and lock screen transitions** are drawn at random from all of Noctalia's shader
+  effects; the rest of the shell keeps its own animations.
+- **The bar only shows state, never actions.** Launcher, clipboard, wallpapers, screenshots and
+  the session menu all have a keybind; the control center opens from its icon or a right-click
+  on the bar. Empty indicators hide themselves (no unread notification, no Bluetooth device).
+- **Geometry follows Hyprland.** The `main` bar is a 32 px full-width band with a transparent
+  background and concave bottom corners of 16 px, the most a 32 px bar allows, close to the
+  windows' `rounding = 18`. The screen corners are rounded to 18 px too, so bar, windows and screen read
+  as one frame.
+- **Panels grow out of the bar.** Control center, session, clipboard and wallpapers attach to
+  the bar; only the launcher floats in the middle of the screen.
+
+The single `main` bar shows workspaces at the start, the clock in the centre, and
+notifications, network, Bluetooth, volume, battery and the control center at the end.
+`SUPER + SHIFT + Space` hides or shows it.
+
+The templates would normally edit `~/.config/hypr/hyprland.lua` and `~/.config/ghostty/config`
+to include the generated colours. Both files are copies Ansible overwrites, so the repository
+already carries the lines the templates look for (`require("noctalia")` and
+`theme = noctalia`) and the templates leave them alone. Hyprland loads the theme through
+`pcall`, so it starts cleanly before Noctalia has generated it. GTK's `gtk.css` is not managed
+here and Noctalia edits it directly.
+
 ## 1Password
 
 SSH authentication and commit signing both go through the 1Password SSH agent. Private keys

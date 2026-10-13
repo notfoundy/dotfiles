@@ -12,6 +12,7 @@ mouse-hide-while-typing = true
 # mouse-scroll-multiplier = 1
 
 # Theme
+theme = noctalia
 cursor-invert-fg-bg = true
 cursor-style = block
 cursor-style-blink = false

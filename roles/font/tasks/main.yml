@@ -6,3 +6,10 @@
   loop:
     - { name: 'JetBrainsMono', is_nerd_font: true }
     - { name: 'MapleMono', is_nerd_font: false }
+
+- name: Install UI fonts
+  ansible.builtin.package:
+    name:
+      - rsms-inter-fonts
+    state: present
+  become: true

@@ -1,5 +1,93 @@
+[shell]
+font_family = "Inter"
+button_borders = false
+input_borders = false
+popup_borders = false
+card_borders = false
+
+[shell.panel]
+transparency_mode = "soft"
+borders = false
+launcher_placement = "floating"
+control_center_placement = "attached"
+session_placement = "attached"
+wallpaper_placement = "attached"
+clipboard_placement = "attached"
+
+[shell.screen_corners]
+enabled = true
+size = 18
+
+[shell.launcher]
+layout = "simple"
+show_app_origin_indicator = false
+
 [theme]
 mode = "dark"
+source = "wallpaper"
+wallpaper_scheme = "muted"
+
+[theme.templates]
+enable_builtin_templates = true
+builtin_ids = ["hyprland", "ghostty", "gtk3", "gtk4"]
 
 [wallpaper]
 directory = "~/Pictures/Wallpapers"
+transition = ["fade", "wipe", "disc", "stripes", "zoom", "honeycomb"]
+transition_duration = 800
+
+[lockscreen]
+transition = ["fade", "wipe", "disc", "stripes", "zoom", "honeycomb"]
+transition_duration = 600
+
+[notification]
+border = false
+background_opacity = 0.9
+
+[osd]
+position = "bottom_center"
+border = false
+background_opacity = 0.9
+
+[bar]
+order = ["main"]
+
+[bar.main]
+position = "top"
+thickness = 32
+background_opacity = 0.85
+compositor_blur = true
+shadow = false
+margin_ends = 0
+margin_edge = 0
+concave_edge_corners = true
+radius_top_left = 0
+radius_top_right = 0
+radius_bottom_left = 16
+radius_bottom_right = 16
+widget_spacing = 10
+capsule = false
+start = ["workspaces"]
+center = ["clock"]
+end = ["notifications", "network", "bluetooth", "volume", "battery", "control-center"]
+
+[widget.workspaces]
+show_labels = false
+pill_scale = 0.6
+
+[widget.clock]
+format = "{:%H:%M}"
+tooltip_format = "{:%A %d %B %Y}"
+font_weight = 600
+
+[widget.network]
+show_label = false
+
+[widget.volume]
+show_label = false
+
+[widget.bluetooth]
+hide_when_no_connected_device = true
+
+[widget.notifications]
+hide_when_no_unread = true
