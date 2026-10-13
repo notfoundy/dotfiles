@@ -28,3 +28,4 @@
     - { name: 'Obsidian', flathub_name: 'md.obsidian.Obsidian' }
     - { name: 'Vesktop', flathub_name: 'dev.vencord.Vesktop' }
     - { name: 'Zen Browser', flathub_name: 'app.zen_browser.zen' }
+    - { name: 'Thunderbird', flathub_name: 'org.mozilla.Thunderbird' }
