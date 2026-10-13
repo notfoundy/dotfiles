@@ -72,7 +72,27 @@ It also handles notifications, the lock screen and idle, so there is no mako, hy
 hypridle.
 
 Its idle behaviours (lock, screen off, suspend) ship **disabled**: turn them on once in
-Noctalia's settings (`SUPER + I`). Its configuration is not tracked here yet.
+Noctalia's settings (`SUPER + I`), then commit the result.
+
+The repository is the only place its configuration lives. Noctalia layers two sources, and
+the role symlinks both into the checkout that ran the playbook:
+
+| Link                                    | Target                               | Written by       |
+| --------------------------------------- | ------------------------------------ | ---------------- |
+| `~/.config/noctalia/`                   | `roles/noctalia/files/config/`       | hand             |
+| `~/.local/state/noctalia/settings.toml` | `roles/noctalia/files/settings.toml` | the settings GUI |
+
+Noctalia writes through symlinks and hot-reloads both, so anything changed from `SUPER + I`
+shows up in `git diff roles/noctalia` straight away; GUI values win over the hand-written
+ones. `noctalia config validate` checks the hand-written files.
+
+An uncommitted change leaves the checkout dirty, and `dotfiles` then refuses to update it:
+commit it, or pass `--skip-update`. Ansible also refuses to replace a non-empty
+`~/.config/noctalia` directory; move its `*.toml` files into `roles/noctalia/files/config/`
+first.
+
+The wallpapers in `roles/noctalia/files/wallpapers/` are copied to `~/Pictures/Wallpapers`,
+which `config.toml` sets as Noctalia's wallpaper folder.
 
 ## 1Password
 

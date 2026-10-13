@@ -3,3 +3,27 @@
     name: noctalia
     state: present
   become: true
+
+- name: Copy wallpapers
+  ansible.builtin.copy:
+    src: files/wallpapers/
+    dest: "{{ ansible_facts['user_dir'] }}/Pictures/Wallpapers/"
+    mode: "0644"
+
+- name: Create Noctalia state directory
+  ansible.builtin.file:
+    path: "{{ ansible_facts['user_dir'] }}/.local/state/noctalia"
+    state: directory
+    mode: "0755"
+
+- name: Link Noctalia configuration to the repository
+  ansible.builtin.file:
+    src: "{{ role_path }}/files/{{ item.src }}"
+    dest: "{{ ansible_facts['user_dir'] }}/{{ item.dest }}"
+    state: link
+    force: true
+  loop:
+    - src: config
+      dest: .config/noctalia
+    - src: settings.toml
+      dest: .local/state/noctalia/settings.toml
