@@ -10,7 +10,7 @@
 
 - name: Show latest version
   ansible.builtin.debug:
-    var: latest_version,json.tag_name
+    var: latest_version.json.tag_name
 
 - name: Show ARCH
   ansible.builtin.debug:
