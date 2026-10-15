@@ -1,9 +1,3 @@
-- name: Install fuzzel
-  ansible.builtin.package:
-    name: fuzzel
-    state: present
-  become: true
-
 - name: Ensure .config/fuzzel exist
   ansible.builtin.file:
     path: "{{ ansible_facts['user_dir'] }}/.config/fuzzel"

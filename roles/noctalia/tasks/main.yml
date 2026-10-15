@@ -1,9 +1,3 @@
-- name: Install Noctalia
-  ansible.builtin.package:
-    name: noctalia
-    state: present
-  become: true
-
 - name: Copy wallpapers
   ansible.builtin.copy:
     src: files/wallpapers/

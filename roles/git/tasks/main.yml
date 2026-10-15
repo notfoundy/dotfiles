@@ -1,11 +1,3 @@
-- name: Install git
-  ansible.builtin.package:
-    name: git
-    state: present
-  become: true
-
-# Sign commits with the SSH key held in 1Password. git_config touches only the
-# listed keys, so a hand-written ~/.gitconfig survives.
 - name: Configure commit signing
   community.general.git_config:
     name: "{{ item.name }}"

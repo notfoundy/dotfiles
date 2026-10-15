@@ -1,5 +1,0 @@
-- name: Install the Steam udev rules
-  ansible.builtin.dnf:
-    name: steam-devices
-    state: present
-  become: true

@@ -1,17 +1,3 @@
-- name: Check flatpak version
-  ansible.builtin.command:
-    cmd: flatpak --version
-  register: flatpak_version
-  changed_when: false
-  failed_when: false
-
-- name: Install flatpak
-  ansible.builtin.package:
-    name: flatpak
-    state: present
-  when: flatpak_version.rc != 0
-  become: true
-
 - name: Add the flathub repository
   community.general.flatpak_remote:
     name: flathub
