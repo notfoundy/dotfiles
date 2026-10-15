@@ -17,6 +17,9 @@ done < <(cat /ctx/deps/*/binaries.txt)
 ((broken == 0))
 
 ln -sf ../usr/share/zoneinfo/Europe/Paris /etc/localtime
+rm /etc/greetd/config.toml.rpmnew
+systemctl enable greetd.service
+systemctl set-default graphical.target
 
 dnf clean all
 rm -rf /var/cache/* /var/log/* /var/lib/dnf /tmp/*

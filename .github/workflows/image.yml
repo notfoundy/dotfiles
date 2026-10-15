@@ -16,7 +16,7 @@ on:
   workflow_dispatch:
     inputs:
       rebuild_builders:
-        description: Rebuild the Hyprland and Ghostty builders even if their inputs did not change
+        description: Rebuild the Hyprland, Ghostty and Noctalia Greeter builders even if their inputs did not change
         type: boolean
         default: false
 
@@ -49,7 +49,7 @@ jobs:
         env:
           REBUILD: ${{ inputs.rebuild_builders || false }}
         run: |
-          for builder in hyprland ghostty; do
+          for builder in hyprland ghostty noctalia-greeter; do
             hash=$(cat "image/$builder/Containerfile" "image/scripts/$builder.sh" image/scripts/runtime-deps.sh |
               sha256sum | cut -c1-12)
             ref="$REGISTRY/$builder-build:$FEDORA_VERSION-$hash"
@@ -73,6 +73,7 @@ jobs:
             --build-arg FEDORA_VERSION="$FEDORA_VERSION" \
             --build-arg HYPRLAND_IMAGE="${{ steps.builders.outputs.hyprland }}" \
             --build-arg GHOSTTY_IMAGE="${{ steps.builders.outputs.ghostty }}" \
+            --build-arg NOCTALIA_GREETER_IMAGE="${{ steps.builders.outputs.noctalia-greeter }}" \
             "${tags[@]/#/--tag=$image:}" \
             image
           if [[ "$PUSH" == true ]]; then

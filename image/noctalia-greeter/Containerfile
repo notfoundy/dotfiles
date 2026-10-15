@@ -1,0 +1,21 @@
+ARG FEDORA_VERSION=44
+
+FROM quay.io/fedora/fedora-bootc:${FEDORA_VERSION} AS build
+RUN dnf -y install \
+      meson ninja-build gcc-c++ stb_image_resize2-devel \
+      'pkgconfig(cairo)' 'pkgconfig(cairo-ft)' 'pkgconfig(egl)' 'pkgconfig(fontconfig)' \
+      'pkgconfig(freetype2)' 'pkgconfig(gio-2.0)' 'pkgconfig(glesv2)' 'pkgconfig(glib-2.0)' \
+      'pkgconfig(gobject-2.0)' 'pkgconfig(libinput)' 'pkgconfig(librsvg-2.0)' 'pkgconfig(libwebp)' \
+      'pkgconfig(libxml-2.0)' 'pkgconfig(nlohmann_json)' 'pkgconfig(pango)' 'pkgconfig(pangocairo)' \
+      'pkgconfig(pangoft2)' 'pkgconfig(tomlplusplus)' 'pkgconfig(wayland-client)' \
+      'pkgconfig(wayland-egl)' 'pkgconfig(wayland-protocols)' 'pkgconfig(wayland-scanner)' \
+      'pkgconfig(wayland-server)' 'pkgconfig(wlroots-0.20)' 'pkgconfig(xkbcommon)'
+COPY scripts/noctalia-greeter.sh scripts/runtime-deps.sh /ctx/
+
+# renovate: datasource=github-tags depName=noctalia-dev/noctalia-greeter
+ARG NOCTALIA_GREETER_VERSION=v1.6.0
+RUN bash /ctx/noctalia-greeter.sh && bash /ctx/runtime-deps.sh
+
+FROM scratch
+COPY --from=build /out /out
+COPY --from=build /deps /deps

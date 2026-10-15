@@ -83,7 +83,7 @@ RUN bash /ctx/hyprland.sh glaze \
 ARG HYPRLAND_VERSION=v0.56.2
 RUN bash /ctx/hyprland.sh hyprland \
       "https://github.com/hyprwm/Hyprland/releases/download/$HYPRLAND_VERSION/source-$HYPRLAND_VERSION.tar.gz" image \
-      -DNO_TESTS=TRUE
+      -DNO_TESTS=TRUE -DNO_UWSM=TRUE
 
 RUN rm -rf /out/usr/include /out/usr/lib64/pkgconfig /out/usr/lib64/cmake /out/usr/share/pkgconfig \
       /out/usr/bin/hyprwire-scanner \

@@ -1,7 +1,9 @@
+dbus-daemon
 dbus-tools
 flatpak
 fuzzel
 gnome-keyring
+greetd
 grim
 noctalia
 papirus-icon-theme

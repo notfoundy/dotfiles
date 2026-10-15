@@ -269,7 +269,7 @@ func announceFirstRun(p *ui.Printer) error {
 	}
 
 	p.Success("First run complete!")
-	p.Notice("Log out and back in on tty1 to start Hyprland.")
+	p.Notice("Log out and sign in from the greeter to start Hyprland.")
 
 	f, err := os.Create(marker)
 	if err != nil {

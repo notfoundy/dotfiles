@@ -41,7 +41,8 @@ curl -fsSL https://github.com/notfoundy/dotfiles/releases/latest/download/dotfil
 ```
 
 Swap `amd64` for `arm64` if that is what you are running. The first run clones the
-repository to `~/.dotfiles`; log in again on tty1 once it is done to start Hyprland.
+repository to `~/.dotfiles`; log out once it is done and sign in from the greeter to start
+Hyprland.
 
 To build it from a clone instead:
 
@@ -73,8 +74,9 @@ is used:
   own repository, one file per category (`desktop.txt`, `hardware.txt`, `cli.txt`, `dev.txt`…).
   No COPR.
 - **Hyprland** and its libraries, `xdg-desktop-portal-hyprland` and `hyprpicker` are not in
-  Fedora 44, and **Ghostty** never was: each is built from source by its own Containerfile
-  (`image/hyprland/`, `image/ghostty/`). Those builder images keep only the installed files
+  Fedora 44, and neither **Ghostty** nor **Noctalia Greeter** ever was: each is built from
+  source by its own Containerfile (`image/hyprland/`, `image/ghostty/`,
+  `image/noctalia-greeter/`). Those builder images keep only the installed files
   (`/out`) and their runtime package list (`/deps`), which the image copies in: no build
   dependency reaches the system.
 
@@ -99,7 +101,14 @@ applied at the next reboot. `bootc rollback` returns to the previous image.
 
 A few things differ from a regular Fedora:
 
-- Hyprland starts from tty1 through `start-hyprland`, without a display manager or uwsm.
+- greetd is the display manager, with [Noctalia Greeter](https://docs.noctalia.dev/greeter/)
+  as its greeter. It only offers the `Hyprland` session, which runs `start-hyprland`: Hyprland
+  is built without uwsm. The greeter runs as Fedora's `greetd` account, so the tmpfiles rule
+  creating its state directory is overridden in `/etc/tmpfiles.d/`, as upstream expects.
+  `greetd` gets a fixed UID (903, `image/files/usr/lib/sysusers.d/greetd-id.conf`) so that
+  `/var/lib/greetd` keeps its owner across images. `dbus-daemon` ships only for
+  `dbus-run-session`, which the greeter session needs; the system bus stays on dbus-broker.
+  Syncing Noctalia's wallpaper and palette to the greeter is not set up.
 - Noctalia is the polkit agent.
 - libvirt is managed by the `wheel` group through a polkit rule: `usermod -aG libvirt` does not
   work, since the group lives in `/usr/lib/group`.
@@ -112,10 +121,11 @@ To build it locally, builders first:
 ```bash
 podman build -f image/hyprland/Containerfile -t localhost/hyprland-build image
 podman build -f image/ghostty/Containerfile -t localhost/ghostty-build image
+podman build -f image/noctalia-greeter/Containerfile -t localhost/noctalia-greeter-build image
 podman build -f image/Containerfile -t localhost/dotfiles image
 ```
 
-Moving to a new Fedora release means bumping `ARG FEDORA_VERSION` in the three Containerfiles.
+Moving to a new Fedora release means bumping `ARG FEDORA_VERSION` in the four Containerfiles.
 
 ## Desktop shell
 
