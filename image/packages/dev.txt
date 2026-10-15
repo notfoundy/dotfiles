@@ -1,0 +1,6 @@
+ansible
+gcc
+git
+make
+rsync
+rustup

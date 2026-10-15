@@ -1,0 +1,17 @@
+dbus-tools
+flatpak
+fuzzel
+gnome-keyring
+grim
+noctalia
+papirus-icon-theme
+playerctl
+qt6-qtwayland
+slurp
+tesseract
+wl-clipboard
+wtype
+xdg-desktop-portal
+xdg-desktop-portal-gtk
+xdg-user-dirs
+xorg-x11-server-Xwayland

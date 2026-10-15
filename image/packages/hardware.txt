@@ -1,0 +1,9 @@
+bluez
+mesa-dri-drivers
+mesa-vulkan-drivers
+NetworkManager-wifi
+pipewire
+pipewire-pulseaudio
+steam-devices
+tuned-ppd
+wireplumber

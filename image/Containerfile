@@ -1,0 +1,21 @@
+ARG FEDORA_VERSION=44
+ARG HYPRLAND_IMAGE=localhost/hyprland-build
+ARG GHOSTTY_IMAGE=localhost/ghostty-build
+
+FROM scratch AS ctx
+COPY scripts/install.sh /
+COPY packages/ /packages/
+
+FROM ${HYPRLAND_IMAGE} AS hyprland
+FROM ${GHOSTTY_IMAGE} AS ghostty
+
+FROM quay.io/fedora/fedora-bootc:${FEDORA_VERSION}
+COPY --from=hyprland /out/ /
+COPY --from=ghostty /out/ /
+COPY files/ /
+RUN --mount=type=bind,from=ctx,source=/packages,target=/ctx/packages \
+    --mount=type=bind,from=ctx,source=/install.sh,target=/ctx/install.sh \
+    --mount=type=bind,from=hyprland,source=/deps,target=/ctx/deps/hyprland \
+    --mount=type=bind,from=ghostty,source=/deps,target=/ctx/deps/ghostty \
+    bash /ctx/install.sh
+RUN bootc container lint
