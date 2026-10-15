@@ -1,13 +1,10 @@
 default_roles:
-  - system
   - bash
   - git
-  - packages
   - font
   - go
   - nodejs
   - nvim
-  - rust
   - hyprland
   - hyprdot
   - ghostty
@@ -16,9 +13,7 @@ default_roles:
   - app
   - steam
   - ssh
-  - virtualization
   - noctalia
-  # - blender
   - nnn
   - typst
 
