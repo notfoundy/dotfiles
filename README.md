@@ -21,13 +21,12 @@ At the moment, it’s probably not fully automated, but I’ll live with it. May
 ## Usage
 
 > [!WARNING]
-> For now, only Fedora is supported because it’s the only distribution I use.
-> I'm not a distro hopper, so it might stay this way.
+> Only the Fedora bootc image built from `image/` is supported: it carries every system
+> package, and the playbook only manages `$HOME`.
 
 Everything runs through the `dotfiles` command, a small Go program living in `cli/`.
-It prepares the host, makes sure the Ansible dependencies are installed and updated,
-refreshes the checkout in `~/.dotfiles`, then hands the terminal over to
-`ansible-playbook`.
+It checks the host, updates the Ansible dependencies, refreshes the checkout in
+`~/.dotfiles`, then hands the terminal over to `ansible-playbook`. Nothing needs `sudo`.
 Ansible will take care of the rest (or almost). You just need to grab a coffee while it works!
 
 ### On a fresh installation
@@ -42,7 +41,7 @@ curl -fsSL https://github.com/notfoundy/dotfiles/releases/latest/download/dotfil
 ```
 
 Swap `amd64` for `arm64` if that is what you are running. The first run clones the
-repository to `~/.dotfiles` and asks you to reboot once it is done.
+repository to `~/.dotfiles`; log in again on tty1 once it is done to start Hyprland.
 
 To build it from a clone instead:
 
@@ -64,9 +63,63 @@ dotfiles --repo . -- --check    # run against this clone; anything after -- goes
 release. Every run is appended to `~/.local/state/dotfiles/dotfiles.log`, so a role
 that failed can be read back afterwards.
 
+## Bootc image
+
+The system is a [bootc](https://bootc-dev.github.io/bootc/) image built from
+`quay.io/fedora/fedora-bootc:44`, which ships no desktop. `image/Containerfile` adds only what
+is used:
+
+- `image/packages/` — packages from the official Fedora repositories, plus 1Password from its
+  own repository, one file per category (`desktop.txt`, `hardware.txt`, `cli.txt`, `dev.txt`…).
+  No COPR.
+- **Hyprland** and its libraries, `xdg-desktop-portal-hyprland` and `hyprpicker` are not in
+  Fedora 44, and **Ghostty** never was: each is built from source by its own Containerfile
+  (`image/hyprland/`, `image/ghostty/`). Those builder images keep only the installed files
+  (`/out`) and their runtime package list (`/deps`), which the image copies in: no build
+  dependency reaches the system.
+
+Upstream versions are pinned by `ARG`s in the builder Containerfiles, one `RUN` per project in
+dependency order, so bumping one only rebuilds it and what depends on it. Renovate opens a pull
+request for each release, grouping Hyprland and its libraries since they move together. The
+runtime libraries of what is built from source are resolved in the builder (`ldd`, then
+`rpm -qf`), so a version bump needs no package list update, and the image build fails if a
+library is still missing.
+
+`.github/workflows/image.yml` builds on every change and daily for Fedora updates, and publishes
+`ghcr.io/notfoundy/dotfiles`. A builder image is tagged with the hash of its inputs and only
+rebuilt when they change, so the daily build takes minutes, not the half hour Hyprland needs.
+If a Fedora update ever breaks the ABI the builders were compiled against, the library check
+fails the build: run the workflow by hand with **rebuild builders** checked. The same daily
+run re-enables its own schedule, which GitHub would otherwise turn off after 60 days without
+activity.
+
+The machine follows with `bootc upgrade`. The stock update timer runs
+`bootc upgrade --apply`, which reboots on its own; it is overridden to only stage the update,
+applied at the next reboot. `bootc rollback` returns to the previous image.
+
+A few things differ from a regular Fedora:
+
+- Hyprland starts from tty1 through `start-hyprland`, without a display manager or uwsm.
+- Noctalia is the polkit agent.
+- libvirt is managed by the `wheel` group through a polkit rule: `usermod -aG libvirt` does not
+  work, since the group lives in `/usr/lib/group`.
+- Go, Node, Typst, Starship and Lazygit are installed in `~/.local` by their roles, so they
+  stay on the latest release without touching the image. Starship goes through its official
+  install script, Lazygit is checked against the release's `checksums.txt`.
+
+To build it locally, builders first:
+
+```bash
+podman build -f image/hyprland/Containerfile -t localhost/hyprland-build image
+podman build -f image/ghostty/Containerfile -t localhost/ghostty-build image
+podman build -f image/Containerfile -t localhost/dotfiles image
+```
+
+Moving to a new Fedora release means bumping `ARG FEDORA_VERSION` in the three Containerfiles.
+
 ## Desktop shell
 
-The `noctalia` role installs [Noctalia](https://docs.noctalia.dev) from the official Fedora
+The image installs [Noctalia](https://docs.noctalia.dev) from the official Fedora
 repositories; Hyprland starts it and every shell keybind goes through `noctalia msg`.
 It also handles notifications, the lock screen and idle, so there is no mako, hyprlock or
 hypridle.
@@ -101,7 +154,22 @@ The shell aims to be quiet: one typeface, one colour source, no outlines.
 - **Colours** come from the current wallpaper (`muted` scheme), so changing the wallpaper
   re-themes the whole system without ever turning loud. Noctalia's built-in templates push the
   palette to Hyprland's borders, Ghostty and GTK 3/4.
-- **Inter** is the shell font; the `font` role installs it from the Fedora repositories.
+- **Inter** is the shell font; the image installs it from the Fedora repositories.
+- **One cursor everywhere.** The cursor theme is user data, not part of the image: changing it
+  never needs a rebuild. `hyprdot_cursor` in `roles/hyprdot/defaults/main.yml` sets the theme,
+  its size and the archive it comes from (Bibata Modern Classic, 24 px, from the upstream
+  release). The theme is extracted into `~/.local/share/icons`, then set for every toolkit,
+  since each one reads its own setting:
+  - Hyprland and the apps it starts: `XCURSOR_THEME`/`XCURSOR_SIZE` from the generated
+    `~/.config/hypr/cursor.lua`;
+  - GTK: `gsettings` (`org.gnome.desktop.interface`) and `settings.ini` for GTK 3 and 4;
+  - Qt: `~/.config/kcminputrc`, which the `kde` platform theme reads;
+  - XWayland and other fallbacks: `~/.local/share/icons/default/index.theme`;
+  - Flatpak: a user override that exposes `~/.local/share/icons` read-only and sets
+    `XCURSOR_*`.
+
+  To change themes, edit `hyprdot_cursor` and run the playbook again. The old theme stays in
+  `~/.local/share/icons` until you delete it.
 - **No borders.** Panels, OSDs and notifications are separated by contrast and Hyprland's blur,
   not outlines.
 - **Wallpaper and lock screen transitions** are drawn at random from all of Noctalia's shader
@@ -146,8 +214,8 @@ Which key signs is set by `op.git.signing_key` in `group_vars/all.yml`.
 The `steam` role installs Steam from Flathub (`com.valvesoftware.Steam`, user install) along
 with the `gamescope` and `MangoHud` Vulkan layers, on the same branch as Steam's runtime. The
 sandbox ships its own Mesa, including the 32-bit drivers Proton needs, so the host needs
-neither RPM Fusion nor multilib packages. On Fedora it adds `steam-devices` from the official
-repositories, for the udev rules controllers and VR headsets need.
+neither RPM Fusion nor multilib packages. The image ships `steam-devices`, for the udev rules
+controllers and VR headsets need.
 
 Steam Play is enabled by default by recent Steam clients, so nothing else is required.
 For titles that need a community Proton build, drop GE-Proton into
