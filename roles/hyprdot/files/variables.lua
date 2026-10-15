@@ -2,7 +2,7 @@
 ---@diagnostic disable: lowercase-global
 
 -- Apps
-terminal = "~/.config/hypr/scripts/launch_first_available.sh 'ghostty' 'kitty -1' "
+terminal = "~/.config/hypr/scripts/launch_first_available.sh 'ghostty' "
 fileManager = "~/.config/hypr/scripts/launch_first_available.sh 'dolphin' 'nautilus' 'nemo' 'thunar' "
 browser = "~/.config/hypr/scripts/launch_first_available.sh 'zen-browser' 'firefox' 'brave' 'chromium' 'opera'"
 codeEditor = "~/.config/hypr/scripts/launch_first_available.sh 'command -v nvim && ghostty -e nvim' 'zed'"
