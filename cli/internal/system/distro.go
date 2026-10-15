@@ -1,4 +1,4 @@
-// Package system prepares the host: distribution detection, base packages,
+// Package system prepares the host: distribution detection, base tools,
 // SSH keys and the dotfiles checkout.
 package system
 
@@ -9,6 +9,9 @@ import (
 	"strings"
 )
 
+// ostreeBooted exists only on a system booted from an image-based deployment.
+const ostreeBooted = "/run/ostree-booted"
+
 // Distro is the detected distribution identity, as reported by os-release.
 type Distro struct {
 	ID   string // e.g. "fedora"
@@ -16,11 +19,13 @@ type Distro struct {
 	Name string // pretty name, for messages
 }
 
-// Supported reports whether the CLI knows how to prepare this host.
-//
-// Only Fedora is handled, mirroring the roles: ten of them dispatch on
-// {{ ansible_distribution | lower }}.yml and only ship a fedora.yml.
+// Supported reports whether the CLI knows how to prepare this host: the
+// Fedora bootc image built from image/, which carries every system package
+// the roles used to install.
 func (d Distro) Supported() bool {
+	if _, err := os.Stat(ostreeBooted); err != nil {
+		return false
+	}
 	if d.ID == "fedora" {
 		return true
 	}

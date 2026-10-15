@@ -8,7 +8,7 @@ alias lt="eza --tree --level=2 --long --icons --git"
 alias vim=nvim
 
 # System update
-alias update="sudo dnf update -y && flatpak update -y"
+alias update="sudo bootc upgrade && flatpak update -y"
 
 # Podman
 alias pp="podman ps"

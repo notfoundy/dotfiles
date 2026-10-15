@@ -42,7 +42,7 @@ func Execute(opts Options) error {
 
 	// On a machine that has been set up before, refresh the checkout and
 	// resolve the selection up front: a typo in -t then fails instantly,
-	// before any package installation or sudo prompt. A fresh machine has no
+	// before any 1Password prompt. A fresh machine has no
 	// checkout yet, so there it can only happen after the clone.
 	var (
 		cfg       *config.Config
@@ -70,7 +70,7 @@ func Execute(opts Options) error {
 		return err
 	}
 
-	env, err := setupOnePassword(log, p, root, cfg)
+	env, err := setupOnePassword(log, p, cfg)
 	if err != nil {
 		return err
 	}
@@ -98,11 +98,11 @@ func prepareHost(log *config.Logger, p *ui.Printer) error {
 	task := p.Start("Preparing %s", distro.Name)
 	if !distro.Supported() {
 		task.Fail()
-		return fmt.Errorf("%s is not supported — only Fedora is", distro.Name)
+		return fmt.Errorf("%s is not supported — only the Fedora bootc image built from image/ is", distro.Name)
 	}
 	task.Done()
 
-	if err := system.EnsureBasePackages(log, p); err != nil {
+	if err := system.CheckBaseTools(p); err != nil {
 		return err
 	}
 	return system.EnsureSSHKeys(log, p)
@@ -172,20 +172,14 @@ func resolveSelection(cfg *config.Config, opts Options) (config.Selection, error
 	return cfg.Resolve(chosen)
 }
 
-// setupOnePassword makes sure op is installed and a session is available,
-// returning the environment additions to pass on to Ansible.
-func setupOnePassword(log *config.Logger, p *ui.Printer, root string, cfg *config.Config) ([]string, error) {
+// setupOnePassword makes sure a 1Password session is available, returning the
+// environment additions to pass on to Ansible.
+func setupOnePassword(log *config.Logger, p *ui.Printer, cfg *config.Config) ([]string, error) {
 	client := onepass.New(log)
 
 	if !onepass.Installed() {
-		p.Start("Checking 1Password CLI").Skip("not installed")
-		p.Warn("Installing it through Ansible — expect a separate sudo prompt.")
-		if err := ansible.RunTag(log, root, "1password"); err != nil {
-			return nil, err
-		}
-		if !onepass.Installed() {
-			return nil, fmt.Errorf("1Password CLI still not available after installing the 1password role")
-		}
+		p.Start("Checking 1Password CLI").Fail()
+		return nil, fmt.Errorf("1Password CLI not found — it ships with the bootc image")
 	}
 
 	if client.Authenticated() {
@@ -262,7 +256,7 @@ func verifySecrets(p *ui.Printer, client *onepass.Client, cfg *config.Config, en
 	return nil
 }
 
-// announceFirstRun prints the reboot notice once, tracked by ~/.dotfiles_run.
+// announceFirstRun prints the log-in notice once, tracked by ~/.dotfiles_run.
 func announceFirstRun(p *ui.Printer) error {
 	home, err := os.UserHomeDir()
 	if err != nil {
@@ -275,7 +269,7 @@ func announceFirstRun(p *ui.Printer) error {
 	}
 
 	p.Success("First run complete!")
-	p.Notice("Please reboot your computer to complete the setup.")
+	p.Notice("Log out and back in on tty1 to start Hyprland.")
 
 	f, err := os.Create(marker)
 	if err != nil {

@@ -41,7 +41,7 @@ type PlaybookOptions struct {
 }
 
 // RunPlaybook executes main.yml with the terminal handed over to Ansible, so
-// its native output and its BECOME password prompt behave normally.
+// its native output behaves normally.
 func RunPlaybook(log *config.Logger, opts PlaybookOptions) error {
 	return shell.Interactive(log, shell.Cmd{
 		Name: "ansible-playbook",
@@ -58,33 +58,5 @@ func playbookArgs(opts PlaybookOptions) []string {
 	if opts.Selection.Explicit {
 		args = append(args, "-t", strings.Join(opts.Selection.Roles, ","))
 	}
-	args = append(args, opts.Extra...)
-	if !hasBecomeFlag(opts.Extra) {
-		args = append(args, "-K")
-	}
-	return args
-}
-
-// RunTag runs a single tag, used to bootstrap the 1Password role before the
-// main run.
-func RunTag(log *config.Logger, root, tag string) error {
-	return shell.Interactive(log, shell.Cmd{
-		Name: "ansible-playbook",
-		Args: []string{filepath.Join(root, "main.yml"), "-t", tag, "-K"},
-		Dir:  root,
-	})
-}
-
-// hasBecomeFlag reports whether the caller already dealt with privilege
-// escalation, so we do not append a second -K on top of theirs.
-func hasBecomeFlag(extra []string) bool {
-	for _, arg := range extra {
-		switch {
-		case arg == "-K", arg == "--ask-become-pass":
-			return true
-		case strings.HasPrefix(arg, "--become-password-file"):
-			return true
-		}
-	}
-	return false
+	return append(args, opts.Extra...)
 }

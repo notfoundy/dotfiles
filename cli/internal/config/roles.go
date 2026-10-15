@@ -15,8 +15,8 @@ type Selection struct {
 	// tags at all, so main.yml sees ansible_run_tags == ['all'] and skips tag
 	// filtering entirely — the behaviour of a bare `dotfiles`. Passing the full
 	// list via -t would instead switch Ansible into filtering mode, where role
-	// dependencies pulled in through meta/main.yml (hyprdot -> starship,
-	// kitty) are subject to the filter.
+	// dependencies pulled in through meta/main.yml (hyprdot -> starship) are
+	// subject to the filter.
 	Explicit bool
 }
 
