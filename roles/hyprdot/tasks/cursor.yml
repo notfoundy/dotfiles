@@ -58,20 +58,6 @@
       - { option: gtk-cursor-theme-name, value: "{{ hyprdot_cursor.theme }}" }
       - { option: gtk-cursor-theme-size, value: "{{ hyprdot_cursor.size }}" }
 
-- name: Set Qt cursor
-  community.general.ini_file:
-    path: "{{ ansible_facts['user_dir'] }}/.config/kcminputrc"
-    section: Mouse
-    option: "{{ item.option }}"
-    value: "{{ item.value }}"
-    no_extra_spaces: true
-    mode: "0644"
-  loop:
-    - { option: cursorTheme, value: "{{ hyprdot_cursor.theme }}" }
-    - { option: cursorSize, value: "{{ hyprdot_cursor.size }}" }
-  loop_control:
-    label: "{{ item.option }}"
-
 - name: Read Flatpak overrides
   ansible.builtin.command:
     cmd: flatpak override --user --show

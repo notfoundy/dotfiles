@@ -153,7 +153,7 @@ The shell aims to be quiet: one typeface, one colour source, no outlines.
 
 - **Colours** come from the current wallpaper (`muted` scheme), so changing the wallpaper
   re-themes the whole system without ever turning loud. Noctalia's built-in templates push the
-  palette to Hyprland's borders, Ghostty and GTK 3/4.
+  palette to Hyprland's borders, Ghostty, GTK 3/4 and Qt.
 - **Inter** is the shell font; the image installs it from the Fedora repositories.
 - **One cursor everywhere.** The cursor theme is user data, not part of the image: changing it
   never needs a rebuild. `hyprdot_cursor` in `roles/hyprdot/defaults/main.yml` sets the theme,
@@ -163,7 +163,7 @@ The shell aims to be quiet: one typeface, one colour source, no outlines.
   - Hyprland and the apps it starts: `XCURSOR_THEME`/`XCURSOR_SIZE` from the generated
     `~/.config/hypr/cursor.lua`;
   - GTK: `gsettings` (`org.gnome.desktop.interface`) and `settings.ini` for GTK 3 and 4;
-  - Qt: `~/.config/kcminputrc`, which the `kde` platform theme reads;
+  - Qt: `XCURSOR_THEME`/`XCURSOR_SIZE` too, which Qt reads on Wayland;
   - XWayland and other fallbacks: `~/.local/share/icons/default/index.theme`;
   - Flatpak: a user override that exposes `~/.local/share/icons` read-only and sets
     `XCURSOR_*`.
@@ -194,6 +194,11 @@ already carries the lines the templates look for (`require("noctalia")` and
 `theme = noctalia`) and the templates leave them alone. Hyprland loads the theme through
 `pcall`, so it starts cleanly before Noctalia has generated it. GTK's `gtk.css` is not managed
 here and Noctalia edits it directly.
+
+Qt apps go through `qt6ct` (`QT_QPA_PLATFORMTHEME=qt6ct`), installed by the image. Noctalia's
+`qt` template only writes `~/.config/qt6ct/colors/noctalia.conf`, so the `noctalia` role points
+`qt6ct.conf` at it, along with the Fusion style and the Papirus-Dark icons. Only those keys
+are set: whatever else is changed in the `qt6ct` window is kept.
 
 ## 1Password
 

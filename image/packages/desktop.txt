@@ -7,6 +7,7 @@ noctalia
 papirus-icon-theme
 playerctl
 qt6-qtwayland
+qt6ct
 slurp
 tesseract
 wl-clipboard
