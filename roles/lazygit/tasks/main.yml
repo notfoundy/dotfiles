@@ -1,0 +1,36 @@
+- name: Check lazygit version
+  ansible.builtin.command:
+    cmd: "{{ ansible_facts['user_dir'] }}/.local/bin/lazygit --version"
+  register: lazygit_current_version
+  changed_when: false
+  failed_when: false
+
+- name: Query lazygit latest release
+  ansible.builtin.uri:
+    url: https://api.github.com/repos/jesseduffield/lazygit/releases/latest
+  register: lazygit_latest_release
+  changed_when: false
+
+- name: Define lazygit release
+  ansible.builtin.set_fact:
+    lazygit_version: "{{ lazygit_latest_release.json.tag_name | regex_replace('^v', '') }}"
+    lazygit_arch: "{{ ansible_facts['machine'] | replace('aarch64', 'arm64') }}"
+
+- name: Install lazygit
+  when: ('version=' ~ lazygit_version ~ ',') not in lazygit_current_version.stdout | default('')
+  block:
+    - name: Download lazygit
+      ansible.builtin.get_url:
+        url: "https://github.com/jesseduffield/lazygit/releases/download/v{{ lazygit_version }}/lazygit_{{ lazygit_version }}_linux_{{ lazygit_arch }}.tar.gz"
+        checksum: "sha256:https://github.com/jesseduffield/lazygit/releases/download/v{{ lazygit_version }}/checksums.txt"
+        dest: /tmp/lazygit.tar.gz
+        mode: "0644"
+      notify: Cleanup lazygit archive
+
+    - name: Extract lazygit
+      ansible.builtin.unarchive:
+        src: /tmp/lazygit.tar.gz
+        dest: "{{ ansible_facts['user_dir'] }}/.local/bin"
+        include:
+          - lazygit
+        remote_src: true

@@ -11,8 +11,8 @@ while IFS= read -r -d '' file; do
 done < <(find "$HOME/.config/bash/" -type f -name "*.sh" -print0)
 
 PATHS=(
-  "/usr/local/go/bin"
-  "/usr/local/node/bin"
+  "$HOME/.local/go/bin"
+  "$HOME/.local/node/bin"
   "$HOME/go/bin"
   "$HOME/.local/bin"
   "$HOME/.dotfiles/bin"

@@ -1,10 +1,8 @@
 - name: Checking typst install
-  ansible.builtin.command:
-    cmd: which typst
-  failed_when: false
-  changed_when: false
+  ansible.builtin.stat:
+    path: "{{ ansible_facts['user_dir'] }}/.local/bin/typst"
   register: typst
 
 - name: Install Typst
   ansible.builtin.include_tasks: install.yml
-  when: typst.rc != 0
+  when: not typst.stat.exists

@@ -20,7 +20,6 @@
   ansible.builtin.file:
     path: "/tmp/typst-{{ arch }}-unknown-linux-musl/"
     state: absent
-  become: true
 
 - name: Downloading Typst
   ansible.builtin.unarchive:
@@ -28,11 +27,9 @@
     dest: "/tmp"
     remote_src: true
   notify: Cleanup downloaded typst archive
-  become: true
 
 - name: Installing Typst
   ansible.builtin.copy:
     src: "/tmp/typst-{{ arch }}-unknown-linux-musl/typst"
-    dest: "/usr/local/bin/typst"
+    dest: "{{ ansible_facts['user_dir'] }}/.local/bin/typst"
     mode: "0755"
-  become: true
