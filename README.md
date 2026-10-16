@@ -110,6 +110,9 @@ A few things differ from a regular Fedora:
   `dbus-run-session`, which the greeter session needs; the system bus stays on dbus-broker.
   Syncing Noctalia's wallpaper and palette to the greeter is not set up.
 - Noctalia is the polkit agent.
+- Swap is zram only, through `zram-generator-defaults`: the base image ships none, and
+  without it the system has no swap at all. `systemd-oomd-defaults` kills the offending
+  cgroup under sustained memory pressure, before the desktop freezes.
 - libvirt is managed by the `wheel` group through a polkit rule: `usermod -aG libvirt` does not
   work, since the group lives in `/usr/lib/group`.
 - Go, Node, Typst, Starship and Lazygit are installed in `~/.local` by their roles, so they

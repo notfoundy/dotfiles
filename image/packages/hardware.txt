@@ -5,5 +5,7 @@ NetworkManager-wifi
 pipewire
 pipewire-pulseaudio
 steam-devices
+systemd-oomd-defaults
 tuned-ppd
 wireplumber
+zram-generator-defaults
