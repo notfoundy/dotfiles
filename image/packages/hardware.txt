@@ -1,5 +1,7 @@
 bluez
 firewalld
+glibc-langpack-en
+glibc-langpack-fr
 mesa-dri-drivers
 mesa-vulkan-drivers
 NetworkManager-wifi
