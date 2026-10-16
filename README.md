@@ -120,6 +120,8 @@ A few things differ from a regular Fedora:
 - The base image only knows `C.UTF-8`. `glibc-langpack-en` and `-fr` are added, and
   `/etc/locale.conf` sets `en_US.UTF-8` with French formats (time, currency, paper, units).
   Numbers stay English: a decimal comma breaks `printf '%.2f'` and friends in scripts.
+- The base image ships no `audit`: without auditd, the kernel prints its audit events on the
+  console, over the TTY. `audit` is added and `auditd` enabled so they go to its log.
 - libvirt is managed by the `wheel` group through a polkit rule: `usermod -aG libvirt` does not
   work, since the group lives in `/usr/lib/group`.
 - bootc only copies the image's `/var` at install time. The directories packages leave there
