@@ -1,4 +1,5 @@
 bluez
+firewalld
 mesa-dri-drivers
 mesa-vulkan-drivers
 NetworkManager-wifi

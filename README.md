@@ -113,6 +113,10 @@ A few things differ from a regular Fedora:
 - Swap is zram only, through `zram-generator-defaults`: the base image ships none, and
   without it the system has no swap at all. `systemd-oomd-defaults` kills the offending
   cgroup under sustained memory pressure, before the desktop freezes.
+- The base image enables sshd with password login and ships no firewall. sshd is disabled
+  (`systemctl enable --now sshd` when needed) and firewalld runs with Fedora's `public`
+  zone. libvirt and podman (netavark) both use nftables and keep their own tables, and
+  firewalld ships the `libvirt` zones, so VMs and containers keep their networking.
 - libvirt is managed by the `wheel` group through a polkit rule: `usermod -aG libvirt` does not
   work, since the group lives in `/usr/lib/group`.
 - Go, Node, Typst, Starship and Lazygit are installed in `~/.local` by their roles, so they

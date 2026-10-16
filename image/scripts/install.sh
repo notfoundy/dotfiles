@@ -18,7 +18,8 @@ done < <(cat /ctx/deps/*/binaries.txt)
 
 ln -sf ../usr/share/zoneinfo/Europe/Paris /etc/localtime
 rm /etc/greetd/config.toml.rpmnew
-systemctl enable greetd.service
+systemctl enable greetd.service firewalld.service
+systemctl disable sshd.service
 systemctl set-default graphical.target
 
 dnf clean all
