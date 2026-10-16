@@ -7,4 +7,5 @@ rootpw --lock
 
 %post
 cp /usr/etc/locale.conf /etc/locale.conf
+sed -Ei '/^[^#][^[:space:]]*[[:space:]]+\/[[:space:]]/d' /etc/fstab
 %end

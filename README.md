@@ -158,13 +158,16 @@ kickstart only holds what never changes, Anaconda stops on its summary for the r
 - **User creation**: with **Make this user administrator** checked (`wheel`). root stays
   locked.
 
-Two kickstart lines keep Anaconda from overriding the image:
+A few kickstart lines undo what Anaconda gets wrong on a bootc system:
 
 - `firewall --use-system-defaults`: otherwise Anaconda runs `firewall-offline-cmd` and opens
   ssh in the default zone.
 - Anaconda always rewrites `/etc/locale.conf` with a lone `LANG=`, with or without a `lang`
   directive. The `%post` copies back the image's version from `/usr/etc`: identical to the
   default, the file is no longer a local change and follows the image again.
+- The `%post` also drops the `/` entry Anaconda writes to `/etc/fstab`: with composefs, `/`
+  is an overlay and `systemd-remount-fs` fails applying btrfs options to it. The root is
+  mounted from the kernel arguments anyway, as `bootc install` does.
 
 ## Desktop shell
 
