@@ -122,6 +122,11 @@ A few things differ from a regular Fedora:
   Numbers stay English: a decimal comma breaks `printf '%.2f'` and friends in scripts.
 - libvirt is managed by the `wheel` group through a polkit rule: `usermod -aG libvirt` does not
   work, since the group lives in `/usr/lib/group`.
+- bootc only copies the image's `/var` at install time. The directories packages leave there
+  without a tmpfiles rule (libvirt, flatpak, AccountsService…) are listed by
+  `bootc container lint` and written to `/usr/lib/tmpfiles.d/dotfiles-var.conf` at the end of
+  the build, so they are recreated if missing, as `rpm-ostree-autovar.conf` does for the base
+  image.
 - Go, Node, Typst, Starship and Lazygit are installed in `~/.local` by their roles, so they
   stay on the latest release without touching the image. Starship goes through its official
   install script, Lazygit is checked against the release's `checksums.txt`.
