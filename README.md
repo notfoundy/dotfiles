@@ -117,6 +117,9 @@ A few things differ from a regular Fedora:
   (`systemctl enable --now sshd` when needed) and firewalld runs with Fedora's `public`
   zone. libvirt and podman (netavark) both use nftables and keep their own tables, and
   firewalld ships the `libvirt` zones, so VMs and containers keep their networking.
+- The base image only knows `C.UTF-8`. `glibc-langpack-en` and `-fr` are added, and
+  `/etc/locale.conf` sets `en_US.UTF-8` with French formats (time, currency, paper, units).
+  Numbers stay English: a decimal comma breaks `printf '%.2f'` and friends in scripts.
 - libvirt is managed by the `wheel` group through a polkit rule: `usermod -aG libvirt` does not
   work, since the group lives in `/usr/lib/group`.
 - Go, Node, Typst, Starship and Lazygit are installed in `~/.local` by their roles, so they
@@ -133,6 +136,35 @@ podman build -f image/Containerfile -t localhost/dotfiles image
 ```
 
 Moving to a new Fedora release means bumping `ARG FEDORA_VERSION` in the four Containerfiles.
+
+### Installing
+
+The machine is installed by Anaconda from the Fedora Everything network ISO, which pulls
+`ghcr.io/notfoundy/dotfiles:latest` through the `ostreecontainer` command of
+`image/install.ks`. The package must be public, or the kickstart needs a `%pre` writing
+`/etc/ostree/auth.json`. Embed the kickstart in the ISO, so that every boot entry loads it:
+
+```bash
+podman run --rm -v "$PWD":/work:z -w /work registry.fedoraproject.org/fedora:44 sh -c \
+  'dnf -y install lorax && mkksiso --ks image/install.ks Fedora-Everything-netinst-x86_64-44-*.iso dotfiles-install.iso'
+```
+
+Write `dotfiles-install.iso` to a USB stick and boot it; Secure Boot can stay on. The
+kickstart only holds what never changes, Anaconda stops on its summary for the rest:
+
+- **Network**: the Wi-Fi, copied to the installed system.
+- **Installation destination**: the disk, automatic partitioning with btrfs, **Encrypt my
+  data** checked, then the LUKS passphrase.
+- **User creation**: with **Make this user administrator** checked (`wheel`). root stays
+  locked.
+
+Two kickstart lines keep Anaconda from overriding the image:
+
+- `firewall --use-system-defaults`: otherwise Anaconda runs `firewall-offline-cmd` and opens
+  ssh in the default zone.
+- Anaconda always rewrites `/etc/locale.conf` with a lone `LANG=`, with or without a `lang`
+  directive. The `%post` copies back the image's version from `/usr/etc`: identical to the
+  default, the file is no longer a local change and follows the image again.
 
 ## Desktop shell
 
