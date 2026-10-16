@@ -1,6 +1,7 @@
 bat
 btop
 eza
+fastfetch
 fd-find
 ffmpeg-free
 fzf
