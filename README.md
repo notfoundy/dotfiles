@@ -120,6 +120,9 @@ A few things differ from a regular Fedora:
 - The base image only knows `C.UTF-8`. `glibc-langpack-en` and `-fr` are added, and
   `/etc/locale.conf` sets `en_US.UTF-8` with French formats (time, currency, paper, units).
   Numbers stay English: a decimal comma breaks `printf '%.2f'` and friends in scripts.
+- Anaconda writes `compress=zstd:1` to fstab, but bootc mounts the root from the kernel
+  command line, and btrfs takes its options from that first mount. Compression is set back
+  through `rootflags` in `/usr/lib/bootc/kargs.d/`.
 - The base image ships no `audit`: without auditd, the kernel prints its audit events on the
   console, over the TTY. `audit` is added and `auditd` enabled so they go to its log.
 - libvirt is managed by the `wheel` group through a polkit rule: `usermod -aG libvirt` does not
