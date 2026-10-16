@@ -132,6 +132,9 @@ A few things differ from a regular Fedora:
   `bootc container lint` and written to `/usr/lib/tmpfiles.d/dotfiles-var.conf` at the end of
   the build, so they are recreated if missing, as `rpm-ostree-autovar.conf` does for the base
   image.
+- `/` is the composefs image, read-only and always 100 % full. Disk usage is read on `/var`,
+  the btrfs partition that also holds `/var/home`: `df -h /var`, and the fastfetch role points
+  its disk module there.
 - Go, Node, Typst, Starship and Lazygit are installed in `~/.local` by their roles, so they
   stay on the latest release without touching the image. Starship goes through its official
   install script, Lazygit is checked against the release's `checksums.txt`.

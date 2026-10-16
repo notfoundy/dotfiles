@@ -17,6 +17,7 @@ default_roles:
   - noctalia
   - nnn
   - typst
+  - fastfetch
 
 op:
   git:
