@@ -57,7 +57,7 @@ func LatestVersion() (string, error) {
 
 // tagFromURL reads the tag off the page the "latest" redirect lands on.
 //
-// GitHub answers with .../releases/tag/vX.Y.Z, but a repository without a
+// GitHub answers with .../releases/tag/cli-vX.Y.Z, but a repository without a
 // single release quietly falls back to the .../releases listing. Matching the
 // tag path explicitly is what keeps that case from being mistaken for a release
 // named "releases", which only surfaced later as a 404 on the assets.
@@ -76,7 +76,8 @@ func tagFromURL(u *url.URL) (string, error) {
 	return tag, nil
 }
 
-// IsNewer reports whether latest differs from current, ignoring a leading "v".
+// IsNewer reports whether latest differs from current, ignoring the "cli-" tag
+// prefix and a leading "v".
 // A development build is never considered up to date.
 func IsNewer(current, latest string) bool {
 	if current == "dev" || current == "" {
@@ -85,7 +86,9 @@ func IsNewer(current, latest string) bool {
 	return normalize(current) != normalize(latest)
 }
 
-func normalize(v string) string { return strings.TrimPrefix(strings.TrimSpace(v), "v") }
+func normalize(v string) string {
+	return strings.TrimPrefix(strings.TrimPrefix(strings.TrimSpace(v), "cli-"), "v")
+}
 
 // Apply downloads the latest archive, verifies its checksum and swaps the
 // running binary for it.

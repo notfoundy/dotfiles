@@ -2,11 +2,8 @@ name: image
 
 on:
   push:
-    branches:
-      - main
-    paths:
-      - "image/**"
-      - ".github/workflows/image.yml"
+    tags:
+      - "img-v*"
   pull_request:
     paths:
       - "image/**"
@@ -37,6 +34,23 @@ jobs:
         run: sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache
 
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Image version
+        if: github.event_name != 'pull_request'
+        run: |
+          if [[ "$GITHUB_REF_TYPE" == tag && "$GITHUB_REF_NAME" == img-v* ]]; then
+            tag=$GITHUB_REF_NAME
+          else
+            tag=$(git tag -l 'img-v*' --sort=-v:refname | head -n1)
+            if [[ -z "$tag" ]]; then
+              echo "::error::no img-v* tag to rebuild"
+              exit 1
+            fi
+            git checkout --quiet "$tag"
+          fi
+          echo "IMAGE_VERSION=${tag#img-v}" >> "$GITHUB_ENV"
 
       - name: Fedora version
         run: echo "FEDORA_VERSION=$(sed -n 's/^ARG FEDORA_VERSION=//p' image/Containerfile)" >> "$GITHUB_ENV"
@@ -69,6 +83,9 @@ jobs:
         run: |
           image="$REGISTRY/dotfiles"
           tags=(latest "$FEDORA_VERSION" "$FEDORA_VERSION-$(date -u +%Y%m%d)")
+          if [[ -n "${IMAGE_VERSION:-}" ]]; then
+            tags+=("$IMAGE_VERSION")
+          fi
           podman build -f image/Containerfile \
             --build-arg FEDORA_VERSION="$FEDORA_VERSION" \
             --build-arg HYPRLAND_IMAGE="${{ steps.builders.outputs.hyprland }}" \

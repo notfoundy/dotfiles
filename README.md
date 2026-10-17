@@ -87,8 +87,10 @@ runtime libraries of what is built from source are resolved in the builder (`ldd
 `rpm -qf`), so a version bump needs no package list update, and the image build fails if a
 library is still missing.
 
-`.github/workflows/image.yml` builds on every change and daily for Fedora updates, and publishes
-`ghcr.io/notfoundy/dotfiles`. A builder image is tagged with the hash of its inputs and only
+`.github/workflows/image.yml` publishes `ghcr.io/notfoundy/dotfiles` when an `img-v*` tag is
+pushed (see [Releases](#releases)), and rebuilds the latest `img-v*` tag daily for Fedora
+updates. Merging to `main`, Renovate pull requests included, publishes nothing until the next
+tag; pull requests touching `image/` only build. A builder image is tagged with the hash of its inputs and only
 rebuilt when they change, so the daily build takes minutes, not the half hour Hyprland needs.
 If a Fedora update ever breaks the ABI the builders were compiled against, the library check
 fails the build: run the workflow by hand with **rebuild builders** checked. The same daily
@@ -313,13 +315,20 @@ gamescope -W 1280 -H 720 -w 1920 -h 1080 -F fsr -f -- %command%
 SHA-256 and swaps the running binary. Until a release exists it stops with
 _no release published yet_ — there is nothing to update to.
 
-Cutting one is a tag away; pushing it runs GoReleaser through
-`.github/workflows/release.yml`:
+The CLI and the image are released separately, each from its own tag on `main`:
 
 ```bash
-git tag -a v0.1.0 -m "v0.1.0"
-git push origin v0.1.0
+git tag -a cli-v0.2.0 -m "cli-v0.2.0"   # CLI: GitHub release
+git tag -a img-v0.1.0 -m "img-v0.1.0"   # image: ghcr.io/notfoundy/dotfiles
+git push origin cli-v0.2.0 img-v0.1.0
 ```
+
+A `cli-v*` tag runs `.github/workflows/release.yml`. GoReleaser OSS only accepts semver tags,
+so it builds against a local `v0.2.0` tag that is never pushed, and `gh` publishes the
+`cli-v0.2.0` release, its notes listing the commits that touched `cli/` since the previous
+CLI tag (a `-rc.1` style suffix makes it a pre-release). An `img-v*` tag also pushes the image
+as `0.1.0`, next to `latest`, `44` and `44-YYYYMMDD`; it creates no GitHub release, which would
+take `/releases/latest` away from the CLI.
 
 Assets are published **without a version in their name** (`dotfiles_linux_amd64.tar.gz`,
 `checksums.txt`). That is deliberate: it keeps the `/releases/latest/download/` URLs

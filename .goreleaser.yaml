@@ -3,6 +3,9 @@
 # The archive and checksum names deliberately carry no version: it is what makes
 # the /releases/latest/download/ URLs stable, so `dotfiles self-update` needs
 # neither a GitHub API call nor jq. See cli/internal/selfupdate.
+#
+# GoReleaser only builds: .github/workflows/release.yml publishes the release with
+# gh, since the cli-v* tags are not semver and tag prefixes need GoReleaser Pro.
 version: 2
 
 project_name: dotfiles
@@ -39,13 +42,4 @@ checksum:
   name_template: checksums.txt
 
 changelog:
-  use: github
-  sort: asc
-  filters:
-    exclude:
-      - "^docs:"
-      - "^test:"
-      - "^chore:"
-
-release:
-  prerelease: auto
+  disable: true
