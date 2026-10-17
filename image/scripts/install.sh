@@ -19,6 +19,7 @@ done < <(cat /ctx/deps/*/binaries.txt)
 ln -sf ../usr/share/zoneinfo/Europe/Paris /etc/localtime
 rm /etc/greetd/config.toml.rpmnew
 systemctl enable greetd.service firewalld.service auditd.service
+systemctl --global enable podman.socket
 systemctl disable sshd.service
 systemctl set-default graphical.target
 

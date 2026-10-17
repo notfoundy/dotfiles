@@ -126,6 +126,11 @@ A few things differ from a regular Fedora:
 - Anaconda adds no `quiet` for a bootc install, so the console printed every kernel info
   message, such as the SELinux label bootc writes to test its rights on each run. `quiet` comes
   from `kargs.d` as well; the messages stay in `journalctl -k`.
+- `podman.socket` is enabled for every user (`systemctl --global`), rootless, for the tools that
+  only speak the Docker API (Testcontainers, a `docker` CLI in a container). It is socket
+  activated: the service only starts on the first connection, at
+  `$XDG_RUNTIME_DIR/podman/podman.sock`. `podman compose` needs no socket, it runs
+  `podman-compose`.
 - The base image ships no `audit`: without auditd, the kernel prints its audit events on the
   console, over the TTY. `audit` is added and `auditd` enabled so they go to its log.
 - libvirt is managed by the `wheel` group through a polkit rule: `usermod -aG libvirt` does not
