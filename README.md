@@ -123,6 +123,9 @@ A few things differ from a regular Fedora:
 - Anaconda writes `compress=zstd:1` to fstab, but bootc mounts the root from the kernel
   command line, and btrfs takes its options from that first mount. Compression is set back
   through `rootflags` in `/usr/lib/bootc/kargs.d/`.
+- Anaconda adds no `quiet` for a bootc install, so the console printed every kernel info
+  message, such as the SELinux label bootc writes to test its rights on each run. `quiet` comes
+  from `kargs.d` as well; the messages stay in `journalctl -k`.
 - The base image ships no `audit`: without auditd, the kernel prints its audit events on the
   console, over the TTY. `audit` is added and `auditd` enabled so they go to its log.
 - libvirt is managed by the `wheel` group through a polkit rule: `usermod -aG libvirt` does not
