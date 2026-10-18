@@ -12,8 +12,7 @@ hl.env(
 
 -- Themes
 hl.env("QT_QPA_PLATFORM", "wayland")
-hl.env("QT_QPA_PLATFORMTHEME", "kde")
-hl.env("XDG_MENU_PREFIX", "plasma-")
+hl.env("QT_QPA_PLATFORMTHEME", "qt6ct")
 
 -- Terminal application
 hl.env("TERMINAL", "ghostty")
