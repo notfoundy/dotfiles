@@ -4,6 +4,7 @@ button_borders = false
 input_borders = false
 popup_borders = false
 card_borders = false
+polkit_agent = false
 
 [shell.panel]
 transparency_mode = "soft"
@@ -30,6 +31,10 @@ wallpaper_scheme = "muted"
 [theme.templates]
 enable_builtin_templates = true
 builtin_ids = ["hyprland", "ghostty", "gtk3", "gtk4", "qt"]
+
+[theme.templates.user.hyprtoolkit]
+input_path = "templates/hyprtoolkit.conf"
+output_path = "$XDG_CONFIG_HOME/hypr/hyprtoolkit.conf"
 
 [wallpaper]
 directory = "~/Pictures/Wallpapers"
