@@ -3,9 +3,10 @@ ARG FEDORA_VERSION=44
 FROM quay.io/fedora/fedora-bootc:${FEDORA_VERSION} AS build
 RUN dnf -y install \
       cmake meson ninja-build gcc-c++ glslang \
-      'cmake(pugixml)' mesa-libEGL-devel \
+      'cmake(pugixml)' mesa-libEGL-devel 'pkgconfig(absl_flat_hash_map)' \
       'pkgconfig(cairo)' 'pkgconfig(egl)' 'pkgconfig(gbm)' 'pkgconfig(gio-2.0)' 'pkgconfig(glesv2)' \
-      'pkgconfig(glslang)' 'pkgconfig(hwdata)' 'pkgconfig(lcms2)' 'pkgconfig(libdisplay-info)' \
+      'pkgconfig(glslang)' 'pkgconfig(hwdata)' 'pkgconfig(iniparser)' 'pkgconfig(lcms2)' \
+      'pkgconfig(libdisplay-info)' \
       'pkgconfig(libdrm)' 'pkgconfig(libeis-1.0)' 'pkgconfig(libffi)' 'pkgconfig(libheif)' \
       'pkgconfig(libinput)' 'pkgconfig(libjpeg)' 'pkgconfig(libjxl)' 'pkgconfig(libjxl_cms)' \
       'pkgconfig(libjxl_threads)' 'pkgconfig(libliftoff)' 'pkgconfig(libmagic)' \
@@ -84,6 +85,21 @@ ARG HYPRLAND_VERSION=v0.56.2
 RUN bash /ctx/hyprland.sh hyprland \
       "https://github.com/hyprwm/Hyprland/releases/download/$HYPRLAND_VERSION/source-$HYPRLAND_VERSION.tar.gz" image \
       -DNO_TESTS=TRUE -DNO_UWSM=TRUE
+
+# renovate: datasource=github-tags depName=hyprwm/hyprtoolkit
+ARG HYPRTOOLKIT_VERSION=v0.6.0
+RUN bash /ctx/hyprland.sh hyprtoolkit \
+      "https://github.com/hyprwm/hyprtoolkit/archive/refs/tags/$HYPRTOOLKIT_VERSION.tar.gz" image
+
+# renovate: datasource=github-tags depName=hyprwm/hyprland-guiutils
+ARG HYPRLAND_GUIUTILS_VERSION=v0.2.2
+RUN bash /ctx/hyprland.sh hyprland-guiutils \
+      "https://github.com/hyprwm/hyprland-guiutils/archive/refs/tags/$HYPRLAND_GUIUTILS_VERSION.tar.gz" image
+
+# renovate: datasource=github-tags depName=hyprwm/hyprpolkitagent
+ARG HYPRPOLKITAGENT_VERSION=v0.2.0
+RUN bash /ctx/hyprland.sh hyprpolkitagent \
+      "https://github.com/hyprwm/hyprpolkitagent/archive/refs/tags/$HYPRPOLKITAGENT_VERSION.tar.gz" image
 
 RUN rm -rf /out/usr/include /out/usr/lib64/pkgconfig /out/usr/lib64/cmake /out/usr/share/pkgconfig \
       /out/usr/bin/hyprwire-scanner \
