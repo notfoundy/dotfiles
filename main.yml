@@ -4,9 +4,10 @@
     - name: Set roles
       ansible.builtin.set_fact:
         selected_roles: >-
-          {{ (default_roles | difference(exclude_roles | default([])))
+          {{ (default_roles | reject('in', exclude_roles | default([])) | list)
              if 'all' in ansible_run_tags
-             else ansible_run_tags }}
+             else ((default_roles + (ansible_run_tags | reject('in', default_roles) | sort))
+                   | select('in', ansible_run_tags) | list) }}
       tags:
         - always
 
