@@ -1,2 +1,5 @@
 # GoReleaser build output
 /dist/
+
+# Installer ISOs
+/*.iso

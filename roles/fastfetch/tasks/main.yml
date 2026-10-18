@@ -1,0 +1,11 @@
+- name: Ensure .config/fastfetch exist
+  ansible.builtin.file:
+    path: "{{ ansible_facts['user_dir'] }}/.config/fastfetch"
+    state: directory
+    mode: "0755"
+
+- name: Copy configuration
+  ansible.builtin.copy:
+    src: files/config.jsonc
+    dest: "{{ ansible_facts['user_dir'] }}/.config/fastfetch/config.jsonc"
+    mode: "0644"

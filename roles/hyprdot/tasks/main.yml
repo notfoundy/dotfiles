@@ -1,14 +1,3 @@
-- name: Install hypr tools
-  ansible.builtin.package:
-    name:
-      - hyprpicker
-      - grim
-      - slurp
-      - tesseract
-      - wtype
-    state: present
-  become: true
-
 - name: Copy hyprland config
   ansible.builtin.copy:
     src: files/
@@ -22,3 +11,6 @@
     mode: "0755"
   loop:
     - scripts/
+
+- name: Configure cursor theme
+  ansible.builtin.include_tasks: cursor.yml

@@ -86,6 +86,8 @@ func TestIsNewer(t *testing.T) {
 		{"same version", "1.0.0", "v1.0.0", false},
 		{"leading v on both sides", "v1.0.0", "v1.0.0", false},
 		{"different version", "1.0.0", "v1.1.0", true},
+		{"same version, prefixed tag", "1.0.0", "cli-v1.0.0", false},
+		{"different version, prefixed tag", "1.0.0", "cli-v1.1.0", true},
 	}
 
 	for _, tt := range tests {

@@ -1,4 +1,0 @@
-- name: Restart dbus-broker
-  ansible.builtin.service:
-    name: dbus-broker
-    state: restarted

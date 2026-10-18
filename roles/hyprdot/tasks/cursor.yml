@@ -1,0 +1,78 @@
+- name: Create icons directory
+  ansible.builtin.file:
+    path: "{{ ansible_facts['user_dir'] }}/.local/share/icons/default"
+    state: directory
+    mode: "0755"
+
+- name: Install {{ hyprdot_cursor.theme }} cursor theme
+  ansible.builtin.unarchive:
+    src: "{{ hyprdot_cursor.url }}"
+    dest: "{{ ansible_facts['user_dir'] }}/.local/share/icons"
+    creates: "{{ ansible_facts['user_dir'] }}/.local/share/icons/{{ hyprdot_cursor.theme }}/index.theme"
+    remote_src: true
+
+- name: Set default cursor theme
+  ansible.builtin.copy:
+    dest: "{{ ansible_facts['user_dir'] }}/.local/share/icons/default/index.theme"
+    content: |
+      [Icon Theme]
+      Inherits={{ hyprdot_cursor.theme }}
+    mode: "0644"
+
+- name: Set Hyprland cursor theme
+  ansible.builtin.template:
+    src: cursor.lua.j2
+    dest: "{{ ansible_facts['user_dir'] }}/.config/hypr/cursor.lua"
+    mode: "0644"
+
+- name: Read GTK cursor settings
+  ansible.builtin.command:
+    cmd: "gsettings get org.gnome.desktop.interface {{ item.key }}"
+  loop:
+    - { key: cursor-theme, value: "'{{ hyprdot_cursor.theme }}'" }
+    - { key: cursor-size, value: "{{ hyprdot_cursor.size }}" }
+  register: gsettings_cursor
+  changed_when: false
+
+- name: Set GTK cursor settings
+  ansible.builtin.command:
+    cmd: "gsettings set org.gnome.desktop.interface {{ item.item.key }} {{ item.item.value }}"
+  loop: "{{ gsettings_cursor.results }}"
+  loop_control:
+    label: "{{ item.item.key }}"
+  when: item.stdout != item.item.value
+
+- name: Set GTK settings.ini cursor
+  community.general.ini_file:
+    path: "{{ ansible_facts['user_dir'] }}/.config/{{ item.0 }}/settings.ini"
+    section: Settings
+    option: "{{ item.1.option }}"
+    value: "{{ item.1.value }}"
+    no_extra_spaces: true
+    mode: "0644"
+  loop: "{{ ['gtk-3.0', 'gtk-4.0'] | product(gtk_cursor) | list }}"
+  loop_control:
+    label: "{{ item.0 }} {{ item.1.option }}"
+  vars:
+    gtk_cursor:
+      - { option: gtk-cursor-theme-name, value: "{{ hyprdot_cursor.theme }}" }
+      - { option: gtk-cursor-theme-size, value: "{{ hyprdot_cursor.size }}" }
+
+- name: Read Flatpak overrides
+  ansible.builtin.command:
+    cmd: flatpak override --user --show
+  register: flatpak_overrides
+  changed_when: false
+
+- name: Expose cursor themes to Flatpak apps
+  ansible.builtin.command:
+    cmd: >-
+      flatpak override --user
+      --filesystem=xdg-data/icons:ro
+      --env=XCURSOR_PATH={{ ansible_facts['user_dir'] }}/.local/share/icons:/run/host/share/icons
+      --env=XCURSOR_THEME={{ hyprdot_cursor.theme }}
+      --env=XCURSOR_SIZE={{ hyprdot_cursor.size }}
+  when: >-
+    'xdg-data/icons:ro' not in flatpak_overrides.stdout
+    or ('XCURSOR_THEME=' ~ hyprdot_cursor.theme) not in flatpak_overrides.stdout
+    or ('XCURSOR_SIZE=' ~ hyprdot_cursor.size) not in flatpak_overrides.stdout

@@ -1,9 +1,0 @@
-- name: "Install rust"
-  ansible.builtin.package:
-    name: "{{ item }}"
-    state: present
-  loop:
-    - cargo
-    - rustup
-  become: yes
-

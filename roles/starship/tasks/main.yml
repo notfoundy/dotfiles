@@ -1,16 +1,34 @@
-- name: Check if starship is installed
-  ansible.builtin.stat:
-    path: /usr/bin/starship
-  register: starship
+- name: Check starship version
+  ansible.builtin.command:
+    cmd: "{{ ansible_facts['user_dir'] }}/.local/bin/starship --version"
+  register: starship_current_version
   changed_when: false
   failed_when: false
 
+- name: Query starship latest release
+  ansible.builtin.uri:
+    url: https://api.github.com/repos/starship/starship/releases/latest
+  register: starship_latest_release
+  changed_when: false
+
 - name: Install starship
-  ansible.builtin.include_tasks: install.yml
-  when: starship.stat.exists == false
+  when: starship_latest_release.json.tag_name | regex_replace('^v', '') not in starship_current_version.stdout | default('')
+  block:
+    - name: Download starship install script
+      ansible.builtin.get_url:
+        url: https://starship.rs/install.sh
+        dest: /tmp/starship-install.sh
+        mode: "0755"
+      notify: Cleanup starship install script
+
+    - name: Run starship install script
+      ansible.builtin.command:
+        cmd: >-
+          /tmp/starship-install.sh --yes
+          --bin-dir {{ ansible_facts['user_dir'] }}/.local/bin
+          --version {{ starship_latest_release.json.tag_name }}
 
 - name: Copy config files
   ansible.builtin.copy:
     src: "files/"
     dest: "{{ ansible_facts['user_dir'] }}/.config"
-

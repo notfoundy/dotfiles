@@ -21,13 +21,12 @@ At the moment, it’s probably not fully automated, but I’ll live with it. May
 ## Usage
 
 > [!WARNING]
-> For now, only Fedora is supported because it’s the only distribution I use.
-> I'm not a distro hopper, so it might stay this way.
+> Only the Fedora bootc image built from `image/` is supported: it carries every system
+> package, and the playbook only manages `$HOME`.
 
 Everything runs through the `dotfiles` command, a small Go program living in `cli/`.
-It prepares the host, makes sure the Ansible dependencies are installed and updated,
-refreshes the checkout in `~/.dotfiles`, then hands the terminal over to
-`ansible-playbook`.
+It checks the host, updates the Ansible dependencies, refreshes the checkout in
+`~/.dotfiles`, then hands the terminal over to `ansible-playbook`. Nothing needs `sudo`.
 Ansible will take care of the rest (or almost). You just need to grab a coffee while it works!
 
 ### On a fresh installation
@@ -42,7 +41,8 @@ curl -fsSL https://github.com/notfoundy/dotfiles/releases/latest/download/dotfil
 ```
 
 Swap `amd64` for `arm64` if that is what you are running. The first run clones the
-repository to `~/.dotfiles` and asks you to reboot once it is done.
+repository to `~/.dotfiles`; log out once it is done and sign in from the greeter to start
+Hyprland.
 
 To build it from a clone instead:
 
@@ -64,9 +64,137 @@ dotfiles --repo . -- --check    # run against this clone; anything after -- goes
 release. Every run is appended to `~/.local/state/dotfiles/dotfiles.log`, so a role
 that failed can be read back afterwards.
 
+## Bootc image
+
+The system is a [bootc](https://bootc-dev.github.io/bootc/) image built from
+`quay.io/fedora/fedora-bootc:44`, which ships no desktop. `image/Containerfile` adds only what
+is used:
+
+- `image/packages/` — packages from the official Fedora repositories, plus 1Password from its
+  own repository, one file per category (`desktop.txt`, `hardware.txt`, `cli.txt`, `dev.txt`…).
+  No COPR.
+- **Hyprland** and its libraries, `xdg-desktop-portal-hyprland` and `hyprpicker` are not in
+  Fedora 44, and neither **Ghostty** nor **Noctalia Greeter** ever was: each is built from
+  source by its own Containerfile (`image/hyprland/`, `image/ghostty/`,
+  `image/noctalia-greeter/`). Those builder images keep only the installed files
+  (`/out`) and their runtime package list (`/deps`), which the image copies in: no build
+  dependency reaches the system.
+
+Upstream versions are pinned by `ARG`s in the builder Containerfiles, one `RUN` per project in
+dependency order, so bumping one only rebuilds it and what depends on it. Renovate opens a pull
+request for each release, grouping Hyprland and its libraries since they move together. The
+runtime libraries of what is built from source are resolved in the builder (`ldd`, then
+`rpm -qf`), so a version bump needs no package list update, and the image build fails if a
+library is still missing.
+
+`.github/workflows/image.yml` publishes `ghcr.io/notfoundy/dotfiles` when an `img-v*` tag is
+pushed (see [Releases](#releases)), and rebuilds the latest `img-v*` tag daily for Fedora
+updates. Merging to `main`, Renovate pull requests included, publishes nothing until the next
+tag; pull requests touching `image/` only build. A builder image is tagged with the hash of its inputs and only
+rebuilt when they change, so the daily build takes minutes, not the half hour Hyprland needs.
+If a Fedora update ever breaks the ABI the builders were compiled against, the library check
+fails the build: run the workflow by hand with **rebuild builders** checked. The same daily
+run re-enables its own schedule, which GitHub would otherwise turn off after 60 days without
+activity.
+
+The machine follows with `bootc upgrade`. The stock update timer runs
+`bootc upgrade --apply`, which reboots on its own; it is overridden to only stage the update,
+applied at the next reboot. `bootc rollback` returns to the previous image.
+
+A few things differ from a regular Fedora:
+
+- greetd is the display manager, with [Noctalia Greeter](https://docs.noctalia.dev/greeter/)
+  as its greeter. It only offers the `Hyprland` session, which runs `start-hyprland`: Hyprland
+  is built without uwsm. The greeter runs as Fedora's `greetd` account, so the tmpfiles rule
+  creating its state directory is overridden in `/etc/tmpfiles.d/`, as upstream expects.
+  `greetd` gets a fixed UID (903, `image/files/usr/lib/sysusers.d/greetd-id.conf`) so that
+  `/var/lib/greetd` keeps its owner across images. `dbus-daemon` ships only for
+  `dbus-run-session`, which the greeter session needs; the system bus stays on dbus-broker.
+  Syncing Noctalia's wallpaper and palette to the greeter is not set up.
+- Noctalia is the polkit agent.
+- Swap is zram only, through `zram-generator-defaults`: the base image ships none, and
+  without it the system has no swap at all. `systemd-oomd-defaults` kills the offending
+  cgroup under sustained memory pressure, before the desktop freezes.
+- The base image enables sshd with password login and ships no firewall. sshd is disabled
+  (`systemctl enable --now sshd` when needed) and firewalld runs with Fedora's `public`
+  zone. libvirt and podman (netavark) both use nftables and keep their own tables, and
+  firewalld ships the `libvirt` zones, so VMs and containers keep their networking.
+- The base image only knows `C.UTF-8`. `glibc-langpack-en` and `-fr` are added, and
+  `/etc/locale.conf` sets `en_US.UTF-8` with French formats (time, currency, paper, units).
+  Numbers stay English: a decimal comma breaks `printf '%.2f'` and friends in scripts.
+- Anaconda writes `compress=zstd:1` to fstab, but bootc mounts the root from the kernel
+  command line, and btrfs takes its options from that first mount. Compression is set back
+  through `rootflags` in `/usr/lib/bootc/kargs.d/`.
+- Anaconda adds no `quiet` for a bootc install, so the console printed every kernel info
+  message, such as the SELinux label bootc writes to test its rights on each run. `quiet` comes
+  from `kargs.d` as well; the messages stay in `journalctl -k`.
+- `podman.socket` is enabled for every user (`systemctl --global`), rootless, for the tools that
+  only speak the Docker API (Testcontainers, a `docker` CLI in a container). It is socket
+  activated: the service only starts on the first connection, at
+  `$XDG_RUNTIME_DIR/podman/podman.sock`. `podman compose` needs no socket, it runs
+  `podman-compose`.
+- The base image ships no `audit`: without auditd, the kernel prints its audit events on the
+  console, over the TTY. `audit` is added and `auditd` enabled so they go to its log.
+- libvirt is managed by the `wheel` group through a polkit rule: `usermod -aG libvirt` does not
+  work, since the group lives in `/usr/lib/group`.
+- bootc only copies the image's `/var` at install time. The directories packages leave there
+  without a tmpfiles rule (libvirt, flatpak, AccountsService…) are listed by
+  `bootc container lint` and written to `/usr/lib/tmpfiles.d/dotfiles-var.conf` at the end of
+  the build, so they are recreated if missing, as `rpm-ostree-autovar.conf` does for the base
+  image.
+- `/` is the composefs image, read-only and always 100 % full. Disk usage is read on `/var`,
+  the btrfs partition that also holds `/var/home`: `df -h /var`, and the fastfetch role points
+  its disk module there.
+- Go, Node, Typst, Starship and Lazygit are installed in `~/.local` by their roles, so they
+  stay on the latest release without touching the image. Starship goes through its official
+  install script, Lazygit is checked against the release's `checksums.txt`.
+
+To build it locally, builders first:
+
+```bash
+podman build -f image/hyprland/Containerfile -t localhost/hyprland-build image
+podman build -f image/ghostty/Containerfile -t localhost/ghostty-build image
+podman build -f image/noctalia-greeter/Containerfile -t localhost/noctalia-greeter-build image
+podman build -f image/Containerfile -t localhost/dotfiles image
+```
+
+Moving to a new Fedora release means bumping `ARG FEDORA_VERSION` in the four Containerfiles.
+
+### Installing
+
+The machine is installed by Anaconda from the Fedora Everything network ISO, which pulls
+`ghcr.io/notfoundy/dotfiles:latest` through the `ostreecontainer` command of
+`image/install.ks`. The package must be public, or the kickstart needs a `%pre` writing
+`/etc/ostree/auth.json`. Embed the kickstart in the ISO, so that every boot entry loads it:
+
+```bash
+podman run --rm -v "$PWD":/work:z -w /work registry.fedoraproject.org/fedora:44 sh -c \
+  'dnf -y install lorax && mkksiso --ks image/install.ks Fedora-Everything-netinst-x86_64-44-*.iso dotfiles-install.iso'
+```
+
+Write `dotfiles-install.iso` to a USB stick and boot it; Secure Boot can stay on. The
+kickstart only holds what never changes, Anaconda stops on its summary for the rest:
+
+- **Network**: the Wi-Fi, copied to the installed system.
+- **Installation destination**: the disk, automatic partitioning with btrfs, **Encrypt my
+  data** checked, then the LUKS passphrase.
+- **User creation**: with **Make this user administrator** checked (`wheel`). root stays
+  locked.
+
+A few kickstart lines undo what Anaconda gets wrong on a bootc system:
+
+- `firewall --use-system-defaults`: otherwise Anaconda runs `firewall-offline-cmd` and opens
+  ssh in the default zone.
+- Anaconda always rewrites `/etc/locale.conf` with a lone `LANG=`, with or without a `lang`
+  directive. The `%post` copies back the image's version from `/usr/etc`: identical to the
+  default, the file is no longer a local change and follows the image again.
+- The `%post` also drops the `/` entry Anaconda writes to `/etc/fstab`: with composefs, `/`
+  is an overlay and `systemd-remount-fs` fails applying btrfs options to it. The root is
+  mounted from the kernel arguments anyway, as `bootc install` does.
+
 ## Desktop shell
 
-The `noctalia` role installs [Noctalia](https://docs.noctalia.dev) from the official Fedora
+The image installs [Noctalia](https://docs.noctalia.dev) from the official Fedora
 repositories; Hyprland starts it and every shell keybind goes through `noctalia msg`.
 It also handles notifications, the lock screen and idle, so there is no mako, hyprlock or
 hypridle.
@@ -100,8 +228,23 @@ The shell aims to be quiet: one typeface, one colour source, no outlines.
 
 - **Colours** come from the current wallpaper (`muted` scheme), so changing the wallpaper
   re-themes the whole system without ever turning loud. Noctalia's built-in templates push the
-  palette to Hyprland's borders, Ghostty and GTK 3/4.
-- **Inter** is the shell font; the `font` role installs it from the Fedora repositories.
+  palette to Hyprland's borders, Ghostty, GTK 3/4 and Qt.
+- **Inter** is the shell font; the image installs it from the Fedora repositories.
+- **One cursor everywhere.** The cursor theme is user data, not part of the image: changing it
+  never needs a rebuild. `hyprdot_cursor` in `roles/hyprdot/defaults/main.yml` sets the theme,
+  its size and the archive it comes from (Bibata Modern Classic, 24 px, from the upstream
+  release). The theme is extracted into `~/.local/share/icons`, then set for every toolkit,
+  since each one reads its own setting:
+  - Hyprland and the apps it starts: `XCURSOR_THEME`/`XCURSOR_SIZE` from the generated
+    `~/.config/hypr/cursor.lua`;
+  - GTK: `gsettings` (`org.gnome.desktop.interface`) and `settings.ini` for GTK 3 and 4;
+  - Qt: `XCURSOR_THEME`/`XCURSOR_SIZE` too, which Qt reads on Wayland;
+  - XWayland and other fallbacks: `~/.local/share/icons/default/index.theme`;
+  - Flatpak: a user override that exposes `~/.local/share/icons` read-only and sets
+    `XCURSOR_*`.
+
+  To change themes, edit `hyprdot_cursor` and run the playbook again. The old theme stays in
+  `~/.local/share/icons` until you delete it.
 - **No borders.** Panels, OSDs and notifications are separated by contrast and Hyprland's blur,
   not outlines.
 - **Wallpaper and lock screen transitions** are drawn at random from all of Noctalia's shader
@@ -127,6 +270,11 @@ already carries the lines the templates look for (`require("noctalia")` and
 `pcall`, so it starts cleanly before Noctalia has generated it. GTK's `gtk.css` is not managed
 here and Noctalia edits it directly.
 
+Qt apps go through `qt6ct` (`QT_QPA_PLATFORMTHEME=qt6ct`), installed by the image. Noctalia's
+`qt` template only writes `~/.config/qt6ct/colors/noctalia.conf`, so the `noctalia` role points
+`qt6ct.conf` at it, along with the Fusion style and the Papirus-Dark icons. Only those keys
+are set: whatever else is changed in the `qt6ct` window is kept.
+
 ## 1Password
 
 SSH authentication and commit signing both go through the 1Password SSH agent. Private keys
@@ -146,8 +294,8 @@ Which key signs is set by `op.git.signing_key` in `group_vars/all.yml`.
 The `steam` role installs Steam from Flathub (`com.valvesoftware.Steam`, user install) along
 with the `gamescope` and `MangoHud` Vulkan layers, on the same branch as Steam's runtime. The
 sandbox ships its own Mesa, including the 32-bit drivers Proton needs, so the host needs
-neither RPM Fusion nor multilib packages. On Fedora it adds `steam-devices` from the official
-repositories, for the udev rules controllers and VR headsets need.
+neither RPM Fusion nor multilib packages. The image ships `steam-devices`, for the udev rules
+controllers and VR headsets need.
 
 Steam Play is enabled by default by recent Steam clients, so nothing else is required.
 For titles that need a community Proton build, drop GE-Proton into
@@ -167,13 +315,20 @@ gamescope -W 1280 -H 720 -w 1920 -h 1080 -F fsr -f -- %command%
 SHA-256 and swaps the running binary. Until a release exists it stops with
 _no release published yet_ — there is nothing to update to.
 
-Cutting one is a tag away; pushing it runs GoReleaser through
-`.github/workflows/release.yml`:
+The CLI and the image are released separately, each from its own tag on `main`:
 
 ```bash
-git tag -a v0.1.0 -m "v0.1.0"
-git push origin v0.1.0
+git tag -a cli-v0.2.0 -m "cli-v0.2.0"   # CLI: GitHub release
+git tag -a img-v0.1.0 -m "img-v0.1.0"   # image: ghcr.io/notfoundy/dotfiles
+git push origin cli-v0.2.0 img-v0.1.0
 ```
+
+A `cli-v*` tag runs `.github/workflows/release.yml`. GoReleaser OSS only accepts semver tags,
+so it builds against a local `v0.2.0` tag that is never pushed, and `gh` publishes the
+`cli-v0.2.0` release, its notes listing the commits that touched `cli/` since the previous
+CLI tag (a `-rc.1` style suffix makes it a pre-release). An `img-v*` tag also pushes the image
+as `0.1.0`, next to `latest`, `44` and `44-YYYYMMDD`; it creates no GitHub release, which would
+take `/releases/latest` away from the CLI.
 
 Assets are published **without a version in their name** (`dotfiles_linux_amd64.tar.gz`,
 `checksums.txt`). That is deliberate: it keeps the `/releases/latest/download/` URLs

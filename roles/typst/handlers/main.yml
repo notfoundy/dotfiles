@@ -1,5 +1,4 @@
-- name: Cleanup downloaded typst archive
+- name: Cleanup typst archive
   ansible.builtin.file:
-    path: "/tmp/typst-{{ arch }}-unknown-linux-musl/"
+    path: /tmp/typst.tar.xz
     state: absent
-  become: true

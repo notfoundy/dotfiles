@@ -3,10 +3,7 @@
 // Capture buffers output into the run log and keeps the terminal clean, which
 // is what the preparation steps want. Interactive hands the real stdin, stdout
 // and stderr over to the child, which is what anything prompting the user needs
-// — ansible-playbook's BECOME password, or `op account add --signin`.
-//
-// Note that sudo prompts work in both modes: sudo reads the password from
-// /dev/tty directly rather than from the inherited descriptors.
+// — ansible-playbook's output, or `op account add --signin`.
 package shell
 
 import (
@@ -106,7 +103,7 @@ func PromptCapture(log *config.Logger, c Cmd) (string, error) {
 }
 
 // Succeeds reports whether the command exits zero, discarding its output.
-// Used for probes such as `op vault list` or `dnf list --installed`.
+// Used for probes such as `op vault list`.
 func Succeeds(log *config.Logger, c Cmd) bool {
 	_, err := Capture(log, c)
 	return err == nil

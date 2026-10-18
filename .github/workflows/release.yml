@@ -3,7 +3,7 @@ name: release
 on:
   push:
     tags:
-      - "v*"
+      - "cli-v*"
 
 permissions:
   contents: write
@@ -14,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          # GoReleaser builds the changelog from the history since the previous tag.
+          # The release notes are built from the history since the previous tag.
           fetch-depth: 0
 
       - uses: actions/setup-go@v5
@@ -22,9 +22,31 @@ jobs:
           go-version-file: cli/go.mod
           cache-dependency-path: cli/go.sum
 
+      # GoReleaser OSS only understands plain semver tags, so it builds against a
+      # local, never pushed, vX.Y.Z tag and gh publishes the cli-vX.Y.Z release.
+      - name: Version
+        run: |
+          version=${GITHUB_REF_NAME#cli-}
+          git tag "$version"
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+
       - uses: goreleaser/goreleaser-action@v6
         with:
           version: "~> v2"
-          args: release --clean
+          args: release --clean --skip=publish
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GORELEASER_CURRENT_TAG: ${{ env.VERSION }}
+
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          previous=$(git describe --tags --abbrev=0 --match 'cli-v*' --match 'v*' "$GITHUB_REF_NAME^")
+          git log --format='- %s' "$previous..$GITHUB_REF_NAME" -- cli .goreleaser.yaml > notes.md
+          if [[ "$VERSION" == *-* ]]; then
+            channel=--prerelease
+          else
+            channel=--latest
+          fi
+          gh release create "$GITHUB_REF_NAME" dist/*.tar.gz dist/checksums.txt \
+            --verify-tag --title "$GITHUB_REF_NAME" --notes-file notes.md "$channel"

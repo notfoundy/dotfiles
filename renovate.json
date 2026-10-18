@@ -1,0 +1,21 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "enabledManagers": ["custom.regex", "github-actions"],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/^image/(.+/)?Containerfile$/"],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)( extractVersion=(?<extractVersion>\\S+))?\\nARG \\w+=(?<currentValue>\\S+)"
+      ]
+    }
+  ],
+  "packageRules": [
+    {
+      "matchManagers": ["custom.regex"],
+      "matchDepNames": ["/^hyprwm\\//", "stephenberry/glaze"],
+      "groupName": "hyprland"
+    }
+  ]
+}

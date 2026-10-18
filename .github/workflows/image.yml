@@ -1,0 +1,106 @@
+name: image
+
+on:
+  push:
+    tags:
+      - "img-v*"
+  pull_request:
+    paths:
+      - "image/**"
+      - ".github/workflows/image.yml"
+  schedule:
+    - cron: "0 4 * * *"
+  workflow_dispatch:
+    inputs:
+      rebuild_builders:
+        description: Rebuild the Hyprland, Ghostty and Noctalia Greeter builders even if their inputs did not change
+        type: boolean
+        default: false
+
+permissions:
+  actions: write
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io/${{ github.repository_owner }}
+  PUSH: ${{ github.event_name != 'pull_request' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Free disk space
+        run: sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Image version
+        if: github.event_name != 'pull_request'
+        run: |
+          if [[ "$GITHUB_REF_TYPE" == tag && "$GITHUB_REF_NAME" == img-v* ]]; then
+            tag=$GITHUB_REF_NAME
+          else
+            tag=$(git tag -l 'img-v*' --sort=-v:refname | head -n1)
+            if [[ -z "$tag" ]]; then
+              echo "::error::no img-v* tag to rebuild"
+              exit 1
+            fi
+            git checkout --quiet "$tag"
+          fi
+          echo "IMAGE_VERSION=${tag#img-v}" >> "$GITHUB_ENV"
+
+      - name: Fedora version
+        run: echo "FEDORA_VERSION=$(sed -n 's/^ARG FEDORA_VERSION=//p' image/Containerfile)" >> "$GITHUB_ENV"
+
+      - name: Log in to ghcr.io
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | podman login -u "${{ github.actor }}" --password-stdin ghcr.io
+
+      - name: Builders
+        id: builders
+        env:
+          REBUILD: ${{ inputs.rebuild_builders || false }}
+        run: |
+          for builder in hyprland ghostty noctalia-greeter; do
+            hash=$(cat "image/$builder/Containerfile" "image/scripts/$builder.sh" image/scripts/runtime-deps.sh |
+              sha256sum | cut -c1-12)
+            ref="$REGISTRY/$builder-build:$FEDORA_VERSION-$hash"
+            if [[ "$REBUILD" != true ]] && podman pull -q "$ref"; then
+              echo "$builder: reusing $ref"
+            else
+              podman build --layers -f "image/$builder/Containerfile" \
+                --build-arg FEDORA_VERSION="$FEDORA_VERSION" -t "$ref" image
+              if [[ "$PUSH" == true ]]; then
+                podman push "$ref"
+              fi
+            fi
+            echo "$builder=$ref" >> "$GITHUB_OUTPUT"
+          done
+
+      - name: Image
+        run: |
+          image="$REGISTRY/dotfiles"
+          tags=(latest "$FEDORA_VERSION" "$FEDORA_VERSION-$(date -u +%Y%m%d)")
+          if [[ -n "${IMAGE_VERSION:-}" ]]; then
+            tags+=("$IMAGE_VERSION")
+          fi
+          podman build -f image/Containerfile \
+            --build-arg FEDORA_VERSION="$FEDORA_VERSION" \
+            --build-arg HYPRLAND_IMAGE="${{ steps.builders.outputs.hyprland }}" \
+            --build-arg GHOSTTY_IMAGE="${{ steps.builders.outputs.ghostty }}" \
+            --build-arg NOCTALIA_GREETER_IMAGE="${{ steps.builders.outputs.noctalia-greeter }}" \
+            "${tags[@]/#/--tag=$image:}" \
+            image
+          if [[ "$PUSH" == true ]]; then
+            for tag in "${tags[@]}"; do
+              podman push "$image:$tag"
+            done
+          fi
+
+      - name: Keep the schedule alive
+        if: github.event_name == 'schedule'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh api -X PUT "repos/${{ github.repository }}/actions/workflows/image.yml/enable"

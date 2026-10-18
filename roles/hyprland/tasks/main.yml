@@ -1,20 +1,11 @@
-- name: "Checking config for {{ ansible_facts['distribution'] }}"
-  ansible.builtin.stat:
-    path: "{{ role_path }}/tasks/{{ ansible_facts['distribution'] | lower }}.yml"
-  register: hyprland_distribution_config
-  delegate_to: localhost
+- name: Create xdg-desktop-portal-hyprland config directory
+  ansible.builtin.file:
+    path: "{{ ansible_facts['user_dir'] }}/.config/xdg-desktop-portal"
+    state: directory
+    mode: "0755"
 
-- name: "Run Tasks for {{ ansible_facts['distribution'] }}"
-  ansible.builtin.include_tasks: "{{ ansible_facts['distribution'] | lower }}.yml"
-  when: hyprland_distribution_config.stat.exists
-
-- name: Check if hyprland is installed
-  ansible.builtin.stat:
-    path: /usr/bin/start-hyprland
-  register: hyprland
-  changed_when: false
-  failed_when: false
-
-- name: Installing Hyprland
-  ansible.builtin.include_tasks: ./install.yml
-  when: not hyprland.stat.exists
+- name: Copy xdg-desktop-portal-hyprland config
+  ansible.builtin.copy:
+    src: "files/hyprland-portals.conf"
+    dest: "{{ ansible_facts['user_dir'] }}/.config/xdg-desktop-portal/hyprland-portals.conf"
+    mode: "0644"

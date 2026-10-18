@@ -1,0 +1,2 @@
+google-noto-color-emoji-fonts
+rsms-inter-fonts

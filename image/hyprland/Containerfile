@@ -1,0 +1,94 @@
+ARG FEDORA_VERSION=44
+
+FROM quay.io/fedora/fedora-bootc:${FEDORA_VERSION} AS build
+RUN dnf -y install \
+      cmake meson ninja-build gcc-c++ glslang \
+      'cmake(pugixml)' mesa-libEGL-devel \
+      'pkgconfig(cairo)' 'pkgconfig(egl)' 'pkgconfig(gbm)' 'pkgconfig(gio-2.0)' 'pkgconfig(glesv2)' \
+      'pkgconfig(glslang)' 'pkgconfig(hwdata)' 'pkgconfig(lcms2)' 'pkgconfig(libdisplay-info)' \
+      'pkgconfig(libdrm)' 'pkgconfig(libeis-1.0)' 'pkgconfig(libffi)' 'pkgconfig(libheif)' \
+      'pkgconfig(libinput)' 'pkgconfig(libjpeg)' 'pkgconfig(libjxl)' 'pkgconfig(libjxl_cms)' \
+      'pkgconfig(libjxl_threads)' 'pkgconfig(libliftoff)' 'pkgconfig(libmagic)' \
+      'pkgconfig(libpipewire-0.3)' 'pkgconfig(libpng)' 'pkgconfig(librsvg-2.0)' 'pkgconfig(libseat)' \
+      'pkgconfig(libsystemd)' 'pkgconfig(libudev)' 'pkgconfig(libwebp)' 'pkgconfig(libzip)' \
+      'pkgconfig(lua)' 'pkgconfig(muparser)' 'pkgconfig(pango)' 'pkgconfig(pangocairo)' \
+      'pkgconfig(pixman-1)' 'pkgconfig(pugixml)' 'pkgconfig(Qt6Widgets)' 'pkgconfig(re2)' \
+      'pkgconfig(readline)' 'pkgconfig(sdbus-c++)' 'pkgconfig(systemd)' 'pkgconfig(tomlplusplus)' \
+      'pkgconfig(uuid)' 'pkgconfig(wayland-client)' 'pkgconfig(wayland-protocols)' \
+      'pkgconfig(wayland-scanner)' 'pkgconfig(wayland-server)' 'pkgconfig(xcb)' \
+      'pkgconfig(xcb-composite)' 'pkgconfig(xcb-dri3)' 'pkgconfig(xcb-errors)' 'pkgconfig(xcb-ewmh)' \
+      'pkgconfig(xcb-icccm)' 'pkgconfig(xcb-present)' 'pkgconfig(xcb-render)' \
+      'pkgconfig(xcb-renderutil)' 'pkgconfig(xcb-res)' 'pkgconfig(xcb-shm)' 'pkgconfig(xcb-util)' \
+      'pkgconfig(xcb-xfixes)' 'pkgconfig(xcb-xinput)' 'pkgconfig(xcursor)' 'pkgconfig(xkbcommon)' \
+      'pkgconfig(xwayland)'
+COPY scripts/hyprland.sh scripts/runtime-deps.sh /ctx/
+
+# renovate: datasource=github-tags depName=hyprwm/hyprwayland-scanner
+ARG HYPRWAYLAND_SCANNER_VERSION=v0.4.5
+RUN bash /ctx/hyprland.sh hyprwayland-scanner \
+      "https://github.com/hyprwm/hyprwayland-scanner/archive/refs/tags/$HYPRWAYLAND_SCANNER_VERSION.tar.gz" build
+
+# renovate: datasource=github-tags depName=hyprwm/hyprutils
+ARG HYPRUTILS_VERSION=v0.14.2
+RUN bash /ctx/hyprland.sh hyprutils \
+      "https://github.com/hyprwm/hyprutils/archive/refs/tags/$HYPRUTILS_VERSION.tar.gz" image
+
+# renovate: datasource=github-tags depName=hyprwm/hyprlang
+ARG HYPRLANG_VERSION=v0.6.8
+RUN bash /ctx/hyprland.sh hyprlang \
+      "https://github.com/hyprwm/hyprlang/archive/refs/tags/$HYPRLANG_VERSION.tar.gz" image
+
+# renovate: datasource=github-tags depName=hyprwm/hyprland-protocols
+ARG HYPRLAND_PROTOCOLS_VERSION=v0.7.0
+RUN bash /ctx/hyprland.sh hyprland-protocols \
+      "https://github.com/hyprwm/hyprland-protocols/archive/refs/tags/$HYPRLAND_PROTOCOLS_VERSION.tar.gz" build
+
+# renovate: datasource=github-tags depName=hyprwm/hyprwire
+ARG HYPRWIRE_VERSION=v0.3.1
+RUN bash /ctx/hyprland.sh hyprwire \
+      "https://github.com/hyprwm/hyprwire/archive/refs/tags/$HYPRWIRE_VERSION.tar.gz" image
+
+# renovate: datasource=github-tags depName=hyprwm/hyprcursor
+ARG HYPRCURSOR_VERSION=v0.1.13
+RUN bash /ctx/hyprland.sh hyprcursor \
+      "https://github.com/hyprwm/hyprcursor/archive/refs/tags/$HYPRCURSOR_VERSION.tar.gz" image
+
+# renovate: datasource=github-tags depName=hyprwm/hyprgraphics
+ARG HYPRGRAPHICS_VERSION=v0.5.1
+RUN bash /ctx/hyprland.sh hyprgraphics \
+      "https://github.com/hyprwm/hyprgraphics/archive/refs/tags/$HYPRGRAPHICS_VERSION.tar.gz" image
+
+# renovate: datasource=github-tags depName=hyprwm/aquamarine
+ARG AQUAMARINE_VERSION=v0.15.1
+RUN bash /ctx/hyprland.sh aquamarine \
+      "https://github.com/hyprwm/aquamarine/archive/refs/tags/$AQUAMARINE_VERSION.tar.gz" image
+
+# renovate: datasource=github-tags depName=hyprwm/xdg-desktop-portal-hyprland
+ARG XDPH_VERSION=v1.4.1
+RUN bash /ctx/hyprland.sh xdg-desktop-portal-hyprland \
+      "https://github.com/hyprwm/xdg-desktop-portal-hyprland/archive/refs/tags/$XDPH_VERSION.tar.gz" image
+
+# renovate: datasource=github-tags depName=hyprwm/hyprpicker
+ARG HYPRPICKER_VERSION=v0.4.7
+RUN bash /ctx/hyprland.sh hyprpicker \
+      "https://github.com/hyprwm/hyprpicker/archive/refs/tags/$HYPRPICKER_VERSION.tar.gz" image
+
+# renovate: datasource=github-tags depName=stephenberry/glaze
+ARG GLAZE_VERSION=v7.7.1
+RUN bash /ctx/hyprland.sh glaze \
+      "https://github.com/stephenberry/glaze/archive/refs/tags/$GLAZE_VERSION.tar.gz" build \
+      -Dglaze_DEVELOPER_MODE=OFF -Dglaze_ENABLE_FUZZING=OFF
+
+# renovate: datasource=github-releases depName=hyprwm/Hyprland
+ARG HYPRLAND_VERSION=v0.56.2
+RUN bash /ctx/hyprland.sh hyprland \
+      "https://github.com/hyprwm/Hyprland/releases/download/$HYPRLAND_VERSION/source-$HYPRLAND_VERSION.tar.gz" image \
+      -DNO_TESTS=TRUE -DNO_UWSM=TRUE
+
+RUN rm -rf /out/usr/include /out/usr/lib64/pkgconfig /out/usr/lib64/cmake /out/usr/share/pkgconfig \
+      /out/usr/bin/hyprwire-scanner \
+ && bash /ctx/runtime-deps.sh
+
+FROM scratch
+COPY --from=build /out /out
+COPY --from=build /deps /deps

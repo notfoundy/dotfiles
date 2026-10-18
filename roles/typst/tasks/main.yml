@@ -1,10 +1,37 @@
-- name: Checking typst install
+- name: Check typst version
   ansible.builtin.command:
-    cmd: which typst
-  failed_when: false
+    cmd: "{{ ansible_facts['user_dir'] }}/.local/bin/typst --version"
+  register: typst_current_version
   changed_when: false
-  register: typst
+  failed_when: false
 
-- name: Install Typst
-  ansible.builtin.include_tasks: install.yml
-  when: typst.rc != 0
+- name: Query typst latest release
+  ansible.builtin.uri:
+    url: https://api.github.com/repos/typst/typst/releases/latest
+  register: typst_latest_release
+  changed_when: false
+
+- name: Define typst release
+  ansible.builtin.set_fact:
+    typst_version: "{{ typst_latest_release.json.tag_name | regex_replace('^v', '') }}"
+    typst_target: "typst-{{ ansible_facts['machine'] }}-unknown-linux-musl"
+
+- name: Install typst
+  when: ('typst ' ~ typst_version ~ ' ') not in typst_current_version.stdout | default('')
+  block:
+    - name: Download typst
+      ansible.builtin.get_url:
+        url: "https://github.com/typst/typst/releases/download/v{{ typst_version }}/{{ typst_target }}.tar.xz"
+        dest: /tmp/typst.tar.xz
+        mode: "0644"
+      notify: Cleanup typst archive
+
+    - name: Extract typst
+      ansible.builtin.unarchive:
+        src: /tmp/typst.tar.xz
+        dest: "{{ ansible_facts['user_dir'] }}/.local/bin"
+        include:
+          - "{{ typst_target }}/typst"
+        extra_opts:
+          - --strip-components=1
+        remote_src: true

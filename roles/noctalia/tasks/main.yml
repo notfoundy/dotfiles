@@ -1,9 +1,3 @@
-- name: Install Noctalia
-  ansible.builtin.package:
-    name: noctalia
-    state: present
-  become: true
-
 - name: Copy wallpapers
   ansible.builtin.copy:
     src: files/wallpapers/
@@ -27,3 +21,19 @@
       dest: .config/noctalia
     - src: settings.toml
       dest: .local/state/noctalia/settings.toml
+
+- name: Configure qt6ct
+  community.general.ini_file:
+    path: "{{ ansible_facts['user_dir'] }}/.config/qt6ct/qt6ct.conf"
+    section: Appearance
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+    no_extra_spaces: true
+    mode: "0644"
+  loop:
+    - { option: custom_palette, value: "true" }
+    - { option: color_scheme_path, value: "{{ ansible_facts['user_dir'] }}/.config/qt6ct/colors/noctalia.conf" }
+    - { option: icon_theme, value: Papirus-Dark }
+    - { option: style, value: Fusion }
+  loop_control:
+    label: "{{ item.option }}"

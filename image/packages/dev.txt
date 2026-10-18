@@ -1,0 +1,7 @@
+ansible
+gcc
+git
+make
+podman-compose
+rsync
+rustup

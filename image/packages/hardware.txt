@@ -1,0 +1,15 @@
+audit
+bluez
+firewalld
+glibc-langpack-en
+glibc-langpack-fr
+mesa-dri-drivers
+mesa-vulkan-drivers
+NetworkManager-wifi
+pipewire
+pipewire-pulseaudio
+steam-devices
+systemd-oomd-defaults
+tuned-ppd
+wireplumber
+zram-generator-defaults

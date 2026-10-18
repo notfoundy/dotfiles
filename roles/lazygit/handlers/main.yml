@@ -1,0 +1,4 @@
+- name: Cleanup lazygit archive
+  ansible.builtin.file:
+    path: /tmp/lazygit.tar.gz
+    state: absent

@@ -31,7 +31,7 @@ func TestLoadRepo(t *testing.T) {
 	}
 
 	// Roles reachable only through -t must still be discovered.
-	for _, role := range []string{"1password", "starship", "kitty"} {
+	for _, role := range []string{"1password", "starship"} {
 		if !cfg.hasRole(role) {
 			t.Errorf("role %q was not discovered", role)
 		}

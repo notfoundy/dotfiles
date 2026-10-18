@@ -1,21 +1,3 @@
-- name: "Install dependencies"
-  ansible.builtin.package:
-    pkg:
-      - 'curl'
-      - 'gcc'
-      - 'git'
-      - 'findutils'
-      - 'make'
-      - 'rsync'
-      - 'tar'
-      - 'jq'
-    state: present
-  register: package_result
-  become: true
-  until: package_result is success
-  retries: 1
-  delay: 2
-
 - name: "Define GOARCH"
   ansible.builtin.set_fact:
     goarch: "{{ ansible_facts['machine'] | replace('x86_64', 'amd64') | replace('aarch64', 'arm64') }}"
@@ -33,7 +15,7 @@
     var: goos
 
 - name: "Getting version information"
-  ansible.builtin.command: "/usr/local/go/bin/go version"
+  ansible.builtin.command: "{{ ansible_facts['user_dir'] }}/.local/go/bin/go version"
   register: current_go_version
   changed_when: false
   failed_when: false
@@ -70,7 +52,6 @@
       ansible.builtin.file:
         path: "/tmp/{{ go_file }}.tar.gz"
         state: absent
-      become: true
 
     - name: "Downloading GoLang Release"
       ansible.builtin.get_url:
@@ -85,7 +66,6 @@
       ansible.builtin.file:
         path: "/tmp/go"
         state: absent
-      become: true
 
     - name: "Extract go tar file"
       ansible.builtin.unarchive:
@@ -95,19 +75,15 @@
 
     - name: "Remove any current Go installations"
       ansible.builtin.file:
-        path: /usr/local/go
+        path: "{{ ansible_facts['user_dir'] }}/.local/go"
         state: absent
-      become: true
 
     - name: "Install Go"
       ansible.builtin.copy:
         remote_src: true
         src: /tmp/go
-        dest: /usr/local/
-        owner: "{{ ansible_facts['user_id'] }}"
-        group: "{{ ansible_facts['user_id'] }}"
+        dest: "{{ ansible_facts['user_dir'] }}/.local/"
         force: true
-      become: true
       notify:
         - Remove extracted go directory
 

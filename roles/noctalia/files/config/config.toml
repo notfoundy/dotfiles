@@ -29,7 +29,7 @@ wallpaper_scheme = "muted"
 
 [theme.templates]
 enable_builtin_templates = true
-builtin_ids = ["hyprland", "ghostty", "gtk3", "gtk4"]
+builtin_ids = ["hyprland", "ghostty", "gtk3", "gtk4", "qt"]
 
 [wallpaper]
 directory = "~/Pictures/Wallpapers"

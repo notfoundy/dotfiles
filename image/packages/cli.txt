@@ -1,0 +1,16 @@
+bat
+btop
+eza
+fastfetch
+fd-find
+ffmpeg-free
+fzf
+ncdu
+neovim
+nnn
+ripgrep
+tar
+tealdeer
+tokei
+unzip
+zoxide
