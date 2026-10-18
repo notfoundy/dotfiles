@@ -60,6 +60,9 @@ dotfiles --skip-update          # leave the checkout alone
 dotfiles --repo . -- --check    # run against this clone; anything after -- goes to ansible-playbook
 ```
 
+Whatever the selection, roles run in the order of `default_roles`, the ones outside it last
+and alphabetically: ansible-core keeps `-t` as a set, so its order cannot be relied on.
+
 `dotfiles --help` lists the rest, and `dotfiles self-update` fetches the latest
 release. Every run is appended to `~/.local/state/dotfiles/dotfiles.log`, so a role
 that failed can be read back afterwards.
