@@ -3,6 +3,7 @@ dbus-tools
 flatpak
 fuzzel
 gnome-keyring
+gnome-keyring-pam
 greetd
 grim
 noctalia
