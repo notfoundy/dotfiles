@@ -90,3 +90,10 @@ are set: whatever else is changed in the `qt6ct` window is kept.
 hyprtoolkit, behind hyprpolkitagent and Hyprland's own dialogs, has no built-in template: a
 user template in `config.toml` renders `roles/noctalia/files/config/templates/hyprtoolkit.conf`
 to `~/.config/hypr/hyprtoolkit.conf`, which the next dialog reads.
+
+Noctalia writes the dark or light mode to GNOME's `color-scheme`, which the portal hands to
+GTK4, libadwaita and Firefox-based apps. Electron apps such as 1Password ignore it and guess
+the mode from the GTK theme name instead, so they stay light on `Adwaita`. The `started` and
+`theme_mode_changed` hooks in `config.toml` run `scripts/sync-gtk-theme.sh`, which switches
+`gtk-theme` between `Adwaita` and `Adwaita-dark` to match. Palettes are changed separately,
+through `[theme].source` (`wallpaper`, a `builtin` one, `community` or `custom`).

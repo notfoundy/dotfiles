@@ -36,6 +36,10 @@ builtin_ids = ["hyprland", "ghostty", "gtk3", "gtk4", "qt"]
 input_path = "templates/hyprtoolkit.conf"
 output_path = "$XDG_CONFIG_HOME/hypr/hyprtoolkit.conf"
 
+[hooks]
+started = "$HOME/.config/noctalia/scripts/sync-gtk-theme.sh"
+theme_mode_changed = "$HOME/.config/noctalia/scripts/sync-gtk-theme.sh"
+
 [wallpaper]
 directory = "~/Pictures/Wallpapers"
 transition = ["fade", "wipe", "disc", "stripes", "zoom", "honeycomb"]
