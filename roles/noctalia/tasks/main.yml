@@ -12,15 +12,30 @@
 
 - name: Link Noctalia configuration to the repository
   ansible.builtin.file:
-    src: "{{ role_path }}/files/{{ item.src }}"
-    dest: "{{ ansible_facts['user_dir'] }}/{{ item.dest }}"
+    src: "{{ role_path }}/files/config"
+    dest: "{{ ansible_facts['user_dir'] }}/.config/noctalia"
     state: link
     force: true
-  loop:
-    - src: config
-      dest: .config/noctalia
-    - src: settings.toml
-      dest: .local/state/noctalia/settings.toml
+
+- name: Check Noctalia settings
+  ansible.builtin.stat:
+    path: "{{ ansible_facts['user_dir'] }}/.local/state/noctalia/settings.toml"
+  register: noctalia_settings
+
+# Replaces the symlink earlier versions of the role created
+- name: Remove Noctalia settings symlink
+  ansible.builtin.file:
+    path: "{{ ansible_facts['user_dir'] }}/.local/state/noctalia/settings.toml"
+    state: absent
+  when: noctalia_settings.stat.islnk | default(false)
+
+# Seeded once, then synced by hand: the settings GUI owns this file
+- name: Copy Noctalia settings
+  ansible.builtin.copy:
+    src: files/settings.toml
+    dest: "{{ ansible_facts['user_dir'] }}/.local/state/noctalia/settings.toml"
+    mode: "0644"
+    force: false
 
 - name: Configure qt6ct
   community.general.ini_file:

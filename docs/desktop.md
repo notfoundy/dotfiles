@@ -6,24 +6,30 @@ It also handles notifications, the lock screen and idle, so there is no mako, hy
 hypridle.
 
 Its idle behaviours (lock, screen off, suspend) ship **disabled**: turn them on once in
-Noctalia's settings (`SUPER + I`), then commit the result.
+Noctalia's settings (`SUPER + I`), then sync the result into the repository.
 
-The repository is the only place its configuration lives. Noctalia layers two sources, and
-the role symlinks both into the checkout that ran the playbook:
+Noctalia layers two configuration sources:
 
-| Link                                    | Target                               | Written by       |
-| --------------------------------------- | ------------------------------------ | ---------------- |
-| `~/.config/noctalia/`                   | `roles/noctalia/files/config/`       | hand             |
-| `~/.local/state/noctalia/settings.toml` | `roles/noctalia/files/settings.toml` | the settings GUI |
+| Path                                    | Source                               | Deployed as | Written by       |
+| --------------------------------------- | ------------------------------------ | ----------- | ---------------- |
+| `~/.config/noctalia/`                   | `roles/noctalia/files/config/`       | symlink     | hand             |
+| `~/.local/state/noctalia/settings.toml` | `roles/noctalia/files/settings.toml` | copy        | the settings GUI |
 
-Noctalia writes through symlinks and hot-reloads both, so anything changed from `SUPER + I`
-shows up in `git diff roles/noctalia` straight away; GUI values win over the hand-written
-ones. `noctalia config validate` checks the hand-written files.
+Noctalia hot-reloads both, and GUI values win over the hand-written ones.
+`noctalia config validate` checks the hand-written files.
 
-An uncommitted change leaves the checkout dirty, and `dotfiles` then refuses to update it:
-commit it, or pass `--skip-update`. Ansible also refuses to replace a non-empty
-`~/.config/noctalia` directory; move its `*.toml` files into `roles/noctalia/files/config/`
-first.
+The hand-written directory is symlinked into the checkout that ran the playbook. Ansible
+refuses to replace a non-empty `~/.config/noctalia` directory; move its `*.toml` files into
+`roles/noctalia/files/config/` first.
+
+`settings.toml` is only copied when missing, so the GUI never dirties the checkout (which
+would make `dotfiles` refuse to update it) and a run never overwrites what the GUI wrote.
+Syncing is manual, in both directions:
+
+```bash
+cp ~/.local/state/noctalia/settings.toml roles/noctalia/files/settings.toml   # keep GUI changes
+cp roles/noctalia/files/settings.toml ~/.local/state/noctalia/settings.toml   # apply the repo's
+```
 
 The wallpapers in `roles/noctalia/files/wallpapers/` are copied to `~/Pictures/Wallpapers`,
 which `config.toml` sets as Noctalia's wallpaper folder.
