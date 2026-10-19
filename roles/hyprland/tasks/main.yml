@@ -1,11 +1,21 @@
-- name: Create xdg-desktop-portal-hyprland config directory
+- name: Create user config directories
   ansible.builtin.file:
-    path: "{{ ansible_facts['user_dir'] }}/.config/xdg-desktop-portal"
+    path: "{{ ansible_facts['user_dir'] }}/.config/{{ item }}"
     state: directory
     mode: "0755"
+  loop:
+    - xdg-desktop-portal
+    - systemd/user
 
 - name: Copy xdg-desktop-portal-hyprland config
   ansible.builtin.copy:
     src: "files/hyprland-portals.conf"
     dest: "{{ ansible_facts['user_dir'] }}/.config/xdg-desktop-portal/hyprland-portals.conf"
     mode: "0644"
+
+- name: Copy Hyprland session target
+  ansible.builtin.copy:
+    src: "files/hyprland-session.target"
+    dest: "{{ ansible_facts['user_dir'] }}/.config/systemd/user/hyprland-session.target"
+    mode: "0644"
+  notify: Reload user systemd

@@ -13,10 +13,14 @@ What the image changes compared to a regular Fedora install:
 - gnome-keyring provides the Secret Service. greetd's PAM stack unlocks it with the login
   password through `pam_gnome_keyring`, which `gnome-keyring-pam` ships: without it, the
   `-auth` line is skipped silently and every app asking for a secret prompts for it.
-- hyprpolkitagent is the polkit agent. Its unit hangs off `graphical-session.target`, which
-  never starts without uwsm, so `execs.lua` starts it once the session environment is imported
-  into systemd, as the Hyprland wiki recommends. Noctalia's own agent stays off
-  (`polkit_agent = false`): a session has a single agent.
+- Without uwsm, nothing starts `graphical-session.target`, which `xdg-desktop-portal`
+  requires: without the portal, Flatpak and Electron apps (Zen, 1Password) never see the
+  dark mode. Once the session environment is imported into systemd, `execs.lua` starts
+  `hyprland-session.target` (from the `hyprland` role), which binds it, and stops it when
+  Hyprland exits.
+- hyprpolkitagent is the polkit agent, started by `execs.lua` along with that target, as the
+  Hyprland wiki recommends. Noctalia's own agent stays off (`polkit_agent = false`): a
+  session has a single agent.
 - Swap is zram only, through `zram-generator-defaults`: the base image ships none, and
   without it the system has no swap at all. `systemd-oomd-defaults` kills the offending
   cgroup under sustained memory pressure, before the desktop freezes.
