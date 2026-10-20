@@ -74,6 +74,8 @@ Hyprland.
   [1Password](docs/1password.md).
 - **Idle**: lock, screen off and suspend ship disabled; turn them on in Noctalia's settings
   (`SUPER + I`), then commit the result, see [Desktop shell](docs/desktop.md).
+- **Battery**: on an IdeaPad, `dotfiles -t battery` caps the charge at 80 %, see
+  [Battery](docs/battery.md).
 
 ## Usage
 
@@ -105,6 +107,7 @@ dotfiles --repo . -- --check    # run against this clone; anything after -- goes
 | [Desktop shell](docs/desktop.md)     | Noctalia, its configuration and the look of the whole desktop |
 | [1Password](docs/1password.md)       | SSH authentication and commit signing                         |
 | [Gaming](docs/gaming.md)             | Steam, gamescope, Proton-GE                                   |
+| [Battery](docs/battery.md)           | The 80 % charge cap, and its IdeaPad workaround               |
 | [Releases](docs/releases.md)         | `cli-v*` and `img-v*` tags, what each one publishes           |
 
 ---

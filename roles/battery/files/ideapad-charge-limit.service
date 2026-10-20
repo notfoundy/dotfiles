@@ -1,0 +1,9 @@
+[Unit]
+Description=Cap the battery charge at 80 % through the IdeaPad charge modes
+ConditionPathExists=/sys/bus/platform/drivers/ideapad_acpi
+
+[Service]
+ExecStart=%h/.local/bin/ideapad-charge-limit
+
+[Install]
+WantedBy=default.target

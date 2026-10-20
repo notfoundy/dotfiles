@@ -1,0 +1,4 @@
+# Firmware with a real threshold (ThinkPad, Framework, Dell…): stop charging at 80 %.
+SUBSYSTEM=="power_supply", ATTR{type}=="Battery", ATTR{charge_control_end_threshold}=="?*", ATTR{charge_control_end_threshold}="80"
+# Firmware with only charge modes (IdeaPad): let wheel switch them, for the battery role.
+SUBSYSTEM=="power_supply", ACTION=="add", ATTR{type}=="Battery", ATTR{charge_types}=="?*", RUN+="/usr/bin/chgrp wheel /sys%p/charge_types", RUN+="/usr/bin/chmod g+w /sys%p/charge_types"

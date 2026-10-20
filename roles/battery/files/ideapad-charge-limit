@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# IdeaPads have no charge threshold, only Conservation mode (Long_Life), fixed at 60 %.
+# Charge in Standard mode up to STOP, then hold there in Long_Life: above 60 %, it stops
+# charging without draining the battery.
+set -euo pipefail
+shopt -s nullglob
+
+START=75
+STOP=80
+
+batteries=()
+for bat in /sys/class/power_supply/BAT*; do
+  [[ $(<"$bat/charge_types") == *Long_Life* ]] && batteries+=("$bat")
+done
+
+set_mode() {
+  local bat=$1 mode=$2
+  [[ $(<"$bat/charge_types") == *"[$mode]"* ]] && return
+  echo "$mode" >"$bat/charge_types"
+  echo "${bat##*/}: $mode at $(<"$bat/capacity") %"
+}
+
+# Back to Long_Life when the session ends, or the battery charges to 100 % while nobody watches.
+hold() {
+  for bat in "${batteries[@]}"; do
+    set_mode "$bat" Long_Life
+  done
+}
+trap hold EXIT
+trap 'exit 0' TERM INT
+
+while true; do
+  for bat in "${batteries[@]}"; do
+    capacity=$(<"$bat/capacity")
+    if ((capacity >= STOP)); then
+      set_mode "$bat" Long_Life
+    elif ((capacity <= START)); then
+      set_mode "$bat" Standard
+    fi
+  done
+  sleep 120 &
+  wait $!
+done

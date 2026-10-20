@@ -1,0 +1,38 @@
+- name: Check for the IdeaPad driver
+  ansible.builtin.stat:
+    path: /sys/bus/platform/drivers/ideapad_acpi
+  register: ideapad
+
+- name: Cap the charge through the IdeaPad charge modes
+  when: ideapad.stat.exists
+  block:
+    - name: Create user directories
+      ansible.builtin.file:
+        path: "{{ ansible_facts['user_dir'] }}/{{ item }}"
+        state: directory
+        mode: "0755"
+      loop:
+        - .local/bin
+        - .config/systemd/user
+
+    - name: Copy the charge limit script
+      ansible.builtin.copy:
+        src: "files/ideapad-charge-limit"
+        dest: "{{ ansible_facts['user_dir'] }}/.local/bin/ideapad-charge-limit"
+        mode: "0755"
+      notify: Restart charge limit
+
+    - name: Copy the charge limit service
+      ansible.builtin.copy:
+        src: "files/ideapad-charge-limit.service"
+        dest: "{{ ansible_facts['user_dir'] }}/.config/systemd/user/ideapad-charge-limit.service"
+        mode: "0644"
+      notify: Restart charge limit
+
+    - name: Enable the charge limit service
+      ansible.builtin.systemd_service:
+        name: ideapad-charge-limit.service
+        enabled: true
+        state: started
+        daemon_reload: true
+        scope: user

@@ -57,3 +57,8 @@ What the image changes compared to a regular Fedora install:
 - Go, Node, Typst, Starship and Lazygit are installed in `~/.local` by their roles, so they
   stay on the latest release without touching the image. Starship goes through its official
   install script, Lazygit is checked against the release's `checksums.txt`.
+- `/usr/lib/udev/rules.d/90-charge-limit.rules` caps the battery charge at 80 % on firmware
+  that exposes a threshold (`charge_control_end_threshold`: ThinkPad, Framework, Dell…). Where
+  the firmware only offers charge modes (`charge_types`, IdeaPad), it makes them writable by
+  `wheel` instead, for the `battery` role: see [Battery](battery.md). Elsewhere, neither line
+  matches.
