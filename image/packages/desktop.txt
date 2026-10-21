@@ -19,3 +19,6 @@ xdg-desktop-portal
 xdg-desktop-portal-gtk
 xdg-user-dirs
 xorg-x11-server-Xwayland
+zathura
+zathura-cb
+zathura-pdf-mupdf

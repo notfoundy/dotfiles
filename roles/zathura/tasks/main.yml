@@ -1,0 +1,36 @@
+- name: Ensure .config/zathura exist
+  ansible.builtin.file:
+    path: "{{ ansible_facts['user_dir'] }}/.config/zathura"
+    state: directory
+    mode: "0755"
+
+- name: Copy configuration
+  ansible.builtin.copy:
+    src: files/zathurarc
+    dest: "{{ ansible_facts['user_dir'] }}/.config/zathura/zathurarc"
+    mode: "0644"
+
+- name: Open PDFs with zathura
+  community.general.ini_file:
+    path: "{{ ansible_facts['user_dir'] }}/.config/mimeapps.list"
+    section: Default Applications
+    option: application/pdf
+    value: org.pwmt.zathura-pdf-mupdf.desktop
+    no_extra_spaces: true
+    mode: "0644"
+
+# zathura-cb also claims folders and plain archives, which would open in zathura
+- name: Keep folders and archives away from zathura
+  community.general.ini_file:
+    path: "{{ ansible_facts['user_dir'] }}/.config/mimeapps.list"
+    section: Removed Associations
+    option: "{{ item }}"
+    value: org.pwmt.zathura-cb.desktop;
+    no_extra_spaces: true
+    mode: "0644"
+  loop:
+    - inode/directory
+    - application/zip
+    - application/x-rar
+    - application/x-7z-compressed
+    - application/x-tar
