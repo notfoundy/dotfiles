@@ -7,6 +7,11 @@ is used:
 - `image/packages/` — packages from the official Fedora repositories, plus 1Password from its
   own repository, one file per category (`desktop.txt`, `hardware.txt`, `cli.txt`, `dev.txt`…).
   No COPR.
+- `image/files/etc/dnf/libdnf5.conf.d/90-excludes.conf` — packages dnf must never install,
+  the single place to list them. `image/files/` is copied before the package install, so it
+  applies to the image build and to any later `dnf` on the machine. It holds `nodejs*`, a weak
+  dependency of `neovim` through `tree-sitter-cli`, whose `/usr/bin/node` would shadow the one
+  from the `nodejs` role. A package that strictly requires an excluded one fails the build.
 - **Hyprland** and its libraries, `xdg-desktop-portal-hyprland`, `hyprpicker`,
   `hyprland-guiutils` (the "app not responding" and permission dialogs, which Hyprland warns
   about when missing) and `hyprpolkitagent`, both built on `hyprtoolkit`, are not in Fedora 44, and neither **Ghostty** nor **Noctalia Greeter** ever was: each is built from
