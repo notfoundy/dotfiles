@@ -57,6 +57,13 @@ What the image changes compared to a regular Fedora install:
 - Go, Node, Typst, Starship and Lazygit are installed in `~/.local` by their roles, so they
   stay on the latest release without touching the image. Starship goes through its official
   install script, Lazygit is checked against the release's `checksums.txt`.
+- `/usr/lib/modprobe.d/90-no-tablet-mode.conf` keeps `lenovo_ymc` (tablet mode switch) and
+  `amd_sfh` (AMD sensor hub: accelerometer, screen angle) from loading. On the IdeaPad Flex 5
+  14ARE05, the touchpad stops answering on I2C (only a BIOS « Disable built-in battery » brings
+  it back) and closed-lid sleep wakes up by itself; both appeared with the move to Linux, and
+  the tablet mode handling is the suspect. Tablet mode and screen rotation are not used, so
+  they are given up. The EC still applies its own tablet mode logic (keyboard off when folded).
+  To undo: delete the file and rebuild.
 - `/usr/lib/udev/rules.d/90-charge-limit.rules` caps the battery charge at 80 % on firmware
   that exposes a threshold (`charge_control_end_threshold`: ThinkPad, Framework, Dell…). Where
   the firmware only offers charge modes (`charge_types`, IdeaPad), it makes them writable by
