@@ -109,8 +109,14 @@ RAR, 7z and tar archives; the role removes those associations in `~/.config/mime
 where it also makes zathura the default PDF reader.
 
 Noctalia writes the dark or light mode to GNOME's `color-scheme`, which the portal hands to
-GTK4, libadwaita and Firefox-based apps. Electron apps such as 1Password ignore it and guess
-the mode from the GTK theme name instead, so they stay light on `Adwaita`. The `started` and
-`theme_mode_changed` hooks in `config.toml` run `scripts/sync-gtk-theme.sh`, which switches
-`gtk-theme` between `Adwaita` and `Adwaita-dark` to match. Palettes are changed separately,
-through `[theme].source` (`wallpaper`, a `builtin` one, `community` or `custom`).
+GTK4, libadwaita, Firefox-based and Electron apps. GTK3 apps ignore it and go by the theme
+name instead, so the `started` and `theme_mode_changed` hooks in `config.toml` run
+`scripts/sync-gtk-theme.sh`, which switches `gtk-theme` between `Adwaita` and `Adwaita-dark`
+to match. Palettes are changed separately, through `[theme].source` (`wallpaper`, a
+`builtin` one, `community` or `custom`).
+
+1Password follows mode changes while it runs, but a cold start misreads the initial value
+and opens light in dark mode
+([known bug](https://www.1password.community/1password-at-home-31/match-system-theme-setting-not-followed-on-startup-21234)).
+Closing its window keeps it running, so this only happens once per session: switch Noctalia
+to light and back to dark to fix it.
