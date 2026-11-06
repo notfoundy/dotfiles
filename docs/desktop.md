@@ -76,6 +76,9 @@ The single `main` bar shows workspaces at the start, the clock in the centre, an
 notifications, network, Bluetooth, volume, battery and the control center at the end.
 `SUPER + SHIFT + Space` hides or shows it.
 
+The charge limit is toggled in the control center, under Battery → *Use charge threshold*
+(through UPower; on an IdeaPad, 60 % on, 100 % off).
+
 The templates would normally edit `~/.config/hypr/hyprland.lua` and `~/.config/ghostty/config`
 to include the generated colours. Both files are copies Ansible overwrites, so the repository
 already carries the lines the templates look for (`require("noctalia")` and

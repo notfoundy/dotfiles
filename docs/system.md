@@ -64,8 +64,3 @@ What the image changes compared to a regular Fedora install:
   the tablet mode handling is the suspect. Tablet mode and screen rotation are not used, so
   they are given up. The EC still applies its own tablet mode logic (keyboard off when folded).
   To undo: delete the file and rebuild.
-- `/usr/lib/udev/rules.d/90-charge-limit.rules` caps the battery charge at 80 % on firmware
-  that exposes a threshold (`charge_control_end_threshold`: ThinkPad, Framework, Dell…). Where
-  the firmware only offers charge modes (`charge_types`, IdeaPad), it makes them writable by
-  `wheel` instead, for the `battery` role: see [Battery](battery.md). Elsewhere, neither line
-  matches.
