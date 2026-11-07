@@ -5,23 +5,13 @@ import (
 	"strings"
 )
 
-// Selection is the outcome of resolving what the user asked for against what
-// the repo actually offers.
 type Selection struct {
 	Roles []string
-	// Explicit reports whether -t must be passed to ansible-playbook.
-	//
-	// When the selection is exactly the default set we deliberately pass no
-	// tags at all, so main.yml sees ansible_run_tags == ['all'] and skips tag
-	// filtering entirely — the behaviour of a bare `dotfiles`. Passing the full
-	// list via -t would instead switch Ansible into filtering mode, where role
-	// dependencies pulled in through meta/main.yml (hyprdot -> starship) are
-	// subject to the filter.
+	// False for the default set: without -t, Ansible does not filter the
+	// meta dependencies (hyprdot -> starship) out.
 	Explicit bool
 }
 
-// Resolve validates the requested tags against the roles present in the repo.
-// An empty request selects the default roles.
 func (c *Config) Resolve(tags []string) (Selection, error) {
 	tags = normalize(tags)
 	if len(tags) == 0 {
@@ -38,8 +28,6 @@ func (c *Config) Resolve(tags []string) (Selection, error) {
 	return Selection{Roles: tags, Explicit: !sameSet(tags, c.DefaultRoles)}, nil
 }
 
-// normalize splits comma-separated values, trims them and drops duplicates
-// while preserving the order the user typed.
 func normalize(tags []string) []string {
 	var out []string
 	seen := map[string]bool{}
@@ -66,8 +54,6 @@ func (c *Config) hasRole(name string) bool {
 	return false
 }
 
-// IsDefault reports whether a role is part of the default set. Roles outside it
-// stay selectable through -t but are not pre-checked in the picker.
 func (c *Config) IsDefault(name string) bool {
 	for _, r := range c.DefaultRoles {
 		if r == name {
@@ -84,8 +70,6 @@ func unknownRoleError(tag string, available []string) error {
 	return fmt.Errorf("unknown role %q (available: %s)", tag, strings.Join(available, ", "))
 }
 
-// closest returns the nearest available role name, provided it is close enough
-// to plausibly be a typo.
 func closest(tag string, available []string) (string, bool) {
 	best, bestDistance := "", -1
 

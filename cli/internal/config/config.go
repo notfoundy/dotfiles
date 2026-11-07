@@ -1,6 +1,3 @@
-// Package config reads the Ansible-side configuration of the dotfiles repo —
-// group_vars/all.yml and the set of roles available under roles/ — and owns the
-// run log every other package writes to.
 package config
 
 import (
@@ -12,14 +9,11 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// Secret is one entry of op.ssh.<provider>.<user> in group_vars/all.yml.
 type Secret struct {
 	Name      string `yaml:"name"`
 	VaultPath string `yaml:"vault_path"`
 }
 
-// groupVars mirrors the subset of group_vars/all.yml the CLI cares about.
-// Everything else in that file is consumed by Ansible only.
 type groupVars struct {
 	DefaultRoles []string `yaml:"default_roles"`
 	ExcludeRoles []string `yaml:"exclude_roles"`
@@ -29,16 +23,14 @@ type groupVars struct {
 	} `yaml:"op"`
 }
 
-// Config is the resolved view of a dotfiles repo checkout.
 type Config struct {
-	Root         string   // repo root holding main.yml
+	Root         string
 	DefaultRoles []string // default_roles minus exclude_roles
 	ExcludeRoles []string
-	Available    []string // roles/ entries that actually hold tasks/main.yml
+	Available    []string
 	Secrets      []Secret // flattened op.ssh.*
 }
 
-// Load reads group_vars/all.yml and scans roles/ under root.
 func Load(root string) (*Config, error) {
 	raw, err := os.ReadFile(filepath.Join(root, "group_vars", "all.yml"))
 	if err != nil {
@@ -69,8 +61,6 @@ func Load(root string) (*Config, error) {
 	return cfg, nil
 }
 
-// scanRoles lists directories under rolesDir that carry a tasks/main.yml.
-// A bare directory is not a usable role and must not be offered as a tag.
 func scanRoles(rolesDir string) ([]string, error) {
 	entries, err := os.ReadDir(rolesDir)
 	if err != nil {

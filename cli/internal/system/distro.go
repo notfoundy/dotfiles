@@ -1,5 +1,3 @@
-// Package system prepares the host: distribution detection, base tools,
-// SSH keys and the dotfiles checkout.
 package system
 
 import (
@@ -9,19 +7,14 @@ import (
 	"strings"
 )
 
-// ostreeBooted exists only on a system booted from an image-based deployment.
 const ostreeBooted = "/run/ostree-booted"
 
-// Distro is the detected distribution identity, as reported by os-release.
 type Distro struct {
-	ID   string // e.g. "fedora"
+	ID   string
 	Like []string
-	Name string // pretty name, for messages
+	Name string
 }
 
-// Supported reports whether the CLI knows how to prepare this host: the
-// Fedora bootc image built from image/, which carries every system package
-// the roles used to install.
 func (d Distro) Supported() bool {
 	if _, err := os.Stat(ostreeBooted); err != nil {
 		return false
@@ -37,7 +30,6 @@ func (d Distro) Supported() bool {
 	return false
 }
 
-// DetectDistro reads /etc/os-release.
 func DetectDistro() (Distro, error) {
 	f, err := os.Open("/etc/os-release")
 	if err != nil {

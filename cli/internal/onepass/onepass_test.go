@@ -7,8 +7,6 @@ import (
 	"github.com/notfoundy/dotfiles/cli/internal/config"
 )
 
-// TestParseSession covers the shapes `op signin` prints on stdout, which the
-// bash script used to hand straight to eval.
 func TestParseSession(t *testing.T) {
 	tests := []struct {
 		name string
@@ -57,8 +55,7 @@ func TestParseSession(t *testing.T) {
 	}
 }
 
-// TestReferences pins the field references down: `op read` rejects an
-// item-level op://vault/item path, so the fields must be appended.
+// `op read` rejects an item-level op://vault/item path.
 func TestReferences(t *testing.T) {
 	tests := []struct {
 		name   string

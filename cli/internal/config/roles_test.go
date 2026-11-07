@@ -23,15 +23,12 @@ func TestResolveWithoutTagsSelectsDefaults(t *testing.T) {
 	if !slices.Equal(got.Roles, want) {
 		t.Errorf("roles = %v, want %v", got.Roles, want)
 	}
-	// No -t must be passed, so main.yml sees ansible_run_tags == ['all'] and
-	// leaves tag filtering off, exactly like a bare `dotfiles`.
 	if got.Explicit {
 		t.Error("Explicit = true, want false for the default selection")
 	}
 }
 
 func TestResolveFullDefaultSetStaysImplicit(t *testing.T) {
-	// Same set, different order: still the default run.
 	got, err := testConfig().Resolve([]string{"nvim,go", "bash", "system"})
 	if err != nil {
 		t.Fatalf("Resolve() error = %v", err)

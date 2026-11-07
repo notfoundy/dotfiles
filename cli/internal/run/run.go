@@ -1,5 +1,3 @@
-// Package run orchestrates a full dotfiles run: prepare the host, resolve what
-// to apply, then hand the terminal over to Ansible.
 package run
 
 import (
@@ -15,17 +13,15 @@ import (
 	"github.com/notfoundy/dotfiles/cli/internal/ui"
 )
 
-// Options are the resolved command-line inputs.
 type Options struct {
-	Repo       string   // explicit checkout; empty means the managed ~/.dotfiles
-	Tags       []string // roles requested with -t
-	Select     bool     // open the role picker
-	SkipUpdate bool     // do not touch git
-	Extra      []string // passed through to ansible-playbook
+	Repo       string   // empty: ~/.dotfiles
+	Tags       []string
+	Select     bool
+	SkipUpdate bool
+	Extra      []string
 	Version    string
 }
 
-// Execute runs the whole flow.
 func Execute(opts Options) error {
 	log := config.Open()
 	defer log.Close()
@@ -40,10 +36,8 @@ func Execute(opts Options) error {
 		return err
 	}
 
-	// On a machine that has been set up before, refresh the checkout and
-	// resolve the selection up front: a typo in -t then fails instantly,
-	// before any 1Password prompt. A fresh machine has no
-	// checkout yet, so there it can only happen after the clone.
+	// Resolve the selection first when possible, so that a typo in -t fails
+	// before any prompt. A fresh machine has to clone first.
 	var (
 		cfg       *config.Config
 		selection config.Selection
@@ -108,11 +102,6 @@ func prepareHost(log *config.Logger, p *ui.Printer) error {
 	return system.EnsureSSHKeys(log, p)
 }
 
-// repoPath returns the checkout to work from.
-//
-// With --repo the given directory is used as-is and git is left alone, which is
-// what running against a development clone needs. The bash script computed its
-// own location and then ignored it, always operating on ~/.dotfiles.
 func repoPath(opts Options) (string, error) {
 	if opts.Repo != "" {
 		return filepath.Abs(opts.Repo)
@@ -125,8 +114,6 @@ func isCheckout(root string) bool {
 	return err == nil
 }
 
-// prepareRun brings the checkout up to date, reads its configuration and
-// resolves what to apply.
 func prepareRun(log *config.Logger, p *ui.Printer, opts Options, root string) (*config.Config, config.Selection, error) {
 	if opts.Repo != "" {
 		p.Start("Using checkout at %s", root).Done()
@@ -157,7 +144,6 @@ func resolveSelection(cfg *config.Config, opts Options) (config.Selection, error
 
 	preselected := cfg.DefaultRoles
 	if len(opts.Tags) > 0 {
-		// -t narrows what the picker starts from; validate it first.
 		requested, err := cfg.Resolve(opts.Tags)
 		if err != nil {
 			return config.Selection{}, err
@@ -172,8 +158,6 @@ func resolveSelection(cfg *config.Config, opts Options) (config.Selection, error
 	return cfg.Resolve(chosen)
 }
 
-// setupOnePassword makes sure a 1Password session is available, returning the
-// environment additions to pass on to Ansible.
 func setupOnePassword(log *config.Logger, p *ui.Printer, cfg *config.Config) ([]string, error) {
 	client := onepass.New(log)
 
@@ -192,8 +176,7 @@ func setupOnePassword(log *config.Logger, p *ui.Printer, cfg *config.Config) ([]
 		return nil, err
 	}
 
-	// Announced before signing in: op takes the terminal over to ask for the
-	// master password, and the step it belongs to has to be on screen by then.
+	// Before SignIn, so that the step is on screen when op prompts.
 	task := p.StartInteractive("1Password session")
 	session, err := client.SignIn(account)
 	if err != nil {
@@ -256,7 +239,6 @@ func verifySecrets(p *ui.Printer, client *onepass.Client, cfg *config.Config, en
 	return nil
 }
 
-// announceFirstRun prints the log-in notice once, tracked by ~/.dotfiles_run.
 func announceFirstRun(p *ui.Printer) error {
 	home, err := os.UserHomeDir()
 	if err != nil {

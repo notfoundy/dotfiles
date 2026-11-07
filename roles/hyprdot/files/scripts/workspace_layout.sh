@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-# Toggles the tiling layout of the active workspace between dwindle and scrolling
-
 active="$(hyprctl activeworkspace -j)"
 curr_workspace="$(jq -r ".id" <<<"${active}")"
 

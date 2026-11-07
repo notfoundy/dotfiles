@@ -10,8 +10,6 @@ import (
 	"github.com/notfoundy/dotfiles/cli/internal/ui"
 )
 
-// EnsureSSHKeys generates an ed25519 key pair and self-authorizes it, unless
-// ~/.ssh/authorized_keys already exists.
 func EnsureSSHKeys(log *config.Logger, p *ui.Printer) error {
 	home, err := os.UserHomeDir()
 	if err != nil {

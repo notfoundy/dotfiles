@@ -1,11 +1,10 @@
 # yaml-language-server: $schema=https://goreleaser.com/static/schema.json
+
+# No version in the asset names: `dotfiles self-update` relies on stable
+# /releases/latest/download/ URLs.
 #
-# The archive and checksum names deliberately carry no version: it is what makes
-# the /releases/latest/download/ URLs stable, so `dotfiles self-update` needs
-# neither a GitHub API call nor jq. See cli/internal/selfupdate.
-#
-# GoReleaser only builds: .github/workflows/release.yml publishes the release with
-# gh, since the cli-v* tags are not semver and tag prefixes need GoReleaser Pro.
+# release.yml publishes with gh: cli-v* tags are not semver, and tag prefixes
+# need GoReleaser Pro.
 version: 2
 
 project_name: dotfiles

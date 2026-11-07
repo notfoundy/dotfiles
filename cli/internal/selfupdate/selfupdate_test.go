@@ -6,7 +6,6 @@ import (
 	"testing"
 )
 
-// TestTagFromURL pins down the pages the /releases/latest redirect can land on.
 func TestTagFromURL(t *testing.T) {
 	tests := []struct {
 		name    string
@@ -60,9 +59,7 @@ func TestTagFromURL(t *testing.T) {
 	}
 }
 
-// TestAssetNameCarriesNoVersion guards the contract with .goreleaser.yaml: the
-// archive name template omits the version, which is what keeps the
-// releases/latest/download URLs stable.
+// Must match the archive name template of .goreleaser.yaml.
 func TestAssetNameCarriesNoVersion(t *testing.T) {
 	got := AssetName()
 

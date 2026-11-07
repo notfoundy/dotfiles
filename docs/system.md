@@ -1,66 +1,35 @@
 # Differences from a regular Fedora
 
-What the image changes compared to a regular Fedora install:
-
-- greetd is the display manager, with [Noctalia Greeter](https://docs.noctalia.dev/greeter/)
-  as its greeter. It only offers the `Hyprland` session, which runs `start-hyprland`: Hyprland
-  is built without uwsm. The greeter runs as Fedora's `greetd` account, so the tmpfiles rule
-  creating its state directory is overridden in `/etc/tmpfiles.d/`, as upstream expects.
-  `greetd` gets a fixed UID (903, `image/files/usr/lib/sysusers.d/greetd-id.conf`) so that
-  `/var/lib/greetd` keeps its owner across images. `dbus-daemon` ships only for
-  `dbus-run-session`, which the greeter session needs; the system bus stays on dbus-broker.
-  Syncing Noctalia's wallpaper and palette to the greeter is not set up.
-- gnome-keyring provides the Secret Service. greetd's PAM stack unlocks it with the login
-  password through `pam_gnome_keyring`, which `gnome-keyring-pam` ships: without it, the
-  `-auth` line is skipped silently and every app asking for a secret prompts for it.
-- Without uwsm, nothing starts `graphical-session.target`, which `xdg-desktop-portal`
-  requires: without the portal, Flatpak and Electron apps (Zen, 1Password) never see the
-  dark mode. Once the session environment is imported into systemd, `execs.lua` starts
-  `hyprland-session.target` (from the `hyprland` role), which binds it, and stops it when
-  Hyprland exits.
-- hyprpolkitagent is the polkit agent, started by `execs.lua` along with that target, as the
-  Hyprland wiki recommends. Noctalia's own agent stays off (`polkit_agent = false`): a
-  session has a single agent.
-- Swap is zram only, through `zram-generator-defaults`: the base image ships none, and
-  without it the system has no swap at all. `systemd-oomd-defaults` kills the offending
-  cgroup under sustained memory pressure, before the desktop freezes.
-- The base image enables sshd with password login and ships no firewall. sshd is disabled
-  (`systemctl enable --now sshd` when needed) and firewalld runs with Fedora's `public`
-  zone. libvirt and podman (netavark) both use nftables and keep their own tables, and
-  firewalld ships the `libvirt` zones, so VMs and containers keep their networking.
-- The base image only knows `C.UTF-8`. `glibc-langpack-en` and `-fr` are added, and
-  `/etc/locale.conf` sets `en_US.UTF-8` with French formats (time, currency, paper, units).
-  Numbers stay English: a decimal comma breaks `printf '%.2f'` and friends in scripts.
-- Anaconda writes `compress=zstd:1` to fstab, but bootc mounts the root from the kernel
-  command line, and btrfs takes its options from that first mount. Compression is set back
-  through `rootflags` in `/usr/lib/bootc/kargs.d/`.
-- Anaconda adds no `quiet` for a bootc install, so the console printed every kernel info
-  message, such as the SELinux label bootc writes to test its rights on each run. `quiet` comes
-  from `kargs.d` as well; the messages stay in `journalctl -k`.
-- `podman.socket` is enabled for every user (`systemctl --global`), rootless, for the tools that
-  only speak the Docker API (Testcontainers, a `docker` CLI in a container). It is socket
-  activated: the service only starts on the first connection, at
-  `$XDG_RUNTIME_DIR/podman/podman.sock`. `podman compose` needs no socket, it runs
-  `podman-compose`.
-- The base image ships no `audit`: without auditd, the kernel prints its audit events on the
-  console, over the TTY. `audit` is added and `auditd` enabled so they go to its log.
-- libvirt is managed by the `wheel` group through a polkit rule: `usermod -aG libvirt` does not
-  work, since the group lives in `/usr/lib/group`.
-- bootc only copies the image's `/var` at install time. The directories packages leave there
-  without a tmpfiles rule (libvirt, flatpak, AccountsService…) are listed by
-  `bootc container lint` and written to `/usr/lib/tmpfiles.d/dotfiles-var.conf` at the end of
-  the build, so they are recreated if missing, as `rpm-ostree-autovar.conf` does for the base
-  image.
-- `/` is the composefs image, read-only and always 100 % full. Disk usage is read on `/var`,
-  the btrfs partition that also holds `/var/home`: `df -h /var`, and the fastfetch role points
-  its disk module there.
-- Go, Node, Typst, Starship and Lazygit are installed in `~/.local` by their roles, so they
-  stay on the latest release without touching the image. Starship goes through its official
-  install script, Lazygit is checked against the release's `checksums.txt`.
-- `/usr/lib/modprobe.d/90-no-tablet-mode.conf` keeps `lenovo_ymc` (tablet mode switch) and
-  `amd_sfh` (AMD sensor hub: accelerometer, screen angle) from loading. On the IdeaPad Flex 5
-  14ARE05, the touchpad stops answering on I2C (only a BIOS « Disable built-in battery » brings
-  it back) and closed-lid sleep wakes up by itself; both appeared with the move to Linux, and
-  the tablet mode handling is the suspect. Tablet mode and screen rotation are not used, so
-  they are given up. The EC still applies its own tablet mode logic (keyboard off when folded).
-  To undo: delete the file and rebuild.
+- **greetd** with [Noctalia Greeter](https://docs.noctalia.dev/greeter/), offering only
+  `start-hyprland` (Hyprland is built without uwsm). `greetd` has a fixed UID (903) so that
+  `/var/lib/greetd` keeps its owner across images. `dbus-daemon` is only there for
+  `dbus-run-session`, which the greeter needs; the system bus stays dbus-broker.
+- **gnome-keyring** is unlocked at login by `pam_gnome_keyring` (`gnome-keyring-pam`): without
+  it, PAM skips the line silently and every app prompts for its secret.
+- **`hyprland-session.target`**: without uwsm nothing starts `graphical-session.target`, which
+  `xdg-desktop-portal` needs (no dark mode in Flatpak and Electron apps otherwise). `execs.lua`
+  starts and stops it.
+- **hyprpolkitagent** is the polkit agent; Noctalia's stays off, a session has only one.
+- **zram swap** (`zram-generator-defaults`): the base image has no swap at all.
+  `systemd-oomd-defaults` kills the offending cgroup before the desktop freezes.
+- **sshd disabled, firewalld on** (`public` zone): the base image enables sshd with password
+  login and ships no firewall. libvirt and podman keep their own nftables tables.
+- **Locale**: `en_US.UTF-8` with French formats, but English numbers: a decimal comma breaks
+  `printf '%.2f'` in scripts.
+- **Kernel arguments** (`/usr/lib/bootc/kargs.d/`): btrfs takes its options from the first
+  mount, done by bootc from the command line, so `compress=zstd:1` goes in `rootflags`. `quiet`
+  too, which Anaconda omits for bootc.
+- **`podman.socket`** for every user, for tools that only speak the Docker API
+  (Testcontainers).
+- **auditd**: without it, audit events are printed over the TTY.
+- **libvirt** is granted to `wheel` by a polkit rule: `usermod -aG libvirt` cannot work, the
+  group lives in `/usr/lib/group`.
+- **`/var` directories** without a tmpfiles rule are listed by `bootc container lint` and written
+  to `/usr/lib/tmpfiles.d/dotfiles-var.conf`: bootc only copies `/var` at install time.
+- **Disk usage** is read on `/var` (`df -h /var`): `/` is the composefs image, always 100 %.
+- Go, Node, Typst, Starship and Lazygit are installed in `~/.local` by their roles, to follow
+  upstream releases without rebuilding the image.
+- **No tablet mode** (`/usr/lib/modprobe.d/90-no-tablet-mode.conf`): `lenovo_ymc` and `amd_sfh`
+  are blacklisted. On the IdeaPad Flex 5 14ARE05 the touchpad stops answering on I2C and
+  closed-lid sleep wakes up by itself; tablet mode handling is the suspect. Delete the file and
+  rebuild to undo.

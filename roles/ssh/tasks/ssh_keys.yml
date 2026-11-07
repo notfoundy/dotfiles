@@ -9,9 +9,7 @@
     content: "{{ op_public_key.stdout }}"
     mode: "0644"
 
-# The private key is served by the 1Password agent, so a copy on disk is both
-# redundant and readable by anything running as this user. Remove the one
-# earlier runs of this role left behind.
+# Left by earlier runs: the 1Password agent serves the private key.
 - name: "Remove on-disk private key: [{{ item.name }}]"
   ansible.builtin.file:
     path: "{{ ansible_facts['user_dir'] }}/.ssh/{{ item.name }}"

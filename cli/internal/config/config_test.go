@@ -6,12 +6,8 @@ import (
 	"testing"
 )
 
-// repoRoot is the checkout this CLI lives in, three levels up from
-// cli/internal/config.
 const repoRoot = "../../.."
 
-// TestLoadRepo reads the real group_vars/all.yml and roles/ directory, so the
-// CLI's view of the repo stays in sync with the Ansible side.
 func TestLoadRepo(t *testing.T) {
 	cfg, err := Load(repoRoot)
 	if err != nil {
@@ -22,15 +18,12 @@ func TestLoadRepo(t *testing.T) {
 		t.Fatal("DefaultRoles is empty")
 	}
 
-	// Every default role must exist on disk, otherwise a plain `dotfiles`
-	// would fail halfway through the playbook.
 	for _, role := range cfg.DefaultRoles {
 		if !cfg.hasRole(role) {
 			t.Errorf("default role %q has no roles/%s/tasks/main.yml", role, role)
 		}
 	}
 
-	// Roles reachable only through -t must still be discovered.
 	for _, role := range []string{"1password", "starship"} {
 		if !cfg.hasRole(role) {
 			t.Errorf("role %q was not discovered", role)
@@ -45,7 +38,6 @@ func TestLoadRepo(t *testing.T) {
 	}
 }
 
-// TestLoadSecrets checks the op.ssh.<provider>.<account> tree is flattened.
 func TestLoadSecrets(t *testing.T) {
 	cfg, err := Load(repoRoot)
 	if err != nil {

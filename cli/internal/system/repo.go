@@ -11,10 +11,8 @@ import (
 	"github.com/notfoundy/dotfiles/cli/internal/ui"
 )
 
-// RepoURL is where a fresh machine gets the dotfiles from.
 const RepoURL = "https://github.com/notfoundy/dotfiles.git"
 
-// DefaultRepoPath is the managed checkout, ~/.dotfiles.
 func DefaultRepoPath() (string, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {
@@ -23,8 +21,6 @@ func DefaultRepoPath() (string, error) {
 	return filepath.Join(home, ".dotfiles"), nil
 }
 
-// EnsureRepo makes sure path holds an up-to-date checkout, cloning it if
-// needed. Updating is skipped when skipUpdate is set.
 func EnsureRepo(log *config.Logger, p *ui.Printer, path string, skipUpdate bool) error {
 	if _, err := os.Stat(filepath.Join(path, ".git")); err != nil {
 		task := p.Start("Cloning dotfiles repository")
@@ -52,11 +48,7 @@ func EnsureRepo(log *config.Logger, p *ui.Printer, path string, skipUpdate bool)
 	return nil
 }
 
-// update fetches and fast-forwards.
-//
-// The bash version ran a bare `git pull`, which fails opaquely when the local
-// checkout has diverged or carries uncommitted work. Splitting fetch from a
-// strict fast-forward lets us say exactly what is wrong.
+// Fetch and fast-forward apart rather than `git pull`, to tell a dirty checkout from a diverged one.
 func update(log *config.Logger, path string) error {
 	git := func(args ...string) (string, error) {
 		return shell.Capture(log, shell.Cmd{Name: "git", Args: args, Dir: path})

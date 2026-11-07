@@ -1,9 +1,3 @@
-// Package shell runs external commands, in one of two modes.
-//
-// Capture buffers output into the run log and keeps the terminal clean, which
-// is what the preparation steps want. Interactive hands the real stdin, stdout
-// and stderr over to the child, which is what anything prompting the user needs
-// — ansible-playbook's output, or `op account add --signin`.
 package shell
 
 import (
@@ -16,19 +10,17 @@ import (
 	"github.com/notfoundy/dotfiles/cli/internal/config"
 )
 
-// Cmd describes an external command to run.
 type Cmd struct {
 	Name string
 	Args []string
 	Dir  string
-	Env  []string // extra variables, appended to the inherited environment
+	Env  []string // appended to the inherited environment
 }
 
 func (c Cmd) String() string {
 	return strings.TrimSpace(c.Name + " " + strings.Join(c.Args, " "))
 }
 
-// Error carries the captured output of a failed command.
 type Error struct {
 	Cmd    string
 	Output string
@@ -47,7 +39,6 @@ func (c Cmd) build() *exec.Cmd {
 	return cmd
 }
 
-// Capture runs the command with its output buffered, returning it as a string.
 func Capture(log *config.Logger, c Cmd) (string, error) {
 	log.Printf("exec: %s", c)
 
@@ -63,7 +54,6 @@ func Capture(log *config.Logger, c Cmd) (string, error) {
 	return output, nil
 }
 
-// Interactive runs the command wired to the real terminal.
 func Interactive(log *config.Logger, c Cmd) error {
 	log.Printf("exec (interactive): %s", c)
 
@@ -79,13 +69,7 @@ func Interactive(log *config.Logger, c Cmd) error {
 	return nil
 }
 
-// PromptCapture runs the command with stdin and stderr wired to the terminal
-// but stdout buffered and returned.
-//
-// This is what reading a value out of an interactive tool requires: `op signin`
-// writes its password prompt to stderr and reads the answer from the terminal,
-// while the session token it emits on stdout must be captured rather than
-// printed. It replaces the shell idiom `eval "$(op signin)"`.
+// PromptCapture is for `op signin`: it prompts on stderr and prints the session on stdout.
 func PromptCapture(log *config.Logger, c Cmd) (string, error) {
 	log.Printf("exec (prompt): %s", c)
 
@@ -102,20 +86,16 @@ func PromptCapture(log *config.Logger, c Cmd) (string, error) {
 	return stdout.String(), nil
 }
 
-// Succeeds reports whether the command exits zero, discarding its output.
-// Used for probes such as `op vault list`.
 func Succeeds(log *config.Logger, c Cmd) bool {
 	_, err := Capture(log, c)
 	return err == nil
 }
 
-// Exists reports whether a binary is on PATH.
 func Exists(name string) bool {
 	_, err := exec.LookPath(name)
 	return err == nil
 }
 
-// Output returns the captured output of a failed command, if any.
 func Output(err error) string {
 	var e *Error
 	if errors.As(err, &e) {

@@ -1,9 +1,3 @@
-// Package onepass wraps the 1Password CLI.
-//
-// It replaces the bash implementation's `eval "$(op signin)"` followed by a
-// fixed sequence of cursor-movement escapes to erase the prompts. Here the
-// session token is parsed out of op's own output and propagated to
-// ansible-playbook through the child environment, so nothing has to be erased.
 package onepass
 
 import (
@@ -15,17 +9,12 @@ import (
 	"github.com/notfoundy/dotfiles/cli/internal/shell"
 )
 
-// DefaultDomain matches the OP_ACCOUNT_DOMAIN default of the bash script.
 const DefaultDomain = "my.1password.eu"
 
-// secretFields are the field references roles/ssh/tasks/ssh_keys.yml reads for
-// each key. `op read` only resolves a full op://vault/item/field reference, so
-// verifying these is both correct and a dry run of what the playbook will do.
-// Keep in sync with that role: the private key is served by the 1Password agent
-// and never read, so verification does not pull it into memory either.
+// The fields roles/ssh/tasks/ssh_keys.yml reads; keep in sync. The private key
+// is left out on purpose: the 1Password agent serves it.
 var secretFields = []string{"public_key"}
 
-// Account is one entry of `op account list --format=json`.
 type Account struct {
 	URL         string `json:"url"`
 	Email       string `json:"email"`
@@ -34,7 +23,6 @@ type Account struct {
 	Shorthand   string `json:"shorthand"`
 }
 
-// Label is what to show a human choosing between accounts.
 func (a Account) Label() string {
 	if a.Email != "" {
 		return fmt.Sprintf("%s (%s)", a.Email, a.URL)
@@ -42,7 +30,6 @@ func (a Account) Label() string {
 	return a.URL
 }
 
-// Ref is the identifier to hand to `op --account`.
 func (a Account) Ref() string {
 	if a.Shorthand != "" {
 		return a.Shorthand
@@ -53,26 +40,20 @@ func (a Account) Ref() string {
 	return a.AccountUUID
 }
 
-// Client talks to the op binary.
 type Client struct {
 	log *config.Logger
 }
 
-// New returns a client bound to a run log.
 func New(log *config.Logger) *Client {
 	return &Client{log: log}
 }
 
-// Installed reports whether the op binary is on PATH.
 func Installed() bool { return shell.Exists("op") }
 
-// Authenticated reports whether an existing session is already usable, which
-// is the common case on a machine that has been set up before.
 func (c *Client) Authenticated() bool {
 	return shell.Succeeds(c.log, shell.Cmd{Name: "op", Args: []string{"vault", "list"}})
 }
 
-// Accounts lists the accounts configured on this machine.
 func (c *Client) Accounts() ([]Account, error) {
 	out, err := shell.Capture(c.log, shell.Cmd{Name: "op", Args: []string{"account", "list", "--format=json"}})
 	if err != nil {
@@ -94,8 +75,6 @@ func (c *Client) Accounts() ([]Account, error) {
 	return accounts, nil
 }
 
-// AddAccount registers a new account. It needs the terminal: the user has to
-// type their email, secret key and master password.
 func (c *Client) AddAccount(domain string) error {
 	if domain == "" {
 		domain = DefaultDomain
@@ -106,10 +85,7 @@ func (c *Client) AddAccount(domain string) error {
 	})
 }
 
-// SignIn authenticates and returns the resulting session as a KEY=VALUE pair
-// ready to be appended to a child environment. It returns an empty string when
-// op handled the session itself, which is what happens with desktop app
-// integration.
+// SignIn returns "" with the desktop app integration, which keeps the session itself.
 func (c *Client) SignIn(account Account) (string, error) {
 	args := []string{"signin"}
 	if ref := account.Ref(); ref != "" {
@@ -123,8 +99,6 @@ func (c *Client) SignIn(account Account) (string, error) {
 	return parseSession(out), nil
 }
 
-// parseSession extracts OP_SESSION_x=token from the `export OP_SESSION_x="..."`
-// line op prints on stdout.
 func parseSession(out string) string {
 	for line := range strings.SplitSeq(out, "\n") {
 		line = strings.TrimSpace(strings.TrimPrefix(strings.TrimSpace(line), "export "))
@@ -144,7 +118,6 @@ func parseSession(out string) string {
 	return ""
 }
 
-// references expands a secret into the op:// references the ssh role reads.
 func references(s config.Secret) []string {
 	if s.VaultPath == "" {
 		return nil
@@ -157,9 +130,7 @@ func references(s config.Secret) []string {
 	return refs
 }
 
-// VerifySecrets checks that every vault path declared in group_vars/all.yml is
-// readable, so a missing or renamed item fails here rather than midway through
-// the playbook.
+// VerifySecrets fails before the playbook would, midway, on a missing item.
 func (c *Client) VerifySecrets(secrets []config.Secret, env []string) error {
 	var missing []string
 
@@ -176,7 +147,6 @@ func (c *Client) VerifySecrets(secrets []config.Secret, env []string) error {
 				reason = err.Error()
 			}
 			missing = append(missing, fmt.Sprintf("%s (%s): %s", s.Name, ref, reason))
-			// The remaining fields of a key we cannot read add nothing.
 			break
 		}
 	}

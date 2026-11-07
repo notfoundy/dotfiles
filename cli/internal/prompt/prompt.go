@@ -1,4 +1,3 @@
-// Package prompt holds the interactive selections, built on Charm's huh.
 package prompt
 
 import (
@@ -9,9 +8,6 @@ import (
 	"github.com/notfoundy/dotfiles/cli/internal/onepass"
 )
 
-// SelectRoles opens the role picker. Roles in preselected start checked;
-// the others — those outside default_roles, several of which are pulled in as
-// meta dependencies anyway — are listed but unchecked.
 func SelectRoles(available, preselected []string) ([]string, error) {
 	checked := make(map[string]bool, len(preselected))
 	for _, r := range preselected {
@@ -43,7 +39,6 @@ func SelectRoles(available, preselected []string) ([]string, error) {
 	return selected, nil
 }
 
-// SelectAccount asks which 1Password account to sign in to.
 func SelectAccount(accounts []onepass.Account) (onepass.Account, error) {
 	options := make([]huh.Option[string], 0, len(accounts))
 	byRef := make(map[string]onepass.Account, len(accounts))
@@ -68,7 +63,6 @@ func SelectAccount(accounts []onepass.Account) (onepass.Account, error) {
 	return byRef[ref], nil
 }
 
-// AskDomain asks for the 1Password sign-in address when no account exists yet.
 func AskDomain(defaultDomain string) (string, error) {
 	domain := defaultDomain
 

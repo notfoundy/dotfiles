@@ -13,9 +13,6 @@ func TestPlaybookArgsDefaultRunPassesNoTags(t *testing.T) {
 		Selection: config.Selection{Roles: []string{"system", "bash"}, Explicit: false},
 	})
 
-	// This is the parity case with the bash script's bare `dotfiles`: no -t at
-	// all, so main.yml resolves the roles itself from default_roles and Ansible
-	// applies no tag filtering.
 	want := []string{"/home/user/.dotfiles/main.yml"}
 	if !slices.Equal(got, want) {
 		t.Errorf("args = %v, want %v", got, want)

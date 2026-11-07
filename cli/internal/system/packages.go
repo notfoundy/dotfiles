@@ -8,11 +8,8 @@ import (
 	"github.com/notfoundy/dotfiles/cli/internal/ui"
 )
 
-// baseTools are what the rest of the run needs before Ansible takes over. They
-// ship with the bootc image, which is the only place the system is managed.
 var baseTools = []string{"ansible-galaxy", "ansible-playbook", "git"}
 
-// CheckBaseTools fails when one of baseTools is missing from PATH.
 func CheckBaseTools(p *ui.Printer) error {
 	task := p.Start("Checking base tools")
 

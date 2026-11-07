@@ -1,8 +1,3 @@
-// Package selfupdate replaces the running binary with the latest GitHub release.
-//
-// It relies on the release assets being named without a version, so the
-// /releases/latest/download/ URLs are stable and no GitHub API call — nor jq —
-// is needed. The same property is what lets bin/bootstrap.sh stay tiny.
 package selfupdate
 
 import (
@@ -28,18 +23,15 @@ const (
 	latestURL    = "https://github.com/" + repo + "/releases/latest"
 	downloadBase = "https://github.com/" + repo + "/releases/latest/download/"
 
-	// maxDownload caps what we are willing to read from the network.
 	maxDownload = 64 << 20
 )
 
 var client = &http.Client{Timeout: 60 * time.Second}
 
-// AssetName is the archive published for the current platform.
 func AssetName() string {
 	return fmt.Sprintf("dotfiles_%s_%s.tar.gz", runtime.GOOS, runtime.GOARCH)
 }
 
-// LatestVersion resolves the tag the "latest" release points at.
 func LatestVersion() (string, error) {
 	resp, err := client.Get(latestURL)
 	if err != nil {
@@ -55,12 +47,8 @@ func LatestVersion() (string, error) {
 	return tagFromURL(resp.Request.URL)
 }
 
-// tagFromURL reads the tag off the page the "latest" redirect lands on.
-//
-// GitHub answers with .../releases/tag/cli-vX.Y.Z, but a repository without a
-// single release quietly falls back to the .../releases listing. Matching the
-// tag path explicitly is what keeps that case from being mistaken for a release
-// named "releases", which only surfaced later as a 404 on the assets.
+// Without any release, /releases/latest redirects to the /releases listing,
+// not to a /releases/tag/ page.
 func tagFromURL(u *url.URL) (string, error) {
 	const marker = "/releases/tag/"
 
@@ -76,9 +64,6 @@ func tagFromURL(u *url.URL) (string, error) {
 	return tag, nil
 }
 
-// IsNewer reports whether latest differs from current, ignoring the "cli-" tag
-// prefix and a leading "v".
-// A development build is never considered up to date.
 func IsNewer(current, latest string) bool {
 	if current == "dev" || current == "" {
 		return true
@@ -90,8 +75,6 @@ func normalize(v string) string {
 	return strings.TrimPrefix(strings.TrimPrefix(strings.TrimSpace(v), "cli-"), "v")
 }
 
-// Apply downloads the latest archive, verifies its checksum and swaps the
-// running binary for it.
 func Apply() error {
 	asset := AssetName()
 
@@ -116,7 +99,6 @@ func Apply() error {
 	return replaceRunning(binary)
 }
 
-// expectedChecksum pulls the entry for asset out of the published checksums.txt.
 func expectedChecksum(asset string) (string, error) {
 	raw, err := download(downloadBase + "checksums.txt")
 	if err != nil {
@@ -145,7 +127,6 @@ func download(url string) ([]byte, error) {
 	return io.ReadAll(io.LimitReader(resp.Body, maxDownload))
 }
 
-// extract pulls a single file out of a gzipped tarball.
 func extract(archive []byte, name string) ([]byte, error) {
 	gz, err := gzip.NewReader(bytes.NewReader(archive))
 	if err != nil {
@@ -169,8 +150,6 @@ func extract(archive []byte, name string) ([]byte, error) {
 	}
 }
 
-// replaceRunning swaps the executable atomically, by writing the new binary
-// beside it and renaming over the old one.
 func replaceRunning(binary []byte) error {
 	self, err := os.Executable()
 	if err != nil {

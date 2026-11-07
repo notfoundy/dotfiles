@@ -1,31 +1,43 @@
 # Installing
 
-The machine is installed by Anaconda from the Fedora Everything network ISO, which pulls
-`ghcr.io/notfoundy/dotfiles:latest` through the `ostreecontainer` command of
-`image/install.ks`. The package must be public, or the kickstart needs a `%pre` writing
-`/etc/ostree/auth.json`. Embed the kickstart in the ISO, so that every boot entry loads it:
+The installer is the Fedora Everything network ISO with `image/install.ks` embedded: Anaconda
+then installs `ghcr.io/notfoundy/dotfiles:latest` instead of a regular Fedora. The package must
+stay public, or the kickstart needs a `%pre` writing `/etc/ostree/auth.json`.
+
+## 1. Build the ISO
+
+Download `Fedora-Everything-netinst-x86_64-44-*.iso` from
+[fedoraproject.org/everything/download](https://fedoraproject.org/everything/download) into the
+repository root, then embed the kickstart so that every boot entry loads it:
 
 ```bash
 podman run --rm -v "$PWD":/work:z -w /work registry.fedoraproject.org/fedora:44 sh -c \
   'dnf -y install lorax && mkksiso --ks image/install.ks Fedora-Everything-netinst-x86_64-44-*.iso dotfiles-install.iso'
 ```
 
-Write `dotfiles-install.iso` to a USB stick and boot it; Secure Boot can stay on. The
-kickstart only holds what never changes, Anaconda stops on its summary for the rest:
+## 2. Write it to a USB stick
 
-- **Network**: the Wi-Fi, copied to the installed system.
-- **Installation destination**: the disk, automatic partitioning with btrfs, **Encrypt my
-  data** checked, then the LUKS passphrase.
-- **User creation**: with **Make this user administrator** checked (`wheel`). root stays
-  locked.
+Find the stick with `lsblk` (here `/dev/sdX`): everything on it is erased.
 
-A few kickstart lines undo what Anaconda gets wrong on a bootc system:
+```bash
+sudo dd if=dotfiles-install.iso of=/dev/sdX bs=4M status=progress conv=fsync
+```
 
-- `firewall --use-system-defaults`: otherwise Anaconda runs `firewall-offline-cmd` and opens
-  ssh in the default zone.
-- Anaconda always rewrites `/etc/locale.conf` with a lone `LANG=`, with or without a `lang`
-  directive. The `%post` copies back the image's version from `/usr/etc`: identical to the
-  default, the file is no longer a local change and follows the image again.
-- The `%post` also drops the `/` entry Anaconda writes to `/etc/fstab`: with composefs, `/`
-  is an overlay and `systemd-remount-fs` fails applying btrfs options to it. The root is
-  mounted from the kernel arguments anyway, as `bootc install` does.
+## 3. Install
+
+Boot the stick; Secure Boot can stay on. Anaconda stops on its summary for what the kickstart
+leaves out:
+
+- **Network**: the Wi-Fi, kept on the installed system.
+- **Installation destination**: the disk, automatic btrfs partitioning, **Encrypt my data**.
+- **User creation**: check **Make this user administrator** (`wheel`). root stays locked.
+
+Reboot, log in, then set up the home
+
+## What the kickstart fixes
+
+- `firewall --use-system-defaults`: otherwise Anaconda opens ssh in the default zone.
+- `/etc/locale.conf`: Anaconda always rewrites it with a lone `LANG=`; `%post` restores the
+  image's copy so that it keeps following the image.
+- `/etc/fstab`: `%post` drops the `/` entry. With composefs, `/` is an overlay and
+  `systemd-remount-fs` fails on its btrfs options; the root is mounted from the kernel arguments.

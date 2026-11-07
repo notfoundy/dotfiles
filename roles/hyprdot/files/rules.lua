@@ -101,7 +101,6 @@ hl.window_rule({
 	no_initial_focus = true,
 })
 
--- No shadow for tiled windows
 hl.window_rule({ match = { float = 0 }, no_shadow = true })
 
 -- ######## Workspace rules ########

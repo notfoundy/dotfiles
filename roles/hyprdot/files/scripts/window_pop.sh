@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-# Pops the active window out as a centered, floating and pinned tile, or puts it back if already popped
-
 width="${1:-1300}"
 height="${2:-900}"
 

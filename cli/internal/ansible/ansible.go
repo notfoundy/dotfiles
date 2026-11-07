@@ -1,4 +1,3 @@
-// Package ansible drives ansible-galaxy and ansible-playbook.
 package ansible
 
 import (
@@ -10,7 +9,6 @@ import (
 	"github.com/notfoundy/dotfiles/cli/internal/ui"
 )
 
-// InstallGalaxyDeps installs the collections listed in requirements/common.yml.
 func InstallGalaxyDeps(log *config.Logger, p *ui.Printer, root string) error {
 	task := p.Start("Updating Ansible Galaxy dependencies")
 
@@ -29,19 +27,13 @@ func InstallGalaxyDeps(log *config.Logger, p *ui.Printer, root string) error {
 	return nil
 }
 
-// PlaybookOptions describes one ansible-playbook invocation.
 type PlaybookOptions struct {
 	Root      string
 	Selection config.Selection
-	// Extra is passed through verbatim, e.g. --check or -vvv.
-	Extra []string
-	// Env holds additional variables for the child, such as the 1Password
-	// session token.
-	Env []string
+	Extra     []string
+	Env       []string
 }
 
-// RunPlaybook executes main.yml with the terminal handed over to Ansible, so
-// its native output behaves normally.
 func RunPlaybook(log *config.Logger, opts PlaybookOptions) error {
 	return shell.Interactive(log, shell.Cmd{
 		Name: "ansible-playbook",
@@ -51,7 +43,6 @@ func RunPlaybook(log *config.Logger, opts PlaybookOptions) error {
 	})
 }
 
-// playbookArgs assembles the ansible-playbook command line.
 func playbookArgs(opts PlaybookOptions) []string {
 	args := []string{filepath.Join(opts.Root, "main.yml")}
 

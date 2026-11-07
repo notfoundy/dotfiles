@@ -1,4 +1,3 @@
-// Package cmd wires the command-line interface.
 package cmd
 
 import (
@@ -7,7 +6,6 @@ import (
 	"github.com/notfoundy/dotfiles/cli/internal/run"
 )
 
-// Execute parses the arguments and runs the CLI.
 func Execute(version string) error {
 	root := newRootCmd(version)
 	root.SilenceUsage = true
@@ -43,8 +41,7 @@ in group_vars/all.yml. Arguments after -- are forwarded to ansible-playbook.`,
 	flags.StringVar(&opts.Repo, "repo", "", "run against this checkout instead of ~/.dotfiles, leaving git untouched")
 	flags.BoolVar(&opts.SkipUpdate, "skip-update", false, "do not pull the dotfiles repository")
 
-	// Everything after the first positional argument belongs to
-	// ansible-playbook, so cobra must stop interpreting flags there.
+	// Flags after the first positional argument belong to ansible-playbook.
 	flags.SetInterspersed(false)
 
 	_ = cmd.RegisterFlagCompletionFunc("tags", completeTags)
